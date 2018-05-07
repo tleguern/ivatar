@@ -1,0 +1,38 @@
+{% extends 'base.html' %}                                                                                                                      
+{% load i18n %}
+
+{% block title %}{% trans 'Login to yourivatar account' %}{% endblock title %}
+
+{% block content %}
+
+<h1>{% trans 'Login' %}</h1>
+
+<form action="{% url 'login' %}" method="post" name="login">{% csrf_token %}
+
+<table summary="">
+{% if form.username.errors %}
+<tr>
+  <td colspan="2">{{ form.username.errors }}</td>
+</tr>
+{% endif %}
+<tr>
+  <td>{{ form.username.label_tag }}</td>
+  <td>{{ form.username }}</td>
+</tr>
+{% if form.password.errors %}
+<tr>
+  <td colspan="2">{{ form.password.errors }}</td>
+</tr>
+{% endif %}
+<tr>
+  <td>{{ form.password.label_tag }}</td>
+  <td>{{ form.password }}</td>
+</tr>
+</table>
+
+<p><input type="submit" value="{% trans 'Login' %}">
+&nbsp;<a href="/">{% trans 'Cancel' %}</a></p>
+
+</form>
+
+{% endblock content %}

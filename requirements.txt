@@ -1,0 +1,14 @@
+defusedxml
+Django
+git+https://github.com/ofalk/django-openid-auth
+python3-openid
+pytz
+six
+py3gearman
+Pillow
+py3dns
+bcrypt
+django-extensions
+PyMySQL
+django-ipware
+django-bootstrap4

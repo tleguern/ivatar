@@ -1,0 +1,47 @@
+{% extends 'base.html' %}                                                                                                                      
+{% load i18n %}
+
+{% block title %}{% trans 'Create a new ivatar account' %}{% endblock title %}
+
+{% block content %}
+
+<h1>{% trans 'Create a new account' %}</h1>
+
+<form action="{% url 'new_account' %}" method="post" name="newaccount">{% csrf_token %}
+
+<table summary="">
+{% if form.username.errors %}
+<tr>
+  <td colspan="2">{{ form.username.errors }}</td>
+</tr>
+{% endif %}
+<tr>
+  <td>{{ form.username.label_tag }}</td>
+  <td>{{ form.username }}</td>
+</tr>
+{% if form.password1.errors %}
+<tr>
+  <td colspan="2">{{ form.password1.errors }}</td>
+</tr>
+{% endif %}
+<tr>
+  <td>{{ form.password1.label_tag }}</td>
+  <td>{{ form.password1 }}</td>
+</tr>
+{% if form.password2.errors %}
+<tr>
+  <td colspan="2">{{ form.password2.errors }}</td>
+</tr>
+{% endif %}
+<tr>
+  <td>{{ form.password2.label_tag }}</td>
+  <td>{{ form.password2 }}</td>
+</tr>
+</table>
+
+<p><input type="submit" value="{% trans 'Create account' %}">
+&nbsp;<a href="/">{% trans 'Cancel' %}</a></p>
+
+</form>
+
+{% endblock content %}

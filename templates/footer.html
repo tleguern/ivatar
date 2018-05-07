@@ -1,0 +1,9 @@
+{% load static %}                                                                                                                              
+{% load i18n %}
+<div id="footer">
+  <a rel="license" href="http://www.gnu.org/licenses/agpl-3.0.html" id="agpl-button" title="{% trans 'GNU Affero General Public License' %}"></a> {% blocktrans %}<b>{{ site_name }}</b> is an avatar service running the <a href="https://github.com/ofalk/ivatar">ivatar</a>
+  software, version {{ ivatar_version }}{% endblocktrans %}
+  {% block footer %}{% endblock footer %}
+  <script src="{% static '/js/ivatar.js' %}" defer></script>
+</div>
+<script src="https://ad.aloodo.com/ad.js" async></script>
