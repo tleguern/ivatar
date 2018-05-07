@@ -12,7 +12,11 @@ if (document.forms.login) {
 } else if (document.forms.addopenid) {
     document.forms.addopenid.openid.focus();
 } else if (document.forms.changepassword) {
-    document.forms.changepassword.old_password.focus();
+    if(document.forms.changepassword.old_password) {
+      document.forms.changepassword.old_password.focus();
+    } else {
+      document.forms.changepassword.new_password1.focus();
+    }
 } else if (document.forms.deleteaccount) {
     if (document.forms.deleteaccount.password) {
         document.forms.deleteaccount.password.focus();
