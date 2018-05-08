@@ -2,7 +2,7 @@
 Default: useful variables for the base page templates.
 '''
 
-from ivatar.settings import IVATAR_VERSION
+from ivatar.settings import IVATAR_VERSION, SITE_NAME
 from ipware import get_client_ip
 
 def basepage(request):
@@ -12,4 +12,5 @@ def basepage(request):
     client_ip, is_routable = get_client_ip(request)
     context['client_ip'] = client_ip
     context['ivatar_version'] = IVATAR_VERSION
+    context['site_name'] = SITE_NAME
     return context
