@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ip_address', models.GenericIPAddressField(unpack_ipv4=True)),
-                ('add_date', models.DateTimeField(default=ivatar.ivataraccount.models.utcnow)),
+                ('add_date', models.DateTimeField()),
                 ('email', models.EmailField(max_length=254, unique=True)),
             ],
             options={
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ip_address', models.GenericIPAddressField(unpack_ipv4=True)),
-                ('add_date', models.DateTimeField(default=ivatar.ivataraccount.models.utcnow)),
+                ('add_date', models.DateTimeField()),
                 ('openid', models.URLField(max_length=255, unique=True)),
             ],
             options={
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             name='Photo',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('add_date', models.DateTimeField(default=ivatar.ivataraccount.models.utcnow)),
+                ('add_date', models.DateTimeField()),
                 ('ip_address', models.GenericIPAddressField(unpack_ipv4=True)),
                 ('data', models.BinaryField()),
                 ('format', models.CharField(max_length=3)),
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ip_address', models.GenericIPAddressField(unpack_ipv4=True)),
-                ('add_date', models.DateTimeField(default=ivatar.ivataraccount.models.utcnow)),
+                ('add_date', models.DateTimeField()),
                 ('email', models.EmailField(max_length=254)),
                 ('verification_key', models.CharField(max_length=64)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ip_address', models.GenericIPAddressField(unpack_ipv4=True)),
-                ('add_date', models.DateTimeField(default=ivatar.ivataraccount.models.utcnow)),
+                ('add_date', models.DateTimeField()),
                 ('openid', models.URLField(max_length=255)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
