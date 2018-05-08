@@ -15,10 +15,10 @@
   {% endif %}
 </h1>
 
-{% if user.photos.confirmed_emails or user.photos.confirmed_openids %}
+{% if user.confirmedemail_set.count or user.confirmedopenid_set.count %}
 <p>{% trans 'You have the following confirmed email addresses and OpenIDs:' %}</p>
 <ul class="horizontal-list avatar-list">
-    {% for email in confirmed_emails %}
+    {% for email in user.confirmedemail_set.all %}
         <li><form action="{% url 'remove_confirmed_email' email.id %}" method="post">{% csrf_token %}
         <a href="{% url 'assign_photo_email' email.id %}">
         <img class="thumbnail editable avatar-chooser" src="{{ email.photo_url }}" alt=""></a>
@@ -26,7 +26,7 @@
         <br><a href="{% url 'assign_photo_email' email.id %}">{% trans 'Change photo' %}</a>
         <br><br><input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form></li>
     {% endfor %}
-    {% for openid in confirmed_openids %}
+    {% for openid in user.confirmedopenid_set.all %}
         <li><form action="{% url 'remove_confirmed_openid' openid.id %}" method="post">{% csrf_token %}
         <a href="{% url 'assign_photo_openid' openid.id %}">
         <img class="thumbnail editable avatar-chooser" src="{{openid.photo_url}}" alt=""></a>
@@ -38,14 +38,14 @@
 <div class="clear-both"></div>
 {% endif %}
 
-{% if unconfirmed_emails or unconfirmed_openids %}
+{% if user.unconfirmedemail_set.count or user.unconfirmedopenid_set.count %}
 <p>{% trans 'You have the following unconfirmed email addresses and OpenIDs:' %}</p>
 <ul class="vertical-list">
-    {% for email in unconfirmed_emails %}
+    {% for email in user.unconfirmedemail_set.all %}
         <li><form action="{% url 'remove_unconfirmed_email' email.id %}" method="post">{% csrf_token %}{{ email.email }}
         <input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
     {% endfor %}
-    {% for openid in unconfirmed_openids %}
+    {% for openid in user.unconfirmedopenids_set.all %}
         <li><form action="{% url 'remove_unconfirmed_openid' openid.id %}" method="post">{% csrf_token %}{{ openid.openid }}
         <input type="image" src="{% static '/static/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
     {% endfor %}
@@ -60,11 +60,11 @@
 <a href="{% url 'add_openid' %}">{% trans 'Add a new OpenID' %}</a></p>
 </p>
 
-{% if photos %}
+{% if user.photo_set.count %}
 <p>{% trans 'Here are the photos you have uploaded/imported:' %}</p>
 <ul class="horizontal-list avatar-list centered">
-{% for photo in photos %}
-    <li><img class="thumbnail" src="{{photo}}" title="{% blocktrans with photo.upload_datetime as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}" alt="{% blocktrans with photo.upload_datetime as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}"><br>
+{% for photo in user.photo_set.all %}
+<li><img class="thumbnail" src="{% url 'raw_image' photo.id %}" title="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}" alt="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}"><br>
     <a href="{% url 'delete_photo' photo.id %}">{% trans 'Delete' %}</a></li>
 {% endfor %}
 </ul>
