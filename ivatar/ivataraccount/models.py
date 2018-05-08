@@ -2,26 +2,46 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
+from PIL import Image
+from io import BytesIO
+import base64
+
 from . gravatar import get_photo as get_gravatar_photo
 
 from openid.store.interface import OpenIDStore
 from openid.store import nonce as oidnonce
 from openid.association import Association as OIDAssociation
 
-import datetime
-def utcnow():
-    return datetime.datetime.utcnow
+from urllib.request import urlopen
 
-MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
+import hashlib
+from os import urandom
+
+from django.utils import timezone
+
+from ivatar.settings import MAX_LENGTH_EMAIL
 MAX_LENGTH_URL = 255  # MySQL can't handle more than that (LP: 1018682)
+
+
+def file_format(image_type):
+    if image_type == 'JPEG':
+        return 'jpg'
+    elif image_type == 'PNG':
+        return 'png'
+    elif image_type == 'GIF':
+        return 'gif'
+
+    print('Unsupported file format: %s' % image_type)
+    return None
+
 
 class BaseAccountModel(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.deletion.CASCADE,
     )
-    ip_address = models.GenericIPAddressField(unpack_ipv4=True)
-    add_date = models.DateTimeField(default=utcnow)
+    ip_address = models.GenericIPAddressField(unpack_ipv4=True, null=True)
+    add_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
         abstract = True
@@ -36,6 +56,40 @@ class Photo(BaseAccountModel):
         verbose_name = _('photo')
         verbose_name_plural = _('photos')
 
+    #def md5(self):
+    #    return hashlib.md5(self.data)
+
+    def import_image(self, service_name, email_address):
+        image_url = False
+
+        if service_name == 'Gravatar':
+            gravatar = get_gravatar_photo(email_address)
+            if gravatar:
+                image_url = gravatar['image_url']
+
+        if not image_url:
+            return False
+        try:
+            image = urlopen(image_url)
+        except HTTPError as e:
+            print('%s import failed with an HTTP error: %s' % (service_name, e.code))
+            return False
+        except URLError as e:
+            print('%s import failed: %s' % (service_name, e.reason))
+            return False
+        data = image.read()
+
+        try:
+            img = Image.open(BytesIO(data))
+        except ValueError:
+            return False
+
+        self.format = file_format(img.format)
+        if not self.format:
+            return False
+        self.data = data
+        super().save()
+        return True
 
 class ConfirmedEmailManager(models.Manager):
     def create_confirmed_email(self, user, email_address, is_logged_in):
@@ -51,7 +105,7 @@ class ConfirmedEmailManager(models.Manager):
             if gravatar:
                 external_photos.append(gravatar)
 
-        return external_photos
+        return (confirmed.id, external_photos)
 
 
 class ConfirmedEmail(BaseAccountModel):
@@ -69,6 +123,10 @@ class ConfirmedEmail(BaseAccountModel):
         verbose_name = _('confirmed email')
         verbose_name_plural = _('confirmed emails')
 
+    def set_photo(self, photo):
+        self.photo = photo
+        self.save()
+
 
 class UnconfirmedEmail(BaseAccountModel):
     email = models.EmailField(max_length=MAX_LENGTH_EMAIL)
@@ -80,9 +138,8 @@ class UnconfirmedEmail(BaseAccountModel):
 
     def save(self, *args, **kwargs):
         hash_object = hashlib.new('sha256')
-        hash_object.update(urandom(1024) + self.user.username)
+        hash_object.update(urandom(1024) + self.user.username.encode('utf-8'))
         self.verification_key = hash_object.hexdigest()
-
         super(UnconfirmedEmail, self).save(*args, **kwargs)
 
 
@@ -107,6 +164,9 @@ class ConfirmedOpenId(BaseAccountModel):
     class Meta:
         verbose_name = _('confirmed OpenID')
         verbose_name_plural = _('confirmed OpenIDs')
+
+
+
 
 # Classes related to the OpenID Store (from https://github.com/edx/django-openid-auth/)
 class OpenIDNonce(models.Model):
