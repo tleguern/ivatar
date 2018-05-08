@@ -2,9 +2,6 @@ import os
 from sys import platform, argv
 from ivatar.settings import BASE_DIR
 
-if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
-    from config_local import *  # noqa # flake8: noqa # NOQA # pragma: no cover
-
 ADMIN_USERS = []
 ALLOWED_HOSTS = [
     'localhost',
@@ -42,6 +39,14 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append(
 OPENID_CREATE_USERS = True
 OPENID_UPDATE_DETAILS_FROM_SREG = True
 
+SITE_URL = 'https://ivatar.io'
+SITE_NAME = 'ivatar'
 IVATAR_VERSION = '0.1'
 
 LOGIN_REDIRECT_URL = '/account/profile/'
+MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
+SERVER_EMAIL = 'accounts@ivatar.io'
+DEFAULT_FROM_EMAIL = SERVER_EMAIL
+
+if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
+    from config_local import *  # noqa # flake8: noqa # NOQA # pragma: no cover
