@@ -14,8 +14,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
 
-from . forms import AddEmailForm
+from . forms import AddEmailForm, UploadPhotoForm
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
+
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 import io
 
@@ -125,7 +127,7 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
             confirmed.set_photo(confirmed.user.photos.get())
         kwargs['photos'] = [ external_photos ]
         kwargs['email_id'] = confirmed_id
-        return super(ConfirmEmailView, self).get(*args, **kwargs)
+        return super().get(*args, **kwargs)
 
 
 class RemoveConfirmedEmailView(SuccessMessageMixin, View):
@@ -185,3 +187,49 @@ class RawImageView(DetailView):
         return HttpResponse(
             io.BytesIO(photo.data),
             content_type='image/%s' % photo.format)
+
+class DeletePhotoView(SuccessMessageMixin, DetailView):
+    model = Photo
+    success_message = _('Photo deleted successfully')
+    success_url = reverse_lazy('profile')
+
+    def get(self, *args, **kwargs):
+        try:
+            photo = self.model.objects.get(pk=kwargs['pk'], user=self.request.user)
+            photo.delete()
+        except:
+            messages.error(self.request, _('No such image or no permission to delete it'))
+        return super().get(*args, **kwargs)
+
+class UploadPhotoView(SuccessMessageMixin, FormView):
+    model = Photo
+    template_name = 'upload_photo.html'
+    form_class = UploadPhotoForm
+    success_message = _('uploaded successfully')
+    success_url = reverse_lazy('profile')
+
+    def post(self, *args, **kwargs):
+        num_photos = self.request.user.photo_set.count()
+        if num_photos >= MAX_NUM_PHOTOS:
+            messages.error(self.request, _('Maximum number of photos (%i) reached' % MAX_NUM_PHOTOS))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+        return super().post(*args, **kwargs)
+
+    def form_valid(self, form, *args, **kwargs):
+        photo_data = self.request.FILES['photo']
+        if photo_data.size > MAX_PHOTO_SIZE:
+            messsages.error(self.request, _('Image to big'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        try:
+            photo = form.save(self.request, photo_data)
+        except IOError as e:
+            print('Error in IO: %s' % e)
+            messages.error(self.request, _('IO error'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        if not photo:
+            messages.error(self.request, _('Invalid Format'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        return super().form_valid(*args, **kwargs)

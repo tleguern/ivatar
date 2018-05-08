@@ -48,5 +48,8 @@ MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
 SERVER_EMAIL = 'accounts@ivatar.io'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
+MAX_NUM_PHOTOS = 5
+MAX_PHOTO_SIZE = 10485760  # in bytes
+
 if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
     from config_local import *  # noqa # flake8: noqa # NOQA # pragma: no cover

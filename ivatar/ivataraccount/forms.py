@@ -5,9 +5,11 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
 from ivatar import settings
-from . models import UnconfirmedEmail, ConfirmedEmail
+from . models import UnconfirmedEmail, ConfirmedEmail, Photo
 
 from ivatar.settings import MAX_LENGTH_EMAIL
+
+from ipware import get_client_ip
 
 class AddEmailForm(forms.Form):
     email = forms.EmailField(
@@ -58,3 +60,33 @@ class AddEmailForm(forms.Form):
         send_mail(email_subject, email_body, settings.SERVER_EMAIL,
             [unconfirmed.email])
         return True
+
+
+class UploadPhotoForm(forms.Form):
+    photo = forms.FileField(
+        label=_('Photo'),
+        error_messages={'required': _('You must choose an image to upload.')})
+    not_porn = forms.BooleanField(
+        label=_('suitable for all ages (i.e. no offensive content)'),
+        required=True,
+        error_messages={
+            'required':
+            _('We only host "G-rated" images and so this field must be checked.')
+        })
+    can_distribute = forms.BooleanField(
+        label=_('can be freely copied'),
+        required=True,
+        error_messages={
+            'required':
+            _('This field must be checked since we need to be able to distribute photos to third parties.')
+        })
+
+    def save(self, request, data):
+        # Link this file to the user's profile
+        photo = Photo()
+        photo.user = request.user
+        photo.ip_address = get_client_ip(request)
+        photo.data = data.read()
+        if not photo.save():
+            return None
+        return photo
