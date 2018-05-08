@@ -1,0 +1,39 @@
+{% extends 'base.html' %}                                                                                                                      
+{% load i18n %}
+
+{% block title %}{% trans 'Email confirmation' %} - Libravatar{% endblock title %}
+
+{% block content %}
+
+<h1>{% trans 'Email confirmation' %}</h1>
+
+<p><b>{% trans 'Your email address was successfully confirmed!' %}</b></p>
+
+{% if not user.is_anonymous %}
+{% if photos %}
+
+<p>{% trans 'Would you like to import some of these externally hosted photos?' %}</p>
+<form action="{% url 'import_photo' email_id %}" method="post">{% csrf_token %}
+<input type="hidden" name="email_id" value="{{ email_id }}">
+<ul class="horizontal-list imported-list centered">
+{% for photo in photos %}
+  <li><input type="checkbox" name="photo_{{photo.service_name}}" id="photo_{{photo.service_name}}" checked="checked">
+  <br/><label for="photo_{{photo.service_name}}"><img src="{{ photo.thumbnail_url }}" class="thumbnail" alt="{{photo.service_name}} image"></label>
+  <br/>
+  {% if photo.service_url %}
+  <a href="{{ photo.service_url }}">{{ photo.service_name }}</a>
+  {% else %}
+  {{ photo.service_name }}
+  {% endif %}
+  </li>
+{% endfor %}
+</ul>
+
+<p><input type="submit" value="{% trans 'Import' %}"></p>
+</form>
+{% endif %}
+
+<p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
+{% endif %}
+
+{% endblock content %}
