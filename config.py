@@ -51,5 +51,25 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 MAX_NUM_PHOTOS = 5
 MAX_PHOTO_SIZE = 10485760  # in bytes
 
+BOOTSTRAP4 = {
+    'include_jquery': False,
+    'javascript_in_head': False,
+    'css_url': {
+        'href': '/static/css/bootstrap.min.css',
+        'integrity': 'sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB',
+        'crossorigin': 'anonymous',
+    },
+    'javascript_url': {
+        'url': '/static/js/bootstrap.min.js',
+        'integrity': '',
+        'crossorigin': 'anonymous',
+    },
+    'popper_url': {
+        'url': '/static/js/popper.min.js',
+        'integrity': 'sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49',
+        'crossorigin': 'anonymous',
+    },
+}
+
 if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
     from config_local import *  # noqa # flake8: noqa # NOQA # pragma: no cover
