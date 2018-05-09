@@ -21,7 +21,11 @@
     {% for email in user.confirmedemail_set.all %}
         <li><form action="{% url 'remove_confirmed_email' email.id %}" method="post">{% csrf_token %}
         <a href="{% url 'assign_photo_email' email.id %}">
-        <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' email.photo.id %}" alt=""></a>
+        {% if email.photo %}
+            <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' email.photo.id %}" alt=""></a>
+        {% else %}
+            <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/64.png' %}" alt="Nobody"></a>
+        {% endif %}
         {{ email.email }}
         <br><a href="{% url 'assign_photo_email' email.id %}">{% trans 'Change photo' %}</a>
         <br><br><input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form></li>
