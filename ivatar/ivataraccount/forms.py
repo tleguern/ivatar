@@ -55,8 +55,8 @@ class AddEmailForm(forms.Form):
             'verification_link': link,
             'site_name': settings.SITE_NAME,
         })
-        if settings.DEBUG:
-            print('DEBUG: %s' % link)
+        #if settings.DEBUG:
+        #    print('DEBUG: %s' % link)
         send_mail(email_subject, email_body, settings.SERVER_EMAIL,
             [unconfirmed.email])
         return True
