@@ -109,17 +109,12 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
         # check to see whether this email is already confirmed
         if ConfirmedEmail.objects.filter(email=unconfirmed.email).exists():
             messages.warning(self.request, _('Address already confirmed'))
-            # FUCK return HttpResponseRedirect(reverse_lazy('profile'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
 
-        # FUCK - remove this try/except
-        try:
-            (confirmed_id, external_photos) = ConfirmedEmail.objects.create_confirmed_email(
-                unconfirmed.user, unconfirmed.email, not self.request.user.is_anonymous)
-        except:
-            confirmed_id = ConfirmedEmail.objects.filter(user=self.request.user,email=unconfirmed.email).first().id
-            external_photos = get_gravatar_photo(unconfirmed.email)
+        (confirmed_id, external_photos) = ConfirmedEmail.objects.create_confirmed_email(
+            unconfirmed.user, unconfirmed.email, not self.request.user.is_anonymous)
 
-        # FUCK unconfirmed.delete()
+        unconfirmed.delete()
 
         # if there's a single image in this user's profile, assign it to the new email
         confirmed = ConfirmedEmail.objects.get(id=confirmed_id)
