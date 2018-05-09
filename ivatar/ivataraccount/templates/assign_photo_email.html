@@ -37,7 +37,7 @@
   </form></li>
 </ul>
 
-<p>{% blocktrans %}or <a href="{{custom_upload_url}}">upload a new one</a>.{% endblocktrans %}</p>
+<p><a href="{% url 'upload_photo' %}">{% blocktrans %}upload a new one{% endblocktrans %}</a></p>
 
 {% endif %}
 
