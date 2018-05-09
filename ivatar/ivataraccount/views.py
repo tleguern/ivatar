@@ -142,19 +142,44 @@ class RemoveConfirmedEmailView(SuccessMessageMixin, View):
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
-class AssignPhotoEmailView(SuccessMessageMixin, View):
+class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
+    model = Photo
+    template_name = 'assign_photo_email.html'
+
     def post(self, *args, **kwargs):
         photo = None
-        if not 'photo_id' in kwargs:
-            mesages.error(self.request, _('Invalid request'))
+        if not 'email_id' in kwargs:
+            messages.error(self.request, _('Invalid request [email_id] missing'))
             return HttpResponseRedirect(reverse_lazy('profile'))
+        if not 'photo_id' in self.request.POST:
+            messages.error(self.request, _('Invalid request [photo_id] missing'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
         try:
-            photo = Photo.objects.get(
-                id=kwargs['photo_id'], user=request.user)
-        except Photo.DoesNotExist:
+            photo = self.model.objects.get(
+                id=self.request.POST['photo_id'],
+                user=self.request.user)
+        except self.model.DoesNotExist:
             message.error(self.request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
+        try:
+            email = ConfirmedEmail.objects.get(user=self.request.user,
+                    id=kwargs['email_id'])
+        except ConfirmedEmail.DoesNotExist:
+            message.error(self.request, _('Invalid request'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        email.photo = photo
+        email.save()
+
+        messages.success(self.request, _('Successfully changed photo'))
+        return HttpResponseRedirect(reverse_lazy('profile'))
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['email'] = ConfirmedEmail.objects.get(pk=kwargs['email_id'])
+        return data
 
 class ImportPhotoView(SuccessMessageMixin, View):
     def post(self, *args, **kwargs):
