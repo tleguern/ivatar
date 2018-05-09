@@ -2,10 +2,8 @@
 {% load static %}
 {% load bootstrap4 %}
 {% load i18n %}<!DOCTYPE HTML>
-{% spaceless %}{% block bootstrap4_content %}<html>
-{% include 'header.html' %}
-<body>
-
+{% block bootstrap4_extra_head %}{% include 'header.html' %}{% endblock bootstrap4_extra_head %}
+{% spaceless %}{% block bootstrap4_content %}
 <div id="header">
   <div>
   <div id="logo">
@@ -18,7 +16,6 @@
   </div>
 
   {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-
   <div id="account">
     {% if user.is_authenticated %}
     <a href="{% url 'profile' %}">{% trans 'Profile' %}</a>&nbsp;|&nbsp;
@@ -41,5 +38,10 @@
 
 {% block footer %}{% include 'footer.html' %}{% endblock footer %}
 
-</body>
-</html>{% endblock %}{% endspaceless %}
+{% endblock %}{% endspaceless %}
+
+{% block bootstrap4_after_content %}
+<script src="{% static '/js/ivatar.js' %}" defer></script>
+<script src="https://ad.aloodo.com/ad.js" async></script>
+{{ settings }}
+{% endblock bootstrap4_after_content %}
