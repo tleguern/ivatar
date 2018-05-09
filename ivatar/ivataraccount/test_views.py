@@ -12,6 +12,7 @@ from ivatar import settings
 from django.contrib.auth.models import User
 
 from ivatar.utils import random_string
+from ivatar.ivataraccount.models import Photo
 
 class Tester(TestCase):
     client = Client()
@@ -184,3 +185,4 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'unable to import photo from Gravatar?')
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Image successfully imported', 'Importing gravatar photo did not work?')
+        self.assertIsInstance(self.user.photo_set.first(), Photo, 'why is there no Photo (instance)?')
