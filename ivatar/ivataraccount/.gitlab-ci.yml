@@ -1,0 +1,53 @@
+image: centos:centos7
+
+before_script:
+  - yum install -y -t https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  - yum -y -t install python34 python34-pip python34-devel unzip mysql-devel gcc git
+  - pip3 install virtualenv --upgrade
+  - virtualenv -p python3 /tmp/.virtualenv
+  - source /tmp/.virtualenv/bin/activate
+  - pip install -r requirements.txt
+  - pip install python-coveralls
+  - pip install coverage
+  - pip install pycco
+
+test_and_coverage:
+  stage: test
+  script:
+    - pushd ivatar
+    - python manage.py collectstatic --noinput
+    - coverage run --source . manage.py test -v3
+    - coverage report --fail-under=70
+    - coverage html
+    - popd
+  artifacts:
+    paths:
+      - ivatar/htmlcov/
+
+pycco:
+  stage: test
+  script:
+    - /bin/true
+    - find ivatar/ -type f -name "*.py"|grep -v __pycache__|grep -v __init__.py|grep -v /migrations/ | xargs pycco -p -d pycco -i -s
+  artifacts:
+    paths:
+      - pycco/
+    expire_in: 14 days
+
+pages:
+  before_script:
+    - /bin/true
+    - /bin/true
+  stage: deploy
+  dependencies:
+    - test_and_coverage
+    - pycco
+  script:
+    - mv ivatar/htmlcov/ public/
+    - mv pycco/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 14 days
+  only:
+    - master
