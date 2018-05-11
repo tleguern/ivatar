@@ -6,6 +6,10 @@ from ivatar.settings import IVATAR_VERSION, SITE_NAME
 from ipware import get_client_ip
 
 def basepage(request):
+    '''
+    Our contextprocessor adds additional context variables
+    in order to be used in the templates
+    '''
     context = {}
     if 'openid_identifier' in request.GET:
         context['openid_identifier'] = request.GET['openid_identifier']

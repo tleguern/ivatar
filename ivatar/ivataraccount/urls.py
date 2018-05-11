@@ -9,6 +9,9 @@ from . views import ImportPhotoView, RawImageView, DeletePhotoView, UploadPhotoV
 from django.contrib.auth.views import login, logout, password_change, password_change_done
 from django.urls import reverse_lazy
 
+# Define URL patterns, self documenting
+# To see the fancy, colorful evaluation of these use:
+# ./manager show_urls
 urlpatterns = [
     path('new/', CreateView.as_view(), name='new_account'),
     path('login/', login, { 'template_name': 'login.html' }, name='login'),

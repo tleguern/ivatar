@@ -24,6 +24,9 @@ MAX_LENGTH_URL = 255  # MySQL can't handle more than that (LP: 1018682)
 
 
 def file_format(image_type):
+    '''
+    Helper method returning a 3 character long image type
+    '''
     if image_type == 'JPEG':
         return 'jpg'
     elif image_type == 'PNG':
@@ -36,6 +39,9 @@ def file_format(image_type):
 
 
 class BaseAccountModel(models.Model):
+    '''
+    Base, abstract model, holding fields we use in all cases
+    '''
     user = models.ForeignKey(
         User,
         on_delete=models.deletion.CASCADE,
@@ -48,6 +54,9 @@ class BaseAccountModel(models.Model):
 
 
 class Photo(BaseAccountModel):
+    '''
+    Model holding the photos and information about them
+    '''
     ip_address = models.GenericIPAddressField(unpack_ipv4=True)
     data = models.BinaryField()
     format = models.CharField(max_length=3)
@@ -89,6 +98,9 @@ class Photo(BaseAccountModel):
         return True
 
 class ConfirmedEmailManager(models.Manager):
+    '''
+    Manager for our confirmed email addresses model
+    '''
     def create_confirmed_email(self, user, email_address, is_logged_in):
         confirmed = ConfirmedEmail()
         confirmed.user = user
@@ -106,6 +118,10 @@ class ConfirmedEmailManager(models.Manager):
 
 
 class ConfirmedEmail(BaseAccountModel):
+    '''
+    Model holding our confirmed email addresses, as well as the relation
+    to the assigned photo
+    '''
     email = models.EmailField(unique=True, max_length=MAX_LENGTH_EMAIL)
     photo = models.ForeignKey(
         Photo,
@@ -126,6 +142,9 @@ class ConfirmedEmail(BaseAccountModel):
 
 
 class UnconfirmedEmail(BaseAccountModel):
+    '''
+    Model holding unconfirmed email addresses as well as the verification key
+    '''
     email = models.EmailField(max_length=MAX_LENGTH_EMAIL)
     verification_key = models.CharField(max_length=64)
 
@@ -141,6 +160,9 @@ class UnconfirmedEmail(BaseAccountModel):
 
 
 class UnconfirmedOpenId(BaseAccountModel):
+    '''
+    Model holding unconfirmed OpenIDs
+    '''
     openid = models.URLField(unique=False, max_length=MAX_LENGTH_URL)
 
     class Meta:
@@ -149,6 +171,10 @@ class UnconfirmedOpenId(BaseAccountModel):
 
 
 class ConfirmedOpenId(BaseAccountModel):
+    '''
+    Model holding confirmed OpenIDs, as well as the relation to
+    the assigned photo
+    '''
     openid = models.URLField(unique=True, max_length=MAX_LENGTH_URL)
     photo = models.ForeignKey(
         Photo,
@@ -163,15 +189,19 @@ class ConfirmedOpenId(BaseAccountModel):
         verbose_name_plural = _('confirmed OpenIDs')
 
 
-
-
-# Classes related to the OpenID Store (from https://github.com/edx/django-openid-auth/)
 class OpenIDNonce(models.Model):
+    '''
+    Model holding OpenID Nonces
+    See also: https://github.com/edx/django-openid-auth/
+    '''
     server_url = models.CharField(max_length=255)
     timestamp = models.IntegerField()
     salt = models.CharField(max_length=128)
 
 class OpenIDAssociation(models.Model):
+    '''
+    Model holding the relation/association about OpenIDs
+    '''
     server_url = models.TextField(max_length=2047)
     handle = models.CharField(max_length=255)
     secret = models.TextField(max_length=255)  # stored base64 encoded
@@ -187,7 +217,10 @@ class DjangoOpenIDStore(OpenIDStore):
     '''
 
     def storeAssociation(self, server_url, association):
-        # pylint: disable=unexpected-keyword-arg
+        '''
+        Helper method to store associations
+        TODO: Could be moved to classmethod
+        '''
         assoc = OpenIDAssociation(
             server_url=server_url,
             handle=association.handle,
@@ -198,6 +231,9 @@ class DjangoOpenIDStore(OpenIDStore):
         assoc.save()
 
     def getAssociation(self, server_url, handle=None):
+        '''
+        Helper method to get associations
+        '''
         assocs = []
         if handle is not None:
             assocs = OpenIDAssociation.objects.filter(
@@ -229,6 +265,10 @@ class DjangoOpenIDStore(OpenIDStore):
         return associations[-1][1]
 
     def removeAssociation(self, server_url, handle):
+        '''
+        Helper method to remove associations
+        TODO: Could be moved to classmethod
+        '''
         assocs = list(
             OpenIDAssociation.objects.filter(
                 server_url=server_url, handle=handle))
@@ -238,6 +278,10 @@ class DjangoOpenIDStore(OpenIDStore):
         return assocs_exist
 
     def useNonce(self, server_url, timestamp, salt):
+        '''
+        Helper method to 'use' nonces
+        TODO: Could be moved to classmethod
+        '''
         # Has nonce expired?
         if abs(timestamp - time.time()) > oidnonce.SKEW:
             return False
@@ -254,15 +298,25 @@ class DjangoOpenIDStore(OpenIDStore):
         return False
 
     def cleanupNonces(self):
+        '''
+        Helper method to cleanup nonces
+        TODO: Could be moved to classmethod
+        '''
         timestamp = int(time.time()) - oidnonce.SKEW
         OpenIDNonce.objects.filter(timestamp__lt=timestamp).delete()
 
     def cleanupAssociations(self):
+        '''
+        Helper method to cleanup associations
+        TODO: Could be moved to classmethod
+        '''
         OpenIDAssociation.objects.extra(
             where=['issued + lifetimeint < (%s)' % time.time()]).delete()
 
-    # pylint: disable=invalid-name
     def getAuthKey(self):
+        '''
+        Helper method to get authentication key
+        '''
         # Use first AUTH_KEY_LEN characters of md5 hash of SECRET_KEY
         hash_object = hashlib.new('md5')
         hash_object.update(settings.SECRET_KEY)

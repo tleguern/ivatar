@@ -26,6 +26,9 @@ from ipware import get_client_ip
 from . gravatar import get_photo as get_gravatar_photo
 
 class CreateView(SuccessMessageMixin, FormView):
+    '''
+    TODO: Docs
+    '''
     template_name = 'new.html'
     form_class = UserCreationForm
     success_message = _('created successfully')

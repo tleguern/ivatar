@@ -12,6 +12,9 @@ from ivatar.settings import MAX_LENGTH_EMAIL
 from ipware import get_client_ip
 
 class AddEmailForm(forms.Form):
+    '''
+    Form to handle adding email addresses
+    '''
     email = forms.EmailField(
         label=_('Email'),
         max_length=MAX_LENGTH_EMAIL,
@@ -26,6 +29,9 @@ class AddEmailForm(forms.Form):
         return self.cleaned_data['email'].lower()
 
     def save(self, user):
+        '''
+        Save the model, ensuring some safety
+        '''
         # Enforce the maximum number of unconfirmed emails a user can have
         num_unconfirmed = user.unconfirmedemail_set.count()
 
@@ -63,6 +69,9 @@ class AddEmailForm(forms.Form):
 
 
 class UploadPhotoForm(forms.Form):
+    '''
+    Form handling photo upload
+    '''
     photo = forms.FileField(
         label=_('Photo'),
         error_messages={'required': _('You must choose an image to upload.')})
@@ -82,6 +91,9 @@ class UploadPhotoForm(forms.Form):
         })
 
     def save(self, request, data):
+        '''
+        Save the model and assign it to the current user
+        '''
         # Link this file to the user's profile
         photo = Photo()
         photo.user = request.user

@@ -5,6 +5,9 @@ import hashlib
 URL_TIMEOUT = 5  # in seconds
 
 def get_photo(email):
+    '''
+    Fetch photo from Gravatar, given an email address
+    '''
     hash_object = hashlib.new('md5')                                                                                                           
     hash_object.update(email.lower().encode('utf-8'))
     thumbnail_url = 'https://secure.gravatar.com/avatar/' + hash_object.hexdigest(
