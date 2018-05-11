@@ -119,8 +119,8 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
         # if there's a single image in this user's profile, assign it to the new email
         confirmed = ConfirmedEmail.objects.get(id=confirmed_id)
         if confirmed.user.photo_set.count() == 1   :
-            confirmed.set_photo(confirmed.user.photos.get())
-        kwargs['photos'] = [ external_photos ]
+            confirmed.set_photo(confirmed.user.photo_set.first())
+        kwargs['photos'] = external_photos
         kwargs['email_id'] = confirmed_id
         return super().get(*args, **kwargs)
 
@@ -208,10 +208,8 @@ class RawImageView(DetailView):
             io.BytesIO(photo.data),
             content_type='image/%s' % photo.format)
 
-class DeletePhotoView(SuccessMessageMixin, DetailView):
+class DeletePhotoView(SuccessMessageMixin, View):
     model = Photo
-    success_message = _('Photo deleted successfully')
-    success_url = reverse_lazy('profile')
 
     def get(self, *args, **kwargs):
         try:
@@ -219,7 +217,9 @@ class DeletePhotoView(SuccessMessageMixin, DetailView):
             photo.delete()
         except:
             messages.error(self.request, _('No such image or no permission to delete it'))
-        return super().get(*args, **kwargs)
+            return HttpResponseRedirect(reverse_lazy('profile'))
+        messages.success(self.request, _('Photo deleted successfully'))
+        return HttpResponseRedirect(reverse_lazy('profile'))
 
 class UploadPhotoView(SuccessMessageMixin, FormView):
     model = Photo
@@ -252,4 +252,4 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
             messages.error(self.request, _('Invalid Format'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        return super().form_valid(*args, **kwargs)
+        return super().form_valid(form, *args, **kwargs)
