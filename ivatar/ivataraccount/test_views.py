@@ -36,7 +36,7 @@ class Tester(TestCase):
             username=self.username,
             password=self.password,
         )
-    
+
     def test_new_user(self):
         """
         Create a new user
@@ -186,3 +186,33 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Image successfully imported', 'Importing gravatar photo did not work?')
         self.assertIsInstance(self.user.photo_set.first(), Photo, 'why is there no Photo (instance)?')
+
+    def test_raw_image(self):
+        '''
+        test raw image view (as seen in profile <img src=
+        '''
+
+        # Ensure we have a photo
+        self.test_gravatar_photo_import()
+        response = self.client.get(reverse('raw_image', args=[self.user.photo_set.first().id]))
+        self.assertEqual(response.status_code, 200, 'cannot fetch photo?')
+        # Probably not the best way to access the content type
+        self.assertEqual(response._headers['content-type'][1], 'image/jpg', 'Content type wrong!?')
+
+        self.assertEqual(response.content, self.user.photo_set.first().data,
+            'raw_image should return the same content as if we read it directly from the DB')
+
+    def test_delete_photo(self):
+        '''
+        test deleting the photo
+        '''
+
+        # Ensure we have a photo
+        self.test_gravatar_photo_import()
+
+        url = reverse('delete_photo', args=[self.user.photo_set.first().id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200, 'deleting photo doesnt work?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Photo deleted successfully', 'Photo deletion did not work?')
+
