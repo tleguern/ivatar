@@ -14,15 +14,13 @@ before_script:
 test_and_coverage:
   stage: test
   script:
-    - pushd ivatar
     - python manage.py collectstatic --noinput
     - coverage run --source . manage.py test -v3
     - coverage report --fail-under=70
     - coverage html
-    - popd
   artifacts:
     paths:
-      - ivatar/htmlcov/
+      - htmlcov/
 
 pycco:
   stage: test
@@ -43,7 +41,7 @@ pages:
     - test_and_coverage
     - pycco
   script:
-    - mv ivatar/htmlcov/ public/
+    - mv htmlcov/ public/
     - mv pycco/ public/
   artifacts:
     paths:
