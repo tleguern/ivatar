@@ -26,5 +26,5 @@ urlpatterns = [
     url('assign_photo_email/(?P<email_id>\d+)', AssignPhotoEmailView.as_view(), name='assign_photo_email'),
     url('import_photo/(?P<email_id>\d+)', ImportPhotoView.as_view(), name='import_photo'),
     url('delete_photo/(?P<pk>\d+)', DeletePhotoView.as_view(), name='delete_photo'),
-    url('raw_photo/(?P<pk>[-\w]+)', RawImageView.as_view(), name='raw_image'),
+    url('raw_image/(?P<pk>\d+)', RawImageView.as_view(), name='raw_image'),
 ]
