@@ -56,9 +56,6 @@ class Photo(BaseAccountModel):
         verbose_name = _('photo')
         verbose_name_plural = _('photos')
 
-    #def md5(self):
-    #    return hashlib.md5(self.data)
-
     def import_image(self, service_name, email_address):
         image_url = False
 
