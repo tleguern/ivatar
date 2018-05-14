@@ -11,6 +11,8 @@ from ivatar.settings import MAX_LENGTH_EMAIL
 
 from ipware import get_client_ip
 
+MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT = 5
+
 class AddEmailForm(forms.Form):
     '''
     Form to handle adding email addresses
@@ -35,7 +37,7 @@ class AddEmailForm(forms.Form):
         # Enforce the maximum number of unconfirmed emails a user can have
         num_unconfirmed = user.unconfirmedemail_set.count()
 
-        max_num_unconfirmed_emails = getattr(settings, 'MAX_NUM_UNCONFIRMED_EMAILS', 5)
+        max_num_unconfirmed_emails = getattr(settings, 'MAX_NUM_UNCONFIRMED_EMAILS', MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)
 
         if num_unconfirmed >= max_num_unconfirmed_emails:
             return False

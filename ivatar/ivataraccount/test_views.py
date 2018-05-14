@@ -8,6 +8,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'ivatar.settings'
 django.setup()
 
 from ivatar import settings
+from ivatar.ivataraccount.forms import MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT
 
 from django.contrib.auth.models import User
 
@@ -215,4 +216,29 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'deleting photo doesnt work?')
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Photo deleted successfully', 'Photo deletion did not work?')
+
+    def test_too_many_unconfirmed_email(self):
+        '''
+        Request too many unconfirmed email addresses, make sure we
+        cannot add more
+        '''
+        self.login()
+        # Avoid sending out mails
+        settings.EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+        max_num_unconfirmed = getattr(settings, 'MAX_NUM_UNCONFIRMED_EMAILS', MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)                                                     
+
+        for i in range(max_num_unconfirmed+1):
+            response = self.client.post(
+                reverse('add_email'), {
+                    'email': '%i.%s' %(i, self.email),
+                },
+            )  # Create test addresses + 1 too much
+        response = self.client.get(reverse('profile'))
+        self.assertEqual(response.status_code, 200, 'why does profile page not work!?')
+        # Take care, since we do did not fetch any pages after adding mail
+        # addresses, the messages still sit there waiting to be fetched!!
+        # Therefore the message index we need to use is max_num_unconfirmed!
+        self.assertEqual(str(list(response.context[0]['messages'])[max_num_unconfirmed]),
+                'Address not added', 'Too many unconfirmed address, should return a "not added" messsage!')
 
