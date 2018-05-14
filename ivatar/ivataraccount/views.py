@@ -174,10 +174,6 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
 @method_decorator(login_required, name='dispatch')
 class ImportPhotoView(SuccessMessageMixin, View):
     def post(self, *args, **kwargs):
-        if not 'email_id' in kwargs:
-            messages.error(self.request, _('Address not given'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
-
         try:
             email = ConfirmedEmail.objects.get(id=kwargs['email_id'], user=self.request.user)
         except:
