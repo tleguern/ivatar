@@ -9,6 +9,8 @@ from . views import ImportPhotoView, RawImageView, DeletePhotoView, UploadPhotoV
 from django.contrib.auth.views import login, logout, password_change, password_change_done
 from django.urls import reverse_lazy
 
+from django.contrib.auth.decorators import login_required
+
 # Define URL patterns, self documenting
 # To see the fancy, colorful evaluation of these use:
 # ./manager show_urls
@@ -16,11 +18,19 @@ urlpatterns = [
     path('new/', CreateView.as_view(), name='new_account'),
     path('login/', login, { 'template_name': 'login.html' }, name='login'),
     path('logout/', logout, { 'next_page': reverse_lazy('login') }, name='logout'),
-    path('export/', TemplateView.as_view(template_name='export.html'), name='export'),
-    path('delete/', TemplateView.as_view(template_name='delete.html'), name='delete'),
-    path('profile/', TemplateView.as_view(template_name='profile.html'), name='profile'),
+    path('export/', login_required(
+        TemplateView.as_view(template_name='export.html')
+    ), name='export'),
+    path('delete/', login_required(
+        TemplateView.as_view(template_name='delete.html')
+    ), name='delete'),
+    path('profile/', login_required(
+        TemplateView.as_view(template_name='profile.html')
+    ), name='profile'),
     path('add_email/', AddEmailView.as_view(), name='add_email'),
-    path('add_openid/', TemplateView.as_view(template_name='add_openid.html'), name='add_openid'),
+    path('add_openid/', login_required(
+        TemplateView.as_view(template_name='add_openid.html')
+    ), name='add_openid'),
     path('upload_photo/', UploadPhotoView.as_view(), name='upload_photo'),
     path('password_set/', PasswordSetView.as_view(), name='password_set'),
     url('confirm_email/(?P<verification_key>\w+)', ConfirmEmailView.as_view(), name='confirm_email'),
