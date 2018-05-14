@@ -43,7 +43,7 @@ class CreateView(SuccessMessageMixin, FormView):
             login(self.request, user)
             return HttpResponseRedirect(reverse_lazy('profile'))
         else:
-            return HttpResponseRedirect(reverse_lazy('login'))  # noqa
+            return HttpResponseRedirect(reverse_lazy('login'))  # pragma: no cover
 
 @method_decorator(login_required, name='dispatch')
 class PasswordSetView(SuccessMessageMixin, FormView):
