@@ -420,3 +420,40 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'cannot assign photo?')
         self.assertEqual(self.user.confirmedemail_set.first().photo, self.user.photo_set.first())
 
+    def test_assign_invalid_photo_id_to_email(self):
+        self.test_confirm_email()
+        self.test_upload_img()
+        self.assertIsNone(self.user.confirmedemail_set.first().photo)
+        url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
+        response = self.client.post(url, {
+            'photo_id': 1234,
+        }, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'cannot post assign photo request?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Photo does not exist',
+            'Assign non existing photo, does not return error message?')
+
+    def test_post_to_assign_photo_without_photo_id(self):
+        self.test_confirm_email()
+        self.test_upload_img()
+        self.assertIsNone(self.user.confirmedemail_set.first().photo)
+        url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
+        response = self.client.post(url, {}, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'cannot post assign photo request?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Invalid request [photo_id] missing',
+            'Assign non existing photo, does not return error message?')
+
+    def test_assign_photo_to_inexisting_mail(self):
+        self.test_upload_img()
+        url = reverse('assign_photo_email', args=[1234])
+        response = self.client.post(url, {
+            'photo_id': self.user.photo_set.first().id,
+        }, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'cannot post assign photo request?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Invalid request',
+            'Assign non existing photo, does not return error message?')
