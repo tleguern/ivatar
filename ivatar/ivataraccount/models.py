@@ -97,6 +97,19 @@ class Photo(BaseAccountModel):
         super().save()
         return True
 
+    def save(self, *args, **kwargs):
+        # Use PIL to read the file format
+        try:
+            img = Image.open(BytesIO(self.data))
+        except ValueError:
+            return False
+        except OSError:
+            return False
+        self.format = file_format(img.format)
+        if not self.format:
+            return False
+        return super().save(*args, **kwargs)
+
 class ConfirmedEmailManager(models.Manager):
     '''
     Manager for our confirmed email addresses model
