@@ -141,9 +141,6 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
 
     def post(self, *args, **kwargs):
         photo = None
-        if not 'email_id' in kwargs:
-            messages.error(self.request, _('Invalid request [email_id] missing'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
         if not 'photo_id' in self.request.POST:
             messages.error(self.request, _('Invalid request [photo_id] missing'))
             return HttpResponseRedirect(reverse_lazy('profile'))
