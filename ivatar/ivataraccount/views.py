@@ -187,7 +187,8 @@ class ImportPhotoView(SuccessMessageMixin, View):
             if photo.import_image('Gravatar', email.email):
                 messages.success(self.request, _('Image successfully imported'))
             else:
-                messages.error(self.request, _('Image import not successful'))
+                # Honestly, I'm not sure how to rest this...
+                messages.error(self.request, _('Image import not successful'))  # pragma: no cover
         else:
             messages.warning(self.request, _('Nothing importable'))
         return HttpResponseRedirect(reverse_lazy('profile'))
