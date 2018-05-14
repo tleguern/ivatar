@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
 
+import io
 import os
 import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ivatar.settings'
@@ -436,6 +437,36 @@ class Tester(TestCase):
             'Maximum number of photos (%i) reached' % settings.MAX_NUM_PHOTOS,
             'Adding more than allowed images, should return error message!')
 
+    def test_upload_too_big_image(self):
+        '''
+        Test uploading image that is too big
+        '''
+        self.login()
+        url = reverse('upload_photo')
+        # rb => Read binary
+        response = self.client.post(url, {
+            'photo': io.StringIO('x'*(settings.MAX_PHOTO_SIZE+1)),
+            'not_porn': True,
+            'can_distribute': True,
+        }, follow=True)
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Image too big',
+            'Uploading too big image, should return error message!')
+
+    def test_invalid_image(self):
+        '''
+        Test invalid image data
+        '''
+        self.login()
+        url = reverse('upload_photo')
+        # rb => Read binary
+        response = self.client.post(url, {
+            'photo': io.StringIO('x'),
+            'not_porn': True,
+            'can_distribute': True,
+        }, follow=True)
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Invalid Format', 'Invalid img data should return error message!')
 
     def test_automatic_photo_assign_to_confirmed_mail(self):
         self.test_upload_img()
@@ -496,7 +527,7 @@ class Tester(TestCase):
         url = reverse('import_photo', args=[1234])
         response = self.client.post(url, {}, follow=True)
         self.assertEqual(response.status_code, 200,
-            'cannot post mport photo request?')
+            'cannot post import photo request?')
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Address does not exist',
             'Import photo with inexisting mail id, does not return error message?')
@@ -506,7 +537,7 @@ class Tester(TestCase):
         url = reverse('import_photo', args=[self.user.confirmedemail_set.first().id])
         response = self.client.post(url, {}, follow=True)
         self.assertEqual(response.status_code, 200,
-            'cannot post mport photo request?')
+            'cannot post import photo request?')
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Nothing importable',
             'Importing with email that does not exist in Gravatar,\
