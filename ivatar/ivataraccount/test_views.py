@@ -128,9 +128,9 @@ class Tester(TestCase):
         )
         self.assertEqual(response.status_code, 200, 'cannot add email?')
         self.assertEqual(len(response.context[0]['messages']), 1,
-                'there must not be more or less than ONE (1) message')
+            'there must not be more or less than ONE (1) message')
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
-                'Address added successfully', 'unable to add mail address?')
+            'Address added successfully', 'unable to add mail address?')
 
     def test_confirm_email(self):
         '''
@@ -151,9 +151,30 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'unable to confirm mail address?')
 
         self.assertEqual(self.user.unconfirmedemail_set.count(), 0,
-                'there must not be any unconfirmed address, after confirming it')
+            'there must not be any unconfirmed address, after confirming it')
         self.assertEqual(self.user.confirmedemail_set.count(), 1,
-                'there must not be more or less than ONE (1) confirmed address!')
+            'there must not be more or less than ONE (1) confirmed address!')
+
+    def test_confirm_email_w_invalid_auth_key(self):
+        '''
+        Test confirmation with invalid auth key
+        '''
+        self.login()
+        # Avoid sending out mails
+        settings.EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+        response = self.client.post(
+            reverse('add_email'), {
+                'email': self.email,
+            },
+            follow=True,
+        )
+        url = reverse('confirm_email', args=['x'])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'Not able to request confirmation - without verification key?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Verification key incorrect', 'Confirm w/o verification key does not produce error message?')
+
 
     def test_remove_confirmed_email(self):
         '''
@@ -174,7 +195,21 @@ class Tester(TestCase):
         response = self.client.post(url, follow=True)
         self.assertEqual(response.status_code, 200, 'unable to remove confirmed address?')
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
-                'Address removed', 'Removing confirmed mail does not work?')
+            'Address removed', 'Removing confirmed mail does not work?')
+
+    def test_remove_not_existing_confirmed_email(self):
+        '''
+        Try removing confirmed mail that doesn't exist
+        '''
+        self.login()
+        url = reverse('remove_confirmed_email', args=[1234])
+        response = self.client.post(url, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'removing email does not redirect to profile?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Address does not exist',
+            'Removing not existing (confirmed) address, should produce an\
+                error message!')
 
     def test_remove_unconfirmed_email(self):
         '''
