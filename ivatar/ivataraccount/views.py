@@ -234,7 +234,7 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         photo_data = self.request.FILES['photo']
         if photo_data.size > MAX_PHOTO_SIZE:
-            messsages.error(self.request, _('Image to big'))
+            messages.error(self.request, _('Image too big'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
