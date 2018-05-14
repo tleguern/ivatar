@@ -38,12 +38,15 @@ class Tester(TestCase):
             password=self.password,
         )
 
+    # CreateView
     def test_new_user(self):
         """
         Create a new user
         """
         response = self.client.get(reverse('new_account'))
         self.assertEqual(response.status_code, 200, 'no 200 ok?')
+        # Empty database / eliminate existing users
+        User.objects.all().delete()
         url = reverse('new_account')
         response = self.client.post(
             url, {
@@ -54,9 +57,30 @@ class Tester(TestCase):
             follow=True,
         )
         self.assertEqual(response.status_code, 200, 'unable to create user?')
-        self.login()
-        response = self.client.get(reverse('profile'))
         self.assertEqual(response.context[0]['user'].username, self.username)
+
+    # CreateView
+    def test_new_user_twice(self):
+        """
+        Try to create a user that already exists
+        """
+        response = self.client.get(reverse('new_account'))
+        self.assertEqual(response.status_code, 200, 'no 200 ok?')
+        # Due to setUp(), we already have this user!
+        url = reverse('new_account')
+        response = self.client.post(
+            url, {
+                'username': self.username,
+                'password1': self.password,
+                'password2': self.password,
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200, 'unable to create user?')
+        self.assertEqual(response.context[0]['user'].username, '')
+        self.assertContains(response,
+            'A user with that username already exists.', 1, 200, 
+            'can we create a user a second time???')
 
     def test_set_password(self):
         """
@@ -284,4 +308,16 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
                 'Address not added', 'Adding already added address must lead to\
                         "Address not added" message!')
+
+    def test_remove_unconfirmed_non_existing_email(self):
+        '''
+        Remove unconfirmed email that doesn't exist
+        '''
+        self.login()
+        url = reverse('remove_unconfirmed_email', args=[1234])
+        response = self.client.post(url, follow=True)
+        self.assertEqual(response.status_code, 200, 'unable to remove non existing address?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+                'Address does not exist', 'Removing address that does not\
+                        exist, should return error message!')
 
