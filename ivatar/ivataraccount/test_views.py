@@ -388,3 +388,35 @@ class Tester(TestCase):
                 'Address does not exist', 'Removing address that does not\
                         exist, should return error message!')
 
+    def test_upload_img(self):
+        '''
+        Test uploading image
+        '''
+        self.login()
+        url = reverse('upload_photo')
+        # rb => Read binary
+        with open(os.path.join(settings.STATIC_ROOT, 'img', 'deadbeef.png'), 'rb') as photo:
+            response = self.client.post(url, {
+                'photo': photo,
+                'not_porn': True,
+                'can_distribute': True,
+            }, follow=True)
+        self.assertEqual(self.user.photo_set.count(), 1,
+            'there must be exactly one photo now!')
+
+    def test_automatic_photo_assign_to_confirmed_mail(self):
+        self.test_upload_img()
+        self.test_confirm_email()
+        self.assertEqual(self.user.confirmedemail_set.first().photo, self.user.photo_set.first())
+
+    def test_assign_photo_to_email(self):
+        self.test_confirm_email()
+        self.test_upload_img()
+        self.assertIsNone(self.user.confirmedemail_set.first().photo)
+        url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
+        response = self.client.post(url, {
+            'photo_id': self.user.photo_set.first().id,
+        }, follow=True)
+        self.assertEqual(response.status_code, 200, 'cannot assign photo?')
+        self.assertEqual(self.user.confirmedemail_set.first().photo, self.user.photo_set.first())
+
