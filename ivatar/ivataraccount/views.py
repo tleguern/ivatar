@@ -43,15 +43,13 @@ class CreateView(SuccessMessageMixin, FormView):
             login(self.request, user)
             return HttpResponseRedirect(reverse_lazy('profile'))
         else:
-            return HttpResponseRedirect(reverse_lazy('login'))
-
-        return super().form_valid(form)
+            return HttpResponseRedirect(reverse_lazy('login'))  # noqa
 
 @method_decorator(login_required, name='dispatch')
 class PasswordSetView(SuccessMessageMixin, FormView):
     template_name = 'password_change.html'
     form_class = SetPasswordForm
-    success_message = _('password changed successfully')
+    success_message = _('password changed successfully - please login again')
     success_url = reverse_lazy('profile')
 
     def get_form_kwargs(self):

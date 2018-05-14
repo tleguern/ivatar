@@ -11,7 +11,7 @@ from ivatar import settings
 from ivatar.ivataraccount.forms import MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT
 
 from django.contrib.auth.models import User
-
+from django.contrib.auth import authenticate
 from ivatar.utils import random_string
 from ivatar.ivataraccount.models import Photo
 
@@ -92,12 +92,23 @@ class Tester(TestCase):
         self.password = random_string()
         response = self.client.post(
             reverse('password_set'), {
-                'password1': self.password,
-                'password2': self.password,
+                'new_password1': self.password,
+                'new_password2': self.password,
             },
             follow=True,
         )
+
         self.assertEqual(response.status_code, 200, 'cannot change password?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'password changed successfully - please login again', 'password change not successful?')
+
+        self.assertIsNotNone(authenticate(
+            username=self.username,
+            password=self.password,
+        ), 'cannot authenticate with new password!?')
+                  
+        self.login()
+        response = self.client.get(reverse('profile'))
         self.assertEqual(response.context[0]['user'].is_anonymous, False)
 
     def test_add_email(self):
