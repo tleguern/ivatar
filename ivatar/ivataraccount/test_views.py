@@ -242,3 +242,46 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[max_num_unconfirmed]),
                 'Address not added', 'Too many unconfirmed address, should return a "not added" messsage!')
 
+
+    def test_add_mail_address_twice(self):
+        '''
+        Request the same mail address two times, should not lead to
+        having the same address twice
+        '''
+        self.login()
+        # Avoid sending out mails
+        settings.EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+        for i in range(2):
+            response = self.client.post(
+                reverse('add_email'), {
+                    'email': self.email,
+                },
+            )  # Request adding test address twice
+        response = self.client.get(reverse('profile'))
+        self.assertEqual(response.status_code, 200, 'why does profile page not work!?')
+        # Take care, since we do did not fetch any pages after adding mail
+        # addresses, the messages still sit there waiting to be fetched!!
+        self.assertEqual(str(list(response.context[0]['messages'])[1]),
+                'Address not added', 'Adding address twice must lead to "Address not added" message!')
+
+    def test_add_already_confirmed_email(self):
+        '''
+        Request adding mail address that is already confirmed (by someone)
+        '''
+        # Create test mail and confirm it, reuse test code
+        # Should set EMAIL_BACKEND, so no need to do it here
+        self.test_confirm_email()
+
+        response = self.client.post(
+            reverse('add_email'), {
+                'email': self.email,
+            },
+        )  # Request adding test address a second time
+        response = self.client.get(reverse('profile'))
+        self.assertEqual(response.status_code, 200, 'why does profile page not\
+                work!?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+                'Address not added', 'Adding already added address must lead to\
+                        "Address not added" message!')
+
