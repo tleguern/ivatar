@@ -404,7 +404,7 @@ class Tester(TestCase):
                 'Address does not exist', 'Removing address that does not\
                         exist, should return error message!')
 
-    def test_upload_img(self):
+    def test_upload_img(self, test_only_one=True):
         '''
         Test uploading image
         '''
@@ -417,8 +417,25 @@ class Tester(TestCase):
                 'not_porn': True,
                 'can_distribute': True,
             }, follow=True)
-        self.assertEqual(self.user.photo_set.count(), 1,
-            'there must be exactly one photo now!')
+        if test_only_one:
+            self.assertEqual(self.user.photo_set.count(), 1,
+                'there must be exactly one photo now!')
+        else:
+            return response
+
+    def test_upload_too_many_images(self):
+        '''
+        Test uploading more images than we are allowed
+        '''
+        for i in range(settings.MAX_NUM_PHOTOS+1):
+            response = self.test_upload_img(test_only_one=False)
+        self.assertEqual(self.user.photo_set.count(), settings.MAX_NUM_PHOTOS,
+            'there may not be more photos than allowed!')
+        # Take care we need to check the last message
+        self.assertEqual(str(list(response.context[0]['messages'])[-1]),
+            'Maximum number of photos (%i) reached' % settings.MAX_NUM_PHOTOS,
+            'Adding more than allowed images, should return error message!')
+
 
     def test_automatic_photo_assign_to_confirmed_mail(self):
         self.test_upload_img()
