@@ -237,12 +237,7 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
             messages.error(self.request, _('Image too big'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        try:
-            photo = form.save(self.request, photo_data)
-        except IOError as e:
-            print('Error in IO: %s' % e)
-            messages.error(self.request, _('IO error'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
+        photo = form.save(self.request, photo_data)
 
         if not photo:
             messages.error(self.request, _('Invalid Format'))
