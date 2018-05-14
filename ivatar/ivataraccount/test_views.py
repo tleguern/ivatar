@@ -457,3 +457,24 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Invalid request',
             'Assign non existing photo, does not return error message?')
+
+    def test_import_photo_with_inexisting_email(self):
+        self.login()
+        url = reverse('import_photo', args=[1234])
+        response = self.client.post(url, {}, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'cannot post mport photo request?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Address does not exist',
+            'Import photo with inexisting mail id, does not return error message?')
+
+    def test_import_nothing(self):
+        self.test_confirm_email()
+        url = reverse('import_photo', args=[self.user.confirmedemail_set.first().id])
+        response = self.client.post(url, {}, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'cannot post mport photo request?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Nothing importable',
+            'Importing with email that does not exist in Gravatar,\
+            should return an error message!')
