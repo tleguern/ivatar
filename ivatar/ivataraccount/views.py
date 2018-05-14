@@ -150,14 +150,14 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
                 id=self.request.POST['photo_id'],
                 user=self.request.user)
         except self.model.DoesNotExist:
-            message.error(self.request, _('Photo does not exist'))
+            messages.error(self.request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             email = ConfirmedEmail.objects.get(user=self.request.user,
                     id=kwargs['email_id'])
         except ConfirmedEmail.DoesNotExist:
-            message.error(self.request, _('Invalid request'))
+            messages.error(self.request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         email.photo = photo
