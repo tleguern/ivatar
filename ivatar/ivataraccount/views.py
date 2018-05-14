@@ -92,10 +92,6 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
     template_name = 'email_confirmed.html'
 
     def get(self, *args, **kwargs):
-        if 'verification_key' not in kwargs:
-            messages.error(self.request, _('Verification key missing'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
-
         # be tolerant of extra crap added by mail clients
         key = kwargs['verification_key'].replace(' ', '')
 
