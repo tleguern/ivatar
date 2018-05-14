@@ -175,6 +175,27 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Verification key incorrect', 'Confirm w/o verification key does not produce error message?')
 
+    def test_confirm_email_w_inexisting_auth_key(self):
+        '''
+        Test confirmation with inexisting auth key
+        '''
+        self.login()
+        # Avoid sending out mails
+        settings.EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+        response = self.client.post(
+            reverse('add_email'), {
+                'email': self.email,
+            },
+            follow=True,
+        )
+        url = reverse('confirm_email', args=['x'*64])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'Not able to request confirmation - without verification key?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Verification key does not exist',
+            'Confirm w/o inexisting key does not produce error message?')
+
 
     def test_remove_confirmed_email(self):
         '''
