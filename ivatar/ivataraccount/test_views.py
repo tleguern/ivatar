@@ -79,7 +79,7 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'unable to create user?')
         self.assertEqual(response.context[0]['user'].username, '')
         self.assertContains(response,
-            'A user with that username already exists.', 1, 200, 
+            'A user with that username already exists.', 1, 200,
             'can we create a user a second time???')
 
     def test_set_password(self):
@@ -106,7 +106,7 @@ class Tester(TestCase):
             username=self.username,
             password=self.password,
         ), 'cannot authenticate with new password!?')
-                  
+
         self.login()
         response = self.client.get(reverse('profile'))
         self.assertEqual(response.context[0]['user'].is_anonymous, False)
@@ -308,6 +308,22 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Photo deleted successfully', 'Photo deletion did not work?')
 
+    def test_delete_inexisting_photo(self):
+        '''
+        test deleting the photo
+        '''
+
+        # Ensure we have a photo
+        self.test_gravatar_photo_import()
+
+        url = reverse('delete_photo', args=[1234])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200,
+            'post to delete does not work?')
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'No such image or no permission to delete it',
+            'Deleting photo that does not exist, should return error message')
+
     def test_too_many_unconfirmed_email(self):
         '''
         Request too many unconfirmed email addresses, make sure we
@@ -317,7 +333,7 @@ class Tester(TestCase):
         # Avoid sending out mails
         settings.EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
-        max_num_unconfirmed = getattr(settings, 'MAX_NUM_UNCONFIRMED_EMAILS', MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)                                                     
+        max_num_unconfirmed = getattr(settings, 'MAX_NUM_UNCONFIRMED_EMAILS', MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)
 
         for i in range(max_num_unconfirmed+1):
             response = self.client.post(
