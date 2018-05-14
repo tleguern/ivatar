@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.db import transaction
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
@@ -31,8 +33,6 @@ class CreateView(SuccessMessageMixin, FormView):
     '''
     template_name = 'new.html'
     form_class = UserCreationForm
-    success_message = _('created successfully')
-    success_url = reverse_lazy('profile')
 
     def form_valid(self, form):
         form.save()
@@ -47,6 +47,7 @@ class CreateView(SuccessMessageMixin, FormView):
 
         return super().form_valid(form)
 
+@method_decorator(login_required, name='dispatch')
 class PasswordSetView(SuccessMessageMixin, FormView):
     template_name = 'password_change.html'
     form_class = SetPasswordForm
@@ -63,6 +64,7 @@ class PasswordSetView(SuccessMessageMixin, FormView):
         super().form_valid(form)
         return HttpResponseRedirect(reverse_lazy('login'))
 
+@method_decorator(login_required, name='dispatch')
 class AddEmailView(SuccessMessageMixin, FormView):
     template_name = 'add_email.html'
     form_class = AddEmailForm
@@ -75,6 +77,7 @@ class AddEmailView(SuccessMessageMixin, FormView):
             messages.success(self.request, _('Address added successfully'))
         return super().form_valid(form)
 
+@method_decorator(login_required, name='dispatch')
 class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
     def post(self, *args, **kwargs):
         try:
@@ -86,6 +89,7 @@ class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
             messages.error(self.request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
+@method_decorator(login_required, name='dispatch')
 class ConfirmEmailView(SuccessMessageMixin, TemplateView):
     template_name = 'email_confirmed.html'
 
@@ -128,6 +132,7 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
         return super().get(*args, **kwargs)
 
 
+@method_decorator(login_required, name='dispatch')
 class RemoveConfirmedEmailView(SuccessMessageMixin, View):
     def post(self, *args, **kwargs):
         try:
@@ -140,6 +145,7 @@ class RemoveConfirmedEmailView(SuccessMessageMixin, View):
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
+@method_decorator(login_required, name='dispatch')
 class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
     model = Photo
     template_name = 'assign_photo_email.html'
@@ -179,6 +185,7 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
         data['email'] = ConfirmedEmail.objects.get(pk=kwargs['email_id'])
         return data
 
+@method_decorator(login_required, name='dispatch')
 class ImportPhotoView(SuccessMessageMixin, View):
     def post(self, *args, **kwargs):
         if not 'email_id' in kwargs:
@@ -203,6 +210,7 @@ class ImportPhotoView(SuccessMessageMixin, View):
             messages.warning(self.request, _('Nothing importable'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
+@method_decorator(login_required, name='dispatch')
 class RawImageView(DetailView):
     model = Photo
     def get(self, *args, **kwargs):
@@ -211,6 +219,7 @@ class RawImageView(DetailView):
             io.BytesIO(photo.data),
             content_type='image/%s' % photo.format)
 
+@method_decorator(login_required, name='dispatch')
 class DeletePhotoView(SuccessMessageMixin, View):
     model = Photo
 
@@ -224,6 +233,7 @@ class DeletePhotoView(SuccessMessageMixin, View):
         messages.success(self.request, _('Photo deleted successfully'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
+@method_decorator(login_required, name='dispatch')
 class UploadPhotoView(SuccessMessageMixin, FormView):
     model = Photo
     template_name = 'upload_photo.html'
