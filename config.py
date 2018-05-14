@@ -1,6 +1,7 @@
 import os
 from sys import platform, argv
 from ivatar.settings import BASE_DIR
+from django.urls import reverse_lazy
 
 ADMIN_USERS = []
 ALLOWED_HOSTS = [
@@ -43,7 +44,7 @@ SITE_URL = 'https://ivatar.io'
 SITE_NAME = 'ivatar'
 IVATAR_VERSION = '0.1'
 
-LOGIN_REDIRECT_URL = '/account/profile/'
+LOGIN_REDIRECT_URL = reverse_lazy('profile')
 MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
 SERVER_EMAIL = 'accounts@ivatar.io'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL

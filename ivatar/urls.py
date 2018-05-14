@@ -10,7 +10,7 @@ from ivatar import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     url('openid/', include('django_openid_auth.urls')),
-    url('account/', include('ivatar.ivataraccount.urls')),
+    url('accounts/', include('ivatar.ivataraccount.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
