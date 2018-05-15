@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -16,16 +14,31 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
 
-from . forms import AddEmailForm, UploadPhotoForm
-from . models import UnconfirmedEmail, ConfirmedEmail, Photo
+from openid import oidutil
+from openid.consumer import consumer
 
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
+from . forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
+from . models import UnconfirmedEmail, ConfirmedEmail, Photo
+from . models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
+
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE, SITE_URL
 
 import io
 
 from ipware import get_client_ip
 
 from . gravatar import get_photo as get_gravatar_photo
+
+from django_openid_auth.models import UserOpenID
+
+def openid_logging(message, level=0):
+    '''
+    Helper method for openid logging
+    '''
+    # Normal messages are not that important
+    if level > 0:
+        print(message)
+
 
 class CreateView(SuccessMessageMixin, FormView):
     '''
@@ -275,3 +288,150 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         return super().form_valid(form, *args, **kwargs)
+
+@method_decorator(login_required, name='dispatch')
+class AddOpenIDView(SuccessMessageMixin, FormView):
+    '''
+    View class for adding OpenID
+    '''
+    template_name = 'add_openid.html'
+    form_class = AddOpenIDForm
+    success_url = reverse_lazy('profile')
+
+    def form_valid(self, form):
+        openid_id = form.save(self.request.user)
+        if not openid_id:
+            messages.error(self.request, _('ID not added'))
+        else:
+            return HttpResponseRedirect(reverse_lazy('openid_redirection', args=[openid_id]))
+
+            messages.success(self.request, _('ID added successfully'))
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class RemoveUnconfirmedOpenIDView(View):
+    '''
+    View class for removing a unconfirmed OpenID
+    '''
+    model = UnconfirmedOpenId
+    def post(self, *args, **kwargs):
+        try:
+            openid = self.model.objects.get(
+                user=self.request.user, id=kwargs['openid_id'])
+            openid.delete()
+            messages.success(self.request, _('ID removed'))
+        except self.model.DoesNotExist:
+            messages.error(self.request, _('ID does not exist'))
+        return HttpResponseRedirect(reverse_lazy('profile'))
+
+@method_decorator(login_required, name='dispatch')
+class RemoveConfirmedOpenIDView(View):
+    '''
+    View class for removing a confirmed OpenID
+    '''
+    model = ConfirmedOpenId
+    def post(self, *args, **kwargs):
+        try:
+            openid = self.model.objects.get(
+                user=self.request.user, id=kwargs['openid_id'])
+            openid.delete()
+            messages.success(self.request, _('ID removed'))
+        except self.model.DoesNotExist:
+            messages.error(self.request, _('ID does not exist'))
+        return HttpResponseRedirect(reverse_lazy('profile'))
+
+@method_decorator(login_required, name='dispatch')
+class RedirectOpenIDView(View):
+    model = UnconfirmedOpenId
+
+    def get(self, *args, **kwargs):
+        try:
+            unconfirmed = self.model.objects.get(
+                user=self.request.user, id=kwargs['openid_id'])
+        except self.model.DoesNotExist:
+            messages.error(self.request, _('ID does not exist'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        user_url = unconfirmed.openid
+        session = { 'id': self.request.session.session_key }
+
+        oidutil.log = openid_logging
+        openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
+
+
+        try:
+            auth_request = openid_consumer.begin(user_url)
+        except consumer.DiscoveryFailure as exception:
+            messages.error(self.request, _('OpenID discovery failed'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+        except UnicodeDecodeError as exception:
+            msg = _('OpenID discovery failed (userid=%s) for %s' %
+                (request.user.id, user_url.encode('utf-8')))
+            print(msg)
+            messages.error(self.request, msg)
+
+        if auth_request is None:
+            messages.error(self.request, _('OpenID discovery failed'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        realm = SITE_URL
+        return_url = realm + reverse('confirm_openid', args=[kwargs['openid_id']])
+        return HttpResponseRedirect(auth_request.redirectURL(realm, return_url))
+
+
+@method_decorator(login_required, name='dispatch')
+class ConfirmOpenIDView(View):
+    model = UnconfirmedOpenId
+    model_confirmed = ConfirmedOpenId
+
+    def do_request(self, data, *args, **kwargs):
+        session = { 'id': self.request.session.session_key }
+        current_url = SITE_URL + self.request.path
+        openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
+        info = openid_consumer.complete(data, current_url)
+        if info.status == consumer.FAILURE:
+            messages.error(self.request, _('Confirmation failed: ') + info.message)
+            return HttpResponseRedirect(reverse_lazy('profile'))
+        elif info.status == consumer.CANCEL:
+            messages.error(self.request, _('Cancelled by user'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+        elif info.status != consumer.SUCCESS:
+            messages.error(self.request, _('Unknown verification error'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        try:
+            unconfirmed = self.model.objects.get(
+                user=self.request.user, id=kwargs['openid_id']
+            )
+        except self.model.DoesNotExist:
+            messages.error(self.request, _('ID does not exist'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        # TODO: Check for a reasonable expiration time
+        confirmed = self.model_confirmed()
+        confirmed.user = unconfirmed.user
+        confirmed.ip_address = get_client_ip(self.request)
+        confirmed.openid = unconfirmed.openid
+        confirmed.save()
+
+        unconfirmed.delete()
+
+        # If there is a single image in this user's profile
+        # assign it to the new id
+        if self.request.user.photo_set.count() == 1:
+            confirmed.set_photo(self.request.user.photo_set.first())
+
+        # Also allow user to login using this OPenID (if not already taken)
+        if not UserOpenID.objects.filter(claimed_id=confirmed.openid).exists():
+            user_openid = UserOpenID()
+            user_openid.user = self.request.user
+            user_openid.claimed_id = confirmed.openid
+            user_openid.display_id = confirmed.openid
+            user_openid.save()
+        return HttpResponseRedirect(reverse_lazy('profile'))
+
+    def get(self, *args, **kwargs):
+        return self.do_request(self.request.GET, *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.do_request(self.request.POST, *args, **kwargs)
