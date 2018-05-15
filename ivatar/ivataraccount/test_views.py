@@ -405,7 +405,7 @@ class Tester(TestCase):
                 'Address does not exist', 'Removing address that does not\
                         exist, should return error message!')
 
-    def test_upload_img(self, test_only_one=True):
+    def test_upload_image(self, test_only_one=True):
         '''
         Test uploading image
         '''
@@ -424,6 +424,9 @@ class Tester(TestCase):
             self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Successfully uploaded',
             'A valid image should return a success message!')
+            self.assertEqual(self.user.photo_set.first().format, 'png',
+                'Format must be png, since we uploaded a png!')
+
 
         else:
             return response
@@ -433,7 +436,7 @@ class Tester(TestCase):
         Test uploading more images than we are allowed
         '''
         for i in range(settings.MAX_NUM_PHOTOS+1):
-            response = self.test_upload_img(test_only_one=False)
+            response = self.test_upload_image(test_only_one=False)
         self.assertEqual(self.user.photo_set.count(), settings.MAX_NUM_PHOTOS,
             'there may not be more photos than allowed!')
         # Take care we need to check the last message
@@ -457,7 +460,7 @@ class Tester(TestCase):
             'Image too big',
             'Uploading too big image, should return error message!')
 
-    def test_invalid_image(self):
+    def test_upload_invalid_image(self):
         '''
         Test invalid image data
         '''
@@ -472,14 +475,48 @@ class Tester(TestCase):
         self.assertEqual(str(list(response.context[0]['messages'])[0]),
             'Invalid Format', 'Invalid img data should return error message!')
 
+    def test_upload_invalid_image_format(self):
+        '''
+        Test if invalid format is correctly detected
+        '''
+        self.login()
+        url = reverse('upload_photo')
+        # rb => Read binary
+        with open(os.path.join(settings.STATIC_ROOT, 'img', 'mm.svg'), 'rb') as photo:
+            response = self.client.post(url, {
+                'photo': photo,
+                'not_porn': True,
+                'can_distribute': True,
+            }, follow=True)
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Invalid Format', 'Invalid img data should return error message!')
+
+    def test_upload_gif_image(self):
+        '''
+        Test if gif is correctly detected
+        '''
+        self.login()
+        url = reverse('upload_photo')
+        # rb => Read binary
+        with open(os.path.join(settings.STATIC_ROOT, 'img', 'broken.gif'), 'rb') as photo:
+            response = self.client.post(url, {
+                'photo': photo,
+                'not_porn': True,
+                'can_distribute': True,
+            }, follow=True)
+        self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Successfully uploaded', 'Invalid image data should return error message!')
+        self.assertEqual(self.user.photo_set.first().format, 'gif',
+            'Format must be gif, since we uploaded a GIF!')
+
     def test_automatic_photo_assign_to_confirmed_mail(self):
-        self.test_upload_img()
+        self.test_upload_image()
         self.test_confirm_email()
         self.assertEqual(self.user.confirmedemail_set.first().photo, self.user.photo_set.first())
 
     def test_assign_photo_to_email(self):
         self.test_confirm_email()
-        self.test_upload_img()
+        self.test_upload_image()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
         url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
         # The get is for the view - test context data
@@ -495,7 +532,7 @@ class Tester(TestCase):
 
     def test_assign_invalid_photo_id_to_email(self):
         self.test_confirm_email()
-        self.test_upload_img()
+        self.test_upload_image()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
         url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
         response = self.client.post(url, {
@@ -509,7 +546,7 @@ class Tester(TestCase):
 
     def test_post_to_assign_photo_without_photo_id(self):
         self.test_confirm_email()
-        self.test_upload_img()
+        self.test_upload_image()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
         url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
         response = self.client.post(url, {}, follow=True)
@@ -520,7 +557,7 @@ class Tester(TestCase):
             'Assign non existing photo, does not return error message?')
 
     def test_assign_photo_to_inexisting_mail(self):
-        self.test_upload_img()
+        self.test_upload_image()
         url = reverse('assign_photo_email', args=[1234])
         response = self.client.post(url, {
             'photo_id': self.user.photo_set.first().id,
