@@ -6,6 +6,8 @@ from PIL import Image
 from io import BytesIO
 import base64
 
+import time
+
 from . gravatar import get_photo as get_gravatar_photo
 
 from openid.store.interface import OpenIDStore
@@ -200,6 +202,10 @@ class ConfirmedOpenId(BaseAccountModel):
     class Meta:
         verbose_name = _('confirmed OpenID')
         verbose_name_plural = _('confirmed OpenIDs')
+
+    def set_photo(self, photo):
+        self.photo = photo
+        self.save()
 
 
 class OpenIDNonce(models.Model):
