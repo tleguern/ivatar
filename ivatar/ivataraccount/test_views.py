@@ -478,6 +478,11 @@ class Tester(TestCase):
         self.test_upload_img()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
         url = reverse('assign_photo_email', args=[self.user.confirmedemail_set.first().id])
+        # The get is for the view - test context data
+        self.client.get(url, {
+            'photo_id': self.user.photo_set.first().id,
+        })
+        # The post is for the actual assigning
         response = self.client.post(url, {
             'photo_id': self.user.photo_set.first().id,
         }, follow=True)
