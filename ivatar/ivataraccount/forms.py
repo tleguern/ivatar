@@ -4,10 +4,14 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
+from urllib.parse import urlsplit, urlunsplit
+
 from ivatar import settings
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
+from . models import UnconfirmedOpenId, ConfirmedOpenId
 
 from ivatar.settings import MAX_LENGTH_EMAIL
+from ivatar.ivataraccount.models import MAX_LENGTH_URL
 
 from ipware import get_client_ip
 
@@ -105,3 +109,48 @@ class UploadPhotoForm(forms.Form):
         if not photo.id:
             return None
         return photo
+
+class AddOpenIDForm(forms.Form):
+    '''
+    Form to handle adding OpenID
+    '''
+    openid = forms.URLField(
+        label=_('OpenID'),
+        max_length=MAX_LENGTH_URL,
+        # However, not 100% sure if single character domains are possible
+        # under any tld...
+        min_length=11, # eg. http://a.io
+        initial='http://'
+    )
+
+    def clean_openid(self):
+        '''
+        Enforce restrictions
+        '''
+        # Lowercase hostname port of the URL
+        url = urlsplit(self.cleaned_data['openid'])
+        data = urlunsplit((url.scheme.lower(), url.netloc.lower(), url.path,
+            url.query, url.fragment))
+
+        # TODO: Domain restriction as in libravatar?
+
+        return data
+
+    def save(self, user):
+        '''
+        Save the model, ensuring some safety
+        '''
+        if ConfirmedOpenId.objects.filter(
+            openid=self.cleaned_data['openid']).exists():
+            return False
+
+        if UnconfirmedOpenId.objects.filter(
+            openid=self.cleaned_data['openid']).exists():
+            return False
+
+        unconfirmed = UnconfirmedOpenId()
+        unconfirmed.openid = self.cleaned_data['openid']
+        unconfirmed.user = user
+        unconfirmed.save()
+
+        return unconfirmed.id
