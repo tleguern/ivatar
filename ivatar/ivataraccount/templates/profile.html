@@ -33,7 +33,7 @@
     {% for openid in user.confirmedopenid_set.all %}
         <li><form action="{% url 'remove_confirmed_openid' openid.id %}" method="post">{% csrf_token %}
         <a href="{% url 'assign_photo_openid' openid.id %}">
-        <img class="thumbnail editable avatar-chooser" src="{{openid.photo_url}}" alt=""></a>
+        <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' openid.photo.id %}" alt=""></a>
         {{openid.openid}}
         <br><a href="{% url 'assign_photo_openid' openid.id %}">{% trans 'Change photo' %}</a>
         <br><br><input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form></li>
@@ -49,7 +49,7 @@
         <li><form action="{% url 'remove_unconfirmed_email' email.id %}" method="post">{% csrf_token %}{{ email.email }}
         <input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
     {% endfor %}
-    {% for openid in user.unconfirmedopenids_set.all %}
+    {% for openid in user.unconfirmedopenid_set.all %}
         <li><form action="{% url 'remove_unconfirmed_openid' openid.id %}" method="post">{% csrf_token %}{{ openid.openid }}
         <input type="image" src="{% static '/static/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
     {% endfor %}
