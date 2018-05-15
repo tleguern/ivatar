@@ -33,7 +33,11 @@
     {% for openid in user.confirmedopenid_set.all %}
         <li><form action="{% url 'remove_confirmed_openid' openid.id %}" method="post">{% csrf_token %}
         <a href="{% url 'assign_photo_openid' openid.id %}">
-        <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' openid.photo.id %}" alt=""></a>
+        {% if openid.photo %}
+            <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' openid.photo.id %}" alt=""></a>
+        {% else %}
+            <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/64.png' %}" alt=""></a>
+        {% endif %}
         {{openid.openid}}
         <br><a href="{% url 'assign_photo_openid' openid.id %}">{% trans 'Change photo' %}</a>
         <br><br><input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form></li>
