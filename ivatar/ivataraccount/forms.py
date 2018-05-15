@@ -101,6 +101,7 @@ class UploadPhotoForm(forms.Form):
         photo.user = request.user
         photo.ip_address = get_client_ip(request)
         photo.data = data.read()
-        if not photo.save():
+        photo.save()
+        if not photo.id:
             return None
         return photo
