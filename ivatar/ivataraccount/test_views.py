@@ -421,6 +421,10 @@ class Tester(TestCase):
         if test_only_one:
             self.assertEqual(self.user.photo_set.count(), 1,
                 'there must be exactly one photo now!')
+            self.assertEqual(str(list(response.context[0]['messages'])[0]),
+            'Successfully uploaded',
+            'A valid image should return a success message!')
+
         else:
             return response
 
