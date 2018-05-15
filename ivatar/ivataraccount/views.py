@@ -221,7 +221,7 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
     model = Photo
     template_name = 'upload_photo.html'
     form_class = UploadPhotoForm
-    success_message = _('uploaded successfully')
+    success_message = _('Successfully uploaded')
     success_url = reverse_lazy('profile')
 
     def post(self, *args, **kwargs):
