@@ -29,7 +29,7 @@ from . gravatar import get_photo as get_gravatar_photo
 
 class CreateView(SuccessMessageMixin, FormView):
     '''
-    TODO: Docs
+    View class for creating a new user
     '''
     template_name = 'new.html'
     form_class = UserCreationForm
@@ -47,6 +47,9 @@ class CreateView(SuccessMessageMixin, FormView):
 
 @method_decorator(login_required, name='dispatch')
 class PasswordSetView(SuccessMessageMixin, FormView):
+    '''
+    View class for changing the password
+    '''
     template_name = 'password_change.html'
     form_class = SetPasswordForm
     success_message = _('password changed successfully - please login again')
@@ -64,6 +67,9 @@ class PasswordSetView(SuccessMessageMixin, FormView):
 
 @method_decorator(login_required, name='dispatch')
 class AddEmailView(SuccessMessageMixin, FormView):
+    '''
+    View class for adding email addresses
+    '''
     template_name = 'add_email.html'
     form_class = AddEmailForm
     success_url = reverse_lazy('profile')
@@ -77,6 +83,9 @@ class AddEmailView(SuccessMessageMixin, FormView):
 
 @method_decorator(login_required, name='dispatch')
 class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
+    '''
+    View class for removing a unconfirmed email address
+    '''
     def post(self, *args, **kwargs):
         try:
             email = UnconfirmedEmail.objects.get(
@@ -89,6 +98,9 @@ class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
 
 @method_decorator(login_required, name='dispatch')
 class ConfirmEmailView(SuccessMessageMixin, TemplateView):
+    '''
+    View class for confirming an unconfirmed email address
+    '''
     template_name = 'email_confirmed.html'
 
     def get(self, *args, **kwargs):
@@ -123,6 +135,9 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
 
 @method_decorator(login_required, name='dispatch')
 class RemoveConfirmedEmailView(SuccessMessageMixin, View):
+    '''
+    View class for removing a confirmed email address
+    '''
     def post(self, *args, **kwargs):
         try:
             email = ConfirmedEmail.objects.get(
@@ -136,6 +151,9 @@ class RemoveConfirmedEmailView(SuccessMessageMixin, View):
 
 @method_decorator(login_required, name='dispatch')
 class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
+    '''
+    View class for assigning a photo to an email address
+    '''
     model = Photo
     template_name = 'assign_photo_email.html'
 
@@ -173,6 +191,10 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
 
 @method_decorator(login_required, name='dispatch')
 class ImportPhotoView(SuccessMessageMixin, View):
+    '''
+    View class to import a photo from another service
+    Currently only Gravatar is supported
+    '''
     def post(self, *args, **kwargs):
         try:
             email = ConfirmedEmail.objects.get(id=kwargs['email_id'], user=self.request.user)
@@ -195,6 +217,9 @@ class ImportPhotoView(SuccessMessageMixin, View):
 
 @method_decorator(login_required, name='dispatch')
 class RawImageView(DetailView):
+    '''
+    View to return (binary) raw image data, for use in <img/>-tags
+    '''
     model = Photo
     def get(self, *args, **kwargs):
         photo = self.model.objects.get(pk=kwargs['pk'])
@@ -204,6 +229,9 @@ class RawImageView(DetailView):
 
 @method_decorator(login_required, name='dispatch')
 class DeletePhotoView(SuccessMessageMixin, View):
+    '''
+    View class for deleting a photo
+    '''
     model = Photo
 
     def get(self, *args, **kwargs):
@@ -218,6 +246,9 @@ class DeletePhotoView(SuccessMessageMixin, View):
 
 @method_decorator(login_required, name='dispatch')
 class UploadPhotoView(SuccessMessageMixin, FormView):
+    '''
+    View class responsible for photo upload
+    '''
     model = Photo
     template_name = 'upload_photo.html'
     form_class = UploadPhotoForm
