@@ -36,8 +36,8 @@ def openid_logging(message, level=0):
     Helper method for openid logging
     '''
     # Normal messages are not that important
-    if level > 0:
-        print(message)
+    # No need for coverage here
+    if level > 0: print(message) # pragma: no cover
 
 
 class CreateView(SuccessMessageMixin, FormView):
@@ -390,7 +390,7 @@ class ConfirmOpenIDView(View):
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
         info = openid_consumer.complete(data, current_url)
         if info.status == consumer.FAILURE:
-            messages.error(self.request, _('Confirmation failed: ') + info.message)
+            messages.error(self.request, _('Confirmation failed: "') + str(info.message) + '"')
             return HttpResponseRedirect(reverse_lazy('profile'))
         elif info.status == consumer.CANCEL:
             messages.error(self.request, _('Cancelled by user'))
