@@ -5,6 +5,7 @@ Default: useful variables for the base page templates.
 from ivatar.settings import IVATAR_VERSION, SITE_NAME, SITE_URL
 from ipware import get_client_ip
 
+
 def basepage(request):
     '''
     Our contextprocessor adds additional context variables
