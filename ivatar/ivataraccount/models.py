@@ -1,28 +1,25 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
-
-from PIL import Image
-from io import BytesIO
 import base64
-
+import hashlib
 import time
-
-from . gravatar import get_photo as get_gravatar_photo
-
-from openid.store.interface import OpenIDStore
-from openid.store import nonce as oidnonce
-from openid.association import Association as OIDAssociation
-
+from io import BytesIO
+from os import urandom
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-import hashlib
-from os import urandom
-
+from PIL import Image
+from django.contrib.auth.models import User
+from django.db import models
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+from openid.association import Association as OIDAssociation
+from openid.store import nonce as oidnonce
+from openid.store.interface import OpenIDStore
 
+from .gravatar import get_photo as get_gravatar_photo
 from ivatar.settings import MAX_LENGTH_EMAIL
-MAX_LENGTH_URL = 255  # MySQL can't handle more than that (LP: 1018682)
+
+
+MAX_LENGTH_URL = 255  # MySQL can't handle more than that (LP 1018682)
 
 
 def file_format(image_type):
@@ -75,12 +72,14 @@ class Photo(BaseAccountModel):
             if gravatar:
                 image_url = gravatar['image_url']
 
-        if not image_url: return False
+        if not image_url:
+            return False
         try:
             image = urlopen(image_url)
         # No idea how to test this
         except HTTPError as e:  # pragma: no cover
-            print('%s import failed with an HTTP error: %s' % (service_name, e.code))
+            print('%s import failed with an HTTP error: %s' %
+                  (service_name, e.code))
             return False
         # No idea how to test this
         except URLError as e:  # pragma: no cover
@@ -91,10 +90,12 @@ class Photo(BaseAccountModel):
         try:
             img = Image.open(BytesIO(data))
         # How am I supposed to test this?
-        except ValueError: return False
+        except ValueError:
+            return False
 
         self.format = file_format(img.format)
-        if not self.format: return False
+        if not self.format:
+            return False
         self.data = data
         super().save()
         return True
@@ -104,18 +105,21 @@ class Photo(BaseAccountModel):
         try:
             img = Image.open(BytesIO(self.data))
         # Testing? Ideas anyone?
-        except Exception as e:
+        except Exception as e:  # pylint: disable=unused-variable
             # For debugging only
             # print('Exception caught: %s' % e)
             return False
         self.format = file_format(img.format)
-        if not self.format: return False
+        if not self.format:
+            return False
         return super().save(*args, **kwargs)
+
 
 class ConfirmedEmailManager(models.Manager):
     '''
     Manager for our confirmed email addresses model
     '''
+
     def create_confirmed_email(self, user, email_address, is_logged_in):
         confirmed = ConfirmedEmail()
         confirmed.user = user
@@ -129,7 +133,7 @@ class ConfirmedEmailManager(models.Manager):
             if gravatar:
                 external_photos.append(gravatar)
 
-        return (confirmed.id, external_photos)
+        return (confirmed.pk, external_photos)
 
 
 class ConfirmedEmail(BaseAccountModel):
@@ -196,7 +200,7 @@ class ConfirmedOpenId(BaseAccountModel):
         related_name='openids',
         blank=True,
         null=True,
-        on_delete = models.deletion.CASCADE,
+        on_delete=models.deletion.CASCADE,
     )
 
     class Meta:
@@ -216,6 +220,7 @@ class OpenIDNonce(models.Model):
     server_url = models.CharField(max_length=255)
     timestamp = models.IntegerField()
     salt = models.CharField(max_length=128)
+
 
 class OpenIDAssociation(models.Model):
     '''
@@ -273,7 +278,7 @@ class DjangoOpenIDStore(OpenIDStore):
             expires = 0
             try:
                 expires = association.getExpiresIn()
-            except:
+            except Exception as e:
                 expires = association.expiresIn
             if expires == 0:
                 self.removeAssociation(server_url, assoc.handle)
@@ -331,12 +336,3 @@ class DjangoOpenIDStore(OpenIDStore):
         '''
         OpenIDAssociation.objects.extra(
             where=['issued + lifetimeint < (%s)' % time.time()]).delete()
-
-    def getAuthKey(self):
-        '''
-        Helper method to get authentication key
-        '''
-        # Use first AUTH_KEY_LEN characters of md5 hash of SECRET_KEY
-        hash_object = hashlib.new('md5')
-        hash_object.update(settings.SECRET_KEY)
-        return hash_object.hexdigest()[:self.AUTH_KEY_LEN]
