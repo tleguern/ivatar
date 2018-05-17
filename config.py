@@ -1,5 +1,4 @@
 import os
-from sys import platform, argv
 from ivatar.settings import BASE_DIR
 from django.urls import reverse_lazy
 
@@ -8,7 +7,7 @@ ALLOWED_HOSTS = [
     'localhost',
 ]
 
-from ivatar.settings import INSTALLED_APPS # noqa
+from ivatar.settings import INSTALLED_APPS  # noqa
 INSTALLED_APPS.extend([
     'django_extensions',
     'django_openid_auth',
@@ -23,13 +22,14 @@ MIDDLEWARE.extend([
 ])
 
 AUTHENTICATION_BACKENDS = (
-    # Enable this to allow LDAP authentication. See INSTALL for more information.
+    # Enable this to allow LDAP authentication.
+    # See INSTALL for more information.
     # 'django_auth_ldap.backend.LDAPBackend',
     'django_openid_auth.auth.OpenIDBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
-from ivatar.settings import TEMPLATES
+from ivatar.settings import TEMPLATES  # noqa
 TEMPLATES[0]['DIRS'].extend([
     os.path.join(BASE_DIR, 'templates'),
 ])
@@ -57,7 +57,7 @@ BOOTSTRAP4 = {
     'javascript_in_head': False,
     'css_url': {
         'href': '/static/css/bootstrap.min.css',
-        'integrity': 'sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB',
+        'integrity': 'sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB',  # noqa
         'crossorigin': 'anonymous',
     },
     'javascript_url': {
@@ -67,7 +67,7 @@ BOOTSTRAP4 = {
     },
     'popper_url': {
         'url': '/static/js/popper.min.js',
-        'integrity': 'sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49',
+        'integrity': 'sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49',  # noqa
         'crossorigin': 'anonymous',
     },
 }
