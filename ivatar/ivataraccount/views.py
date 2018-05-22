@@ -1,3 +1,6 @@
+'''
+View classes for ivatar/ivataraccount/
+'''
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.messages.views import SuccessMessageMixin
@@ -101,14 +104,14 @@ class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
     View class for removing a unconfirmed email address
     '''
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             email = UnconfirmedEmail.objects.get(
-                user=self.request.user, id=kwargs['email_id'])
+                user=request.user, id=kwargs['email_id'])
             email.delete()
-            messages.success(self.request, _('Address removed'))
+            messages.success(request, _('Address removed'))
         except UnconfirmedEmail.DoesNotExist:
-            messages.error(self.request, _('Address does not exist'))
+            messages.error(request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
@@ -119,18 +122,18 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
     '''
     template_name = 'email_confirmed.html'
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         # be tolerant of extra crap added by mail clients
         key = kwargs['verification_key'].replace(' ', '')
 
         if len(key) != 64:
-            messages.error(self.request, _('Verification key incorrect'))
+            messages.error(request, _('Verification key incorrect'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             unconfirmed = UnconfirmedEmail.objects.get(verification_key=key)
         except UnconfirmedEmail.DoesNotExist:
-            messages.error(self.request, _('Verification key does not exist'))
+            messages.error(request, _('Verification key does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         # TODO: Check for a reasonable expiration time in unconfirmed email
@@ -138,7 +141,7 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
         (confirmed_id,
          external_photos) = ConfirmedEmail.objects.create_confirmed_email(
              unconfirmed.user, unconfirmed.email,
-             not self.request.user.is_anonymous)
+             not request.user.is_anonymous)
 
         unconfirmed.delete()
 
@@ -149,7 +152,7 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
             confirmed.set_photo(confirmed.user.photo_set.first())
         kwargs['photos'] = external_photos
         kwargs['email_id'] = confirmed_id
-        return super().get(*args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -158,14 +161,14 @@ class RemoveConfirmedEmailView(SuccessMessageMixin, View):
     View class for removing a confirmed email address
     '''
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             email = ConfirmedEmail.objects.get(
-                user=self.request.user, id=kwargs['email_id'])
+                user=request.user, id=kwargs['email_id'])
             email.delete()
-            messages.success(self.request, _('Address removed'))
+            messages.success(request, _('Address removed'))
         except ConfirmedEmail.DoesNotExist:
-            messages.error(self.request, _('Address does not exist'))
+            messages.error(request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
@@ -177,31 +180,31 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
     model = Photo
     template_name = 'assign_photo_email.html'
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         photo = None
-        if 'photo_id' not in self.request.POST:
-            messages.error(self.request,
+        if 'photo_id' not in request.POST:
+            messages.error(request,
                            _('Invalid request [photo_id] missing'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             photo = self.model.objects.get(
-                id=self.request.POST['photo_id'], user=self.request.user)
+                id=request.POST['photo_id'], user=request.user)
         except self.model.DoesNotExist:
-            messages.error(self.request, _('Photo does not exist'))
+            messages.error(request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             email = ConfirmedEmail.objects.get(
-                user=self.request.user, id=kwargs['email_id'])
+                user=request.user, id=kwargs['email_id'])
         except ConfirmedEmail.DoesNotExist:
-            messages.error(self.request, _('Invalid request'))
+            messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         email.photo = photo
         email.save()
 
-        messages.success(self.request, _('Successfully changed photo'))
+        messages.success(request, _('Successfully changed photo'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
     def get_context_data(self, **kwargs):
@@ -218,31 +221,31 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
     model = Photo
     template_name = 'assign_photo_openid.html'
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         photo = None
-        if 'photo_id' not in self.request.POST:
-            messages.error(self.request,
+        if 'photo_id' not in request.POST:
+            messages.error(request,
                            _('Invalid request [photo_id] missing'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             photo = self.model.objects.get(
-                id=self.request.POST['photo_id'], user=self.request.user)
+                id=request.POST['photo_id'], user=request.user)
         except self.model.DoesNotExist:
-            messages.error(self.request, _('Photo does not exist'))
+            messages.error(request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             openid = ConfirmedOpenId.objects.get(
-                user=self.request.user, id=kwargs['openid_id'])
+                user=request.user, id=kwargs['openid_id'])
         except ConfirmedOpenId.DoesNotExist:
-            messages.error(self.request, _('Invalid request'))
+            messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         openid.photo = photo
         openid.save()
 
-        messages.success(self.request, _('Successfully changed photo'))
+        messages.success(request, _('Successfully changed photo'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
     def get_context_data(self, **kwargs):
@@ -258,30 +261,30 @@ class ImportPhotoView(SuccessMessageMixin, View):
     Currently only Gravatar is supported
     '''
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             email = ConfirmedEmail.objects.get(
-                id=kwargs['email_id'], user=self.request.user)
+                id=kwargs['email_id'], user=request.user)
         except Exception as e:
             messages.error(
-                self.request,
+                request,
                 _('Address does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        if 'photo_Gravatar' in self.request.POST:
+        if 'photo_Gravatar' in request.POST:
             photo = Photo()
-            photo.user = self.request.user
-            photo.ip_address = get_client_ip(self.request)
+            photo.user = request.user
+            photo.ip_address = get_client_ip(request)
             if photo.import_image('Gravatar', email.email):
-                messages.success(self.request,
+                messages.success(request,
                                  _('Image successfully imported'))
             else:
                 # Honestly, I'm not sure how to test this...
                 messages.error(
-                    self.request,
+                    request,
                     _('Image import not successful'))  # pragma: no cover
         else:
-            messages.warning(self.request, _('Nothing importable'))
+            messages.warning(request, _('Nothing importable'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
@@ -292,7 +295,7 @@ class RawImageView(DetailView):
     '''
     model = Photo
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         photo = self.model.objects.get(pk=kwargs['pk'])
         return HttpResponse(
             io.BytesIO(photo.data), content_type='image/%s' % photo.format)
@@ -305,17 +308,17 @@ class DeletePhotoView(SuccessMessageMixin, View):
     '''
     model = Photo
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         try:
             photo = self.model.objects.get(
-                pk=kwargs['pk'], user=self.request.user)
+                pk=kwargs['pk'], user=request.user)
             photo.delete()
         except Exception as e:
             messages.error(
-                self.request,
+                request,
                 _('No such image or no permission to delete it'))
             return HttpResponseRedirect(reverse_lazy('profile'))
-        messages.success(self.request, _('Photo deleted successfully'))
+        messages.success(request, _('Photo deleted successfully'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
@@ -330,14 +333,14 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
     success_message = _('Successfully uploaded')
     success_url = reverse_lazy('profile')
 
-    def post(self, *args, **kwargs):
-        num_photos = self.request.user.photo_set.count()
+    def post(self, request, *args, **kwargs):
+        num_photos = request.user.photo_set.count()
         if num_photos >= MAX_NUM_PHOTOS:
             messages.error(
-                self.request,
+                request,
                 _('Maximum number of photos (%i) reached' % MAX_NUM_PHOTOS))
             return HttpResponseRedirect(reverse_lazy('profile'))
-        return super().post(*args, **kwargs)
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form, *args, **kwargs):
         photo_data = self.request.FILES['photo']
@@ -382,14 +385,14 @@ class RemoveUnconfirmedOpenIDView(View):
     '''
     model = UnconfirmedOpenId
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             openid = self.model.objects.get(
-                user=self.request.user, id=kwargs['openid_id'])
+                user=request.user, id=kwargs['openid_id'])
             openid.delete()
-            messages.success(self.request, _('ID removed'))
+            messages.success(request, _('ID removed'))
         except self.model.DoesNotExist:
-            messages.error(self.request, _('ID does not exist'))
+            messages.error(request, _('ID does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
@@ -400,14 +403,14 @@ class RemoveConfirmedOpenIDView(View):
     '''
     model = ConfirmedOpenId
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             openid = self.model.objects.get(
-                user=self.request.user, id=kwargs['openid_id'])
+                user=request.user, id=kwargs['openid_id'])
             openid.delete()
-            messages.success(self.request, _('ID removed'))
+            messages.success(request, _('ID removed'))
         except self.model.DoesNotExist:
-            messages.error(self.request, _('ID does not exist'))
+            messages.error(request, _('ID does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
@@ -415,16 +418,16 @@ class RemoveConfirmedOpenIDView(View):
 class RedirectOpenIDView(View):
     model = UnconfirmedOpenId
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         try:
             unconfirmed = self.model.objects.get(
-                user=self.request.user, id=kwargs['openid_id'])
+                user=request.user, id=kwargs['openid_id'])
         except self.model.DoesNotExist:
-            messages.error(self.request, _('ID does not exist'))
+            messages.error(request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         user_url = unconfirmed.openid
-        session = {'id': self.request.session.session_key}
+        session = {'id': request.session.session_key}
 
         oidutil.log = openid_logging
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
@@ -432,16 +435,16 @@ class RedirectOpenIDView(View):
         try:
             auth_request = openid_consumer.begin(user_url)
         except consumer.DiscoveryFailure as e:
-            messages.error(self.request, _('OpenID discovery failed: %s' % e))
+            messages.error(request, _('OpenID discovery failed: %s' % e))
             return HttpResponseRedirect(reverse_lazy('profile'))
         except UnicodeDecodeError as e:
             msg = _('OpenID discovery failed (userid=%s) for %s: %s' %
-                    (self.request.user.id, user_url.encode('utf-8'), e))
+                    (request.user.id, user_url.encode('utf-8'), e))
             print(msg)
-            messages.error(self.request, msg)
+            messages.error(request, msg)
 
         if auth_request is None:
-            messages.error(self.request, _('OpenID discovery failed'))
+            messages.error(request, _('OpenID discovery failed'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         realm = SITE_URL
@@ -457,33 +460,33 @@ class ConfirmOpenIDView(View):
     model_confirmed = ConfirmedOpenId
 
     def do_request(self, data, *args, **kwargs):
-        session = {'id': self.request.session.session_key}
-        current_url = SITE_URL + self.request.path
+        session = {'id': request.session.session_key}
+        current_url = SITE_URL + request.path
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
         info = openid_consumer.complete(data, current_url)
         if info.status == consumer.FAILURE:
             messages.error(
-                self.request,
+                request,
                 _('Confirmation failed: "') + str(info.message) + '"')
             return HttpResponseRedirect(reverse_lazy('profile'))
         elif info.status == consumer.CANCEL:
-            messages.error(self.request, _('Cancelled by user'))
+            messages.error(request, _('Cancelled by user'))
             return HttpResponseRedirect(reverse_lazy('profile'))
         elif info.status != consumer.SUCCESS:
-            messages.error(self.request, _('Unknown verification error'))
+            messages.error(request, _('Unknown verification error'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             unconfirmed = self.model.objects.get(
-                user=self.request.user, id=kwargs['openid_id'])
+                user=request.user, id=kwargs['openid_id'])
         except self.model.DoesNotExist:
-            messages.error(self.request, _('ID does not exist'))
+            messages.error(request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         # TODO: Check for a reasonable expiration time
         confirmed = self.model_confirmed()
         confirmed.user = unconfirmed.user
-        confirmed.ip_address = get_client_ip(self.request)
+        confirmed.ip_address = get_client_ip(request)
         confirmed.openid = unconfirmed.openid
         confirmed.save()
 
@@ -491,20 +494,20 @@ class ConfirmOpenIDView(View):
 
         # If there is a single image in this user's profile
         # assign it to the new id
-        if self.request.user.photo_set.count() == 1:
-            confirmed.set_photo(self.request.user.photo_set.first())
+        if request.user.photo_set.count() == 1:
+            confirmed.set_photo(request.user.photo_set.first())
 
         # Also allow user to login using this OPenID (if not already taken)
         if not UserOpenID.objects.filter(claimed_id=confirmed.openid).exists():
             user_openid = UserOpenID()
-            user_openid.user = self.request.user
+            user_openid.user = request.user
             user_openid.claimed_id = confirmed.openid
             user_openid.display_id = confirmed.openid
             user_openid.save()
         return HttpResponseRedirect(reverse_lazy('profile'))
 
-    def get(self, *args, **kwargs):
-        return self.do_request(self.request.GET, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return self.do_request(request.GET, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        return self.do_request(self.request.POST, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        return self.do_request(request.POST, *args, **kwargs)

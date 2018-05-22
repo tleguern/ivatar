@@ -12,7 +12,7 @@ class AvatarImageView(TemplateView):
     View to return (binary) image, based for OpenID/Email (both by digest)
     '''
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         '''
         Override get from parent class
         '''
