@@ -1,3 +1,7 @@
+'''
+Our models for ivatar.ivataraccount
+'''
+
 import base64
 import hashlib
 import time
@@ -5,6 +9,7 @@ from io import BytesIO
 from os import urandom
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
+from urllib.parse import urlsplit, urlunsplit
 
 from PIL import Image
 from django.contrib.auth.models import User
@@ -15,8 +20,8 @@ from openid.association import Association as OIDAssociation
 from openid.store import nonce as oidnonce
 from openid.store.interface import OpenIDStore
 
-from .gravatar import get_photo as get_gravatar_photo
 from ivatar.settings import MAX_LENGTH_EMAIL
+from .gravatar import get_photo as get_gravatar_photo
 
 
 MAX_LENGTH_URL = 255  # MySQL can't handle more than that (LP 1018682)
@@ -49,6 +54,9 @@ class BaseAccountModel(models.Model):
     add_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
+        '''
+        Class attributes
+        '''
         abstract = True
 
 
@@ -61,6 +69,9 @@ class Photo(BaseAccountModel):
     format = models.CharField(max_length=3)
 
     class Meta:
+        '''
+        Class attributes
+        '''
         verbose_name = _('photo')
         verbose_name_plural = _('photos')
 
@@ -95,12 +106,16 @@ class Photo(BaseAccountModel):
 
         self.format = file_format(img.format)
         if not self.format:
+            print('Unable to determine format: %s' % img)
             return False
         self.data = data
         super().save()
         return True
 
     def save(self, *args, **kwargs):
+        '''
+        Override save from parent, taking care about the image
+        '''
         # Use PIL to read the file format
         try:
             img = Image.open(BytesIO(self.data))
@@ -121,6 +136,9 @@ class ConfirmedEmailManager(models.Manager):
     '''
 
     def create_confirmed_email(self, user, email_address, is_logged_in):
+        '''
+        Helper method to create confirmed email address
+        '''
         confirmed = ConfirmedEmail()
         confirmed.user = user
         confirmed.ip_address = '0.0.0.0'
@@ -149,15 +167,29 @@ class ConfirmedEmail(BaseAccountModel):
         null=True,
         on_delete=models.deletion.CASCADE,
     )
+    digest = models.CharField(max_length=64)
     objects = ConfirmedEmailManager()
 
     class Meta:
+        '''
+        Class attributes
+        '''
         verbose_name = _('confirmed email')
         verbose_name_plural = _('confirmed emails')
 
     def set_photo(self, photo):
+        '''
+        Helper method to set photo
+        '''
         self.photo = photo
         self.save()
+
+    def save(self, *args, **kwargs):
+        '''
+        Override save from parent, add digest
+        '''
+        self.digest = hashlib.md5(self.email.strip().lower().encode('utf-8')).hexdigest()
+        return super().save(*args, **kwargs)
 
 
 class UnconfirmedEmail(BaseAccountModel):
@@ -168,6 +200,9 @@ class UnconfirmedEmail(BaseAccountModel):
     verification_key = models.CharField(max_length=64)
 
     class Meta:
+        '''
+        Class attributes
+        '''
         verbose_name = _('unconfirmed_email')
         verbose_name_plural = _('unconfirmed_emails')
 
@@ -202,6 +237,7 @@ class ConfirmedOpenId(BaseAccountModel):
         null=True,
         on_delete=models.deletion.CASCADE,
     )
+    digest = models.CharField(max_length=64)
 
     class Meta:
         verbose_name = _('confirmed OpenID')
@@ -210,6 +246,17 @@ class ConfirmedOpenId(BaseAccountModel):
     def set_photo(self, photo):
         self.photo = photo
         self.save()
+
+    def save(self, *args, **kwargs):
+        url = urlsplit(self.openid)
+        if url.username:
+            password = url.password or ''
+            netloc = url.username + ':' + password + '@' + url.hostname
+        else:
+            netloc = url.hostname
+        lowercase_url = urlunsplit((url.scheme.lower(), netloc, url.path, url.query, url.fragment))
+        self.digest = hashlib.sha256(lowercase_url.encode('utf-8')).hexdigest()
+        return super().save(*args, **kwargs)
 
 
 class OpenIDNonce(models.Model):
