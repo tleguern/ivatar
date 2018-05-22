@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% blocktrans with openid.openid as openid_address %}Choose a photo for {{ openid_address }}{% endblocktrans %} - ivatar{% endblock title %}
+
+{% block content %}
+
+<h1>{% blocktrans with openid.openid as openid_address %}Choose a photo for {{ openid_address }}{% endblocktrans %}</h1>
+
+{% if not user.photo_set.count %}
+
+{% url 'upload_photo' as upload_url %}
+<p>{% blocktrans %}You need to <a href="{{ upload_url }}">upload some photos</a> first!{% endblocktrans %}</p>
+
+<p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
+
+{% else %}
+
+<p>{% trans 'Here are the pictures you have uploaded, click on the one you wish to associate with this openid address:' %}</p>
+<ul class="horizontal-list avatar-list centered">
+{% for photo in user.photo_set.all %}
+  <li>
+  <form action="{% url 'assign_photo_openid' view.kwargs.openid_id %}" method="post">{% csrf_token %}
+  <input type="hidden" name="photo_id" value="{{ photo.id }}">
+  <input type="image" name="photo{{ photo.id }}" src="{% url 'raw_image' photo.id %}" class="thumbnail">
+  {% ifequal openid.photo.id photo.id %}
+  <br>{% trans '(current)' %}
+  {% endifequal %}
+  </form></li>
+{% endfor %}
+  <li>
+  <form action="{% url 'assign_photo_openid' view.kwargs.openid_id %}" method="post">{% csrf_token %}
+  <input type="submit" name="photoNone" value="{% trans 'None' %}">
+  {% ifequal openid.photo.id photo.id %}
+  <br>{% trans '(current)' %}
+  {% endifequal %}
+  </form></li>
+</ul>
+
+<p><a href="{% url 'upload_photo' %}">{% blocktrans %}upload a new one{% endblocktrans %}</a></p>
+
+{% endif %}
+
+{% endblock content %}

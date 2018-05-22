@@ -211,6 +211,47 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
+class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
+    '''
+    View class for assigning a photo to an openid address
+    '''
+    model = Photo
+    template_name = 'assign_photo_openid.html'
+
+    def post(self, *args, **kwargs):
+        photo = None
+        if 'photo_id' not in self.request.POST:
+            messages.error(self.request,
+                           _('Invalid request [photo_id] missing'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        try:
+            photo = self.model.objects.get(
+                id=self.request.POST['photo_id'], user=self.request.user)
+        except self.model.DoesNotExist:
+            messages.error(self.request, _('Photo does not exist'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        try:
+            openid = ConfirmedOpenId.objects.get(
+                user=self.request.user, id=kwargs['openid_id'])
+        except ConfirmedOpenId.DoesNotExist:
+            messages.error(self.request, _('Invalid request'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        openid.photo = photo
+        openid.save()
+
+        messages.success(self.request, _('Successfully changed photo'))
+        return HttpResponseRedirect(reverse_lazy('profile'))
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['openid'] = ConfirmedOpenId.objects.get(pk=kwargs['openid_id'])
+        return data
+
+
+@method_decorator(login_required, name='dispatch')
 class ImportPhotoView(SuccessMessageMixin, View):
     '''
     View class to import a photo from another service

@@ -6,7 +6,8 @@ from . views import CreateView, PasswordSetView, AddEmailView
 from . views import RemoveUnconfirmedEmailView, ConfirmEmailView
 from . views import RemoveConfirmedEmailView, AssignPhotoEmailView
 from . views import RemoveUnconfirmedOpenIDView, RemoveConfirmedOpenIDView
-from . views import ImportPhotoView, RawImageView, DeletePhotoView, UploadPhotoView
+from . views import ImportPhotoView, RawImageView, DeletePhotoView
+from . views import UploadPhotoView, AssignPhotoOpenIDView
 from . views import AddOpenIDView, RedirectOpenIDView, ConfirmOpenIDView
 from django.contrib.auth.views import login, logout, password_change, password_change_done
 from django.urls import reverse_lazy
@@ -41,7 +42,7 @@ urlpatterns = [
     url('remove_unconfirmed_email/(?P<email_id>\d+)', RemoveUnconfirmedEmailView.as_view(), name='remove_unconfirmed_email'),
     url('remove_confirmed_email/(?P<email_id>\d+)', RemoveConfirmedEmailView.as_view(), name='remove_confirmed_email'),
     url('assign_photo_email/(?P<email_id>\d+)', AssignPhotoEmailView.as_view(), name='assign_photo_email'),
-    url('assign_photo_openid/(?P<email_id>\d+)', TemplateView.as_view(template_name='fixme.html'), name='assign_photo_openid'),
+    url('assign_photo_openid/(?P<openid_id>\d+)', AssignPhotoOpenIDView.as_view(), name='assign_photo_openid'),
     url('import_photo/(?P<email_id>\d+)', ImportPhotoView.as_view(), name='import_photo'),
     url('delete_photo/(?P<pk>\d+)', DeletePhotoView.as_view(), name='delete_photo'),
     url('raw_image/(?P<pk>\d+)', RawImageView.as_view(), name='raw_image'),
