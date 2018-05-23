@@ -500,7 +500,7 @@ class Tester(TestCase):
                 self.user.photo_set.count(), 1,
                 'there must be exactly one photo now!')
             self.assertEqual(
-                str(list(response.context[0]['messages'])[0]),
+                str(list(response.context[0]['messages'])[-1]),
                 'Successfully uploaded',
                 'A valid image should return a success message!')
             self.assertEqual(
@@ -726,7 +726,7 @@ class Tester(TestCase):
             'Importing with email that does not exist in Gravatar,\
             should return an error message!')
 
-    def test_add_openid(self):
+    def test_add_and_confirm_openid(self):
         '''
         Test if adding an OpenID works
         '''
@@ -807,3 +807,70 @@ class Tester(TestCase):
             self.user.unconfirmedopenid_set.count(),
             0, 'There must be no unconfirmed ID, since we tried adding an\
                 already confirmed ID!')
+
+    def test_assign_photo_to_openid(self):
+        self.test_add_and_confirm_openid()
+        self.test_upload_image()
+        self.assertIsNone(self.user.confirmedopenid_set.first().photo)
+        url = reverse(
+            'assign_photo_openid',
+            args=[self.user.confirmedopenid_set.first().id])
+        # The get is for the view - test context data
+        self.client.get(url, {
+            'photo_id': self.user.photo_set.first().id,
+        })
+        # The post is for the actual assigning
+        response = self.client.post(url, {
+            'photo_id': self.user.photo_set.first().id,
+        }, follow=True)
+        self.assertEqual(response.status_code, 200, 'cannot assign photo?')
+        self.assertEqual(
+            self.user.confirmedopenid_set.first().photo,
+            self.user.photo_set.first())
+
+    def test_assign_invalid_photo_id_to_openid(self):
+        self.test_add_and_confirm_openid()
+        self.assertIsNone(self.user.confirmedopenid_set.first().photo)
+        url = reverse(
+            'assign_photo_openid',
+            args=[self.user.confirmedopenid_set.first().id])
+        response = self.client.post(url, {
+            'photo_id': 1234,
+        }, follow=True)
+        self.assertEqual(
+            response.status_code, 200,
+            'cannot post assign photo request?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[-1]),
+            'Photo does not exist',
+            'Assign non existing photo, does not return error message?')
+
+    def test_post_to_assign_photo_openid_without_photo_id(self):
+        self.test_add_and_confirm_openid()
+        self.test_upload_image()
+        self.assertIsNone(self.user.confirmedopenid_set.first().photo)
+        url = reverse(
+            'assign_photo_openid',
+            args=[self.user.confirmedopenid_set.first().id])
+        response = self.client.post(url, {}, follow=True)
+        self.assertEqual(
+            response.status_code, 200,
+            'cannot post assign photo request?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[0]),
+            'Invalid request [photo_id] missing',
+            'Assign non existing photo, does not return error message?')
+
+    def test_assign_photo_to_openid_inexisting_openid(self):
+        self.test_upload_image()
+        url = reverse('assign_photo_openid', args=[1234])
+        response = self.client.post(url, {
+            'photo_id': self.user.photo_set.first().id,
+        }, follow=True)
+        self.assertEqual(
+            response.status_code, 200,
+            'cannot post assign photo request?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[0]),
+            'Invalid request',
+            'Assign non existing photo, does not return error message?')
