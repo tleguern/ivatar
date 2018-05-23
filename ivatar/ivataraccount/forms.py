@@ -17,6 +17,7 @@ from ipware import get_client_ip
 
 MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT = 5
 
+
 class AddEmailForm(forms.Form):
     '''
     Form to handle adding email addresses
@@ -24,7 +25,7 @@ class AddEmailForm(forms.Form):
     email = forms.EmailField(
         label=_('Email'),
         max_length=MAX_LENGTH_EMAIL,
-        min_length=6, # x@x.xx
+        min_length=6,  # x@x.xx
     )
 
     def clean_email(self):
@@ -41,35 +42,44 @@ class AddEmailForm(forms.Form):
         # Enforce the maximum number of unconfirmed emails a user can have
         num_unconfirmed = user.unconfirmedemail_set.count()
 
-        max_num_unconfirmed_emails = getattr(settings, 'MAX_NUM_UNCONFIRMED_EMAILS', MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)
+        max_num_unconfirmed_emails = getattr(
+            settings,
+            'MAX_NUM_UNCONFIRMED_EMAILS',
+            MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)
 
         if num_unconfirmed >= max_num_unconfirmed_emails:
             return False
 
-        # Check whether or not a confirmation email has been sent by this user already
+        # Check whether or not a confirmation email has been
+        # sent by this user already
         if UnconfirmedEmail.objects.filter(
-            user=user, email=self.cleaned_data['email']).exists():
-                return False
+                user=user, email=self.cleaned_data['email']).exists():
+            return False
 
         # Check whether or not the email is already confirmed by someone
         if ConfirmedEmail.objects.filter(
-            email=self.cleaned_data['email']).exists():
-                return False
+                email=self.cleaned_data['email']).exists():
+            return False
 
         unconfirmed = UnconfirmedEmail()
         unconfirmed.email = self.cleaned_data['email']
         unconfirmed.user = user
         unconfirmed.save()
 
-        link = settings.SITE_URL + reverse('confirm_email', kwargs={'verification_key':unconfirmed.verification_key})
-        email_subject = _('Confirm your email address on %s') % settings.SITE_NAME
+        link = settings.SITE_URL + \
+            reverse(
+                'confirm_email',
+                kwargs={'verification_key': unconfirmed.verification_key})
+        email_subject = _('Confirm your email address on %s') % \
+            settings.SITE_NAME
         email_body = render_to_string('email_confirmation.txt', {
             'verification_link': link,
             'site_name': settings.SITE_NAME,
         })
-        #if settings.DEBUG:
+        # if settings.DEBUG:
         #    print('DEBUG: %s' % link)
-        send_mail(email_subject, email_body, settings.SERVER_EMAIL,
+        send_mail(
+            email_subject, email_body, settings.SERVER_EMAIL,
             [unconfirmed.email])
         return True
 
@@ -86,14 +96,16 @@ class UploadPhotoForm(forms.Form):
         required=True,
         error_messages={
             'required':
-            _('We only host "G-rated" images and so this field must be checked.')
+            _('We only host "G-rated" images and so this field must\
+              be checked.')
         })
     can_distribute = forms.BooleanField(
         label=_('can be freely copied'),
         required=True,
         error_messages={
             'required':
-            _('This field must be checked since we need to be able to distribute photos to third parties.')
+            _('This field must be checked since we need to be able to\
+              distribute photos to third parties.')
         })
 
     def save(self, request, data):
@@ -110,6 +122,7 @@ class UploadPhotoForm(forms.Form):
             return None
         return photo
 
+
 class AddOpenIDForm(forms.Form):
     '''
     Form to handle adding OpenID
@@ -119,7 +132,7 @@ class AddOpenIDForm(forms.Form):
         max_length=MAX_LENGTH_URL,
         # However, not 100% sure if single character domains are possible
         # under any tld...
-        min_length=11, # eg. http://a.io
+        min_length=11,  # eg. http://a.io
         initial='http://'
     )
 
@@ -129,8 +142,9 @@ class AddOpenIDForm(forms.Form):
         '''
         # Lowercase hostname port of the URL
         url = urlsplit(self.cleaned_data['openid'])
-        data = urlunsplit((url.scheme.lower(), url.netloc.lower(), url.path,
-            url.query, url.fragment))
+        data = urlunsplit(
+            (url.scheme.lower(), url.netloc.lower(), url.path,
+             url.query, url.fragment))
 
         # TODO: Domain restriction as in libravatar?
 
@@ -141,11 +155,11 @@ class AddOpenIDForm(forms.Form):
         Save the model, ensuring some safety
         '''
         if ConfirmedOpenId.objects.filter(
-            openid=self.cleaned_data['openid']).exists():
+                openid=self.cleaned_data['openid']).exists():
             return False
 
         if UnconfirmedOpenId.objects.filter(
-            openid=self.cleaned_data['openid']).exists():
+                openid=self.cleaned_data['openid']).exists():
             return False
 
         unconfirmed = UnconfirmedOpenId()

@@ -20,7 +20,7 @@ from openid.association import Association as OIDAssociation
 from openid.store import nonce as oidnonce
 from openid.store.interface import OpenIDStore
 
-from ivatar.settings import MAX_LENGTH_EMAIL
+from ivatar.settings import MAX_LENGTH_EMAIL, logger
 from .gravatar import get_photo as get_gravatar_photo
 
 
@@ -38,7 +38,7 @@ def file_format(image_type):
     elif image_type == 'GIF':
         return 'gif'
 
-    print('Unsupported file format: %s' % image_type)
+    logger.info('Unsupported file format: %s' % image_type)
     return None
 
 
@@ -188,7 +188,9 @@ class ConfirmedEmail(BaseAccountModel):
         '''
         Override save from parent, add digest
         '''
-        self.digest = hashlib.md5(self.email.strip().lower().encode('utf-8')).hexdigest()
+        self.digest = hashlib.md5(
+            self.email.strip().lower().encode('utf-8')
+        ).hexdigest()
         return super().save(*args, **kwargs)
 
 
@@ -254,7 +256,9 @@ class ConfirmedOpenId(BaseAccountModel):
             netloc = url.username + ':' + password + '@' + url.hostname
         else:
             netloc = url.hostname
-        lowercase_url = urlunsplit((url.scheme.lower(), netloc, url.path, url.query, url.fragment))
+        lowercase_url = urlunsplit(
+            (url.scheme.lower(), netloc, url.path, url.query, url.fragment)
+        )
         self.digest = hashlib.sha256(lowercase_url.encode('utf-8')).hexdigest()
         return super().save(*args, **kwargs)
 
