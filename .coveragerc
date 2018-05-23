@@ -1,3 +1,6 @@
 [run]
 plugins =
     django_coverage_plugin
+
+[html]
+extra_css = coverage_extra_style.css
