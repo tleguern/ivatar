@@ -31,4 +31,5 @@ class AvatarImageView(TemplateView):
             raise Exception('No photo assigned to "%s"' % email.email)
 
         return HttpResponse(
-            io.BytesIO(email.photo.data), content_type='image/%s' % email.photo.format)
+            io.BytesIO(email.photo.data),
+            content_type='image/%s' % email.photo.format)
