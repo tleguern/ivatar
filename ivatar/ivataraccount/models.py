@@ -101,13 +101,13 @@ class Photo(BaseAccountModel):
         try:
             img = Image.open(BytesIO(data))
         # How am I supposed to test this?
-        except ValueError:
-            return False
+        except ValueError:  # pragma: no cover
+            return False  # pragma: no cover
 
         self.format = file_format(img.format)
         if not self.format:
-            print('Unable to determine format: %s' % img)
-            return False
+            print('Unable to determine format: %s' % img)  # pragma: no cover
+            return False  # pragma: no cover
         self.data = data
         super().save()
         return True
