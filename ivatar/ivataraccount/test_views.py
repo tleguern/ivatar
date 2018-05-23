@@ -588,7 +588,9 @@ class Tester(TestCase):
         url = reverse('upload_photo')
         # rb => Read binary
         with open(os.path.join(
-                settings.STATIC_ROOT, 'img', 'broken.gif'), 'rb') as photo:
+                settings.STATIC_ROOT,
+                'img',
+                'broken.gif'), 'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -601,6 +603,27 @@ class Tester(TestCase):
         self.assertEqual(
             self.user.photo_set.first().format, 'gif',
             'Format must be gif, since we uploaded a GIF!')
+
+    def test_upload_unsupported_tif_image(self):
+        '''
+        Test if unsupported format is correctly detected
+        '''
+        self.login()
+        url = reverse('upload_photo')
+        # rb => Read binary
+        with open(os.path.join(
+                settings.STATIC_ROOT,
+                'img',
+                'hackergotchi_test.tif'), 'rb') as photo:
+            response = self.client.post(url, {
+                'photo': photo,
+                'not_porn': True,
+                'can_distribute': True,
+            }, follow=True)
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[0]),
+            'Invalid Format',
+            'Invalid img data should return error message!')
 
     def test_automatic_photo_assign_to_confirmed_mail(self):
         self.test_upload_image()
@@ -733,3 +756,56 @@ class Tester(TestCase):
         confirmed.openid = unconfirmed.openid
         confirmed.save()
         unconfirmed.delete()
+
+    def test_add_openid_twice(self):
+        '''
+        Test if adding OpenID a second time works - it shouldn't
+        '''
+        self.login()
+        # Get page
+        response = self.client.get(reverse('add_openid'))
+        self.assertEqual(
+            response.status_code,
+            200,
+            'Fetching page to add OpenID fails?')
+
+        response = self.client.post(
+            reverse('add_openid'), {
+                 # Whohu, static... :-[
+                'openid': 'http://oliver.id.fedoraproject.org',
+            },
+        )
+        self.assertEqual(response.status_code, 302, 'OpenID must redirect')
+
+        response = self.client.post(
+            reverse('add_openid'), {
+                 # Whohu, static... :-[
+                'openid': 'http://oliver.id.fedoraproject.org',
+            },
+        )
+        self.assertEqual(response.status_code, 302, 'OpenID must redirect')
+        self.assertEqual(
+            self.user.unconfirmedopenid_set.count(),
+            1, 'There must only be one unconfirmed ID!')
+
+        # Manual confirm, since testing is _really_ hard!
+        unconfirmed = self.user.unconfirmedopenid_set.first()
+        confirmed = ConfirmedOpenId()
+        confirmed.user = unconfirmed.user
+        confirmed.ip_address = '127.0.0.1'
+        confirmed.openid = unconfirmed.openid
+        confirmed.save()
+        unconfirmed.delete()
+
+        # Try adding it again - although already confirmed
+        response = self.client.post(
+            reverse('add_openid'), {
+                 # Whohu, static... :-[
+                'openid': 'http://oliver.id.fedoraproject.org',
+            },
+        )
+        self.assertEqual(response.status_code, 302, 'OpenID must redirect')
+        self.assertEqual(
+            self.user.unconfirmedopenid_set.count(),
+            0, 'There must be no unconfirmed ID, since we tried adding an\
+                already confirmed ID!')
