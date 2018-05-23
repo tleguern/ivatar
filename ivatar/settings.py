@@ -3,6 +3,11 @@ Django settings for ivatar project.
 """
 
 import os
+import logging
+
+log_level = logging.DEBUG
+logger = logging.getLogger('ivatar')
+logger.setLevel(log_level)
 
 PACKAGE_ROOT = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

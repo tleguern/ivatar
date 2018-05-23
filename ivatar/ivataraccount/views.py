@@ -460,33 +460,33 @@ class ConfirmOpenIDView(View):
     model_confirmed = ConfirmedOpenId
 
     def do_request(self, data, *args, **kwargs):
-        session = {'id': request.session.session_key}
-        current_url = SITE_URL + request.path
+        session = {'id': self.request.session.session_key}
+        current_url = SITE_URL + self.request.path
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
         info = openid_consumer.complete(data, current_url)
         if info.status == consumer.FAILURE:
             messages.error(
-                request,
+                self.request,
                 _('Confirmation failed: "') + str(info.message) + '"')
             return HttpResponseRedirect(reverse_lazy('profile'))
         elif info.status == consumer.CANCEL:
-            messages.error(request, _('Cancelled by user'))
+            messages.error(self.request, _('Cancelled by user'))
             return HttpResponseRedirect(reverse_lazy('profile'))
         elif info.status != consumer.SUCCESS:
-            messages.error(request, _('Unknown verification error'))
+            messages.error(self.request, _('Unknown verification error'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             unconfirmed = self.model.objects.get(
-                user=request.user, id=kwargs['openid_id'])
+                user=self.request.user, id=kwargs['openid_id'])
         except self.model.DoesNotExist:
-            messages.error(request, _('ID does not exist'))
+            messages.error(self.request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         # TODO: Check for a reasonable expiration time
         confirmed = self.model_confirmed()
         confirmed.user = unconfirmed.user
-        confirmed.ip_address = get_client_ip(request)
+        confirmed.ip_address = get_client_ip(self.request)
         confirmed.openid = unconfirmed.openid
         confirmed.save()
 
@@ -494,13 +494,13 @@ class ConfirmOpenIDView(View):
 
         # If there is a single image in this user's profile
         # assign it to the new id
-        if request.user.photo_set.count() == 1:
-            confirmed.set_photo(request.user.photo_set.first())
+        if self.request.user.photo_set.count() == 1:
+            confirmed.set_photo(self.request.user.photo_set.first())
 
         # Also allow user to login using this OPenID (if not already taken)
         if not UserOpenID.objects.filter(claimed_id=confirmed.openid).exists():
             user_openid = UserOpenID()
-            user_openid.user = request.user
+            user_openid.user = self.request.user
             user_openid.claimed_id = confirmed.openid
             user_openid.display_id = confirmed.openid
             user_openid.save()
