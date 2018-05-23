@@ -10,6 +10,7 @@ before_script:
   - pip install python-coveralls
   - pip install coverage
   - pip install pycco
+  - pip install django_coverage_plugin
 
 test_and_coverage:
   stage: test

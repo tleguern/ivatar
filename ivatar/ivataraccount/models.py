@@ -84,7 +84,7 @@ class Photo(BaseAccountModel):
                 image_url = gravatar['image_url']
 
         if not image_url:
-            return False
+            return False  # pragma: no cover
         try:
             image = urlopen(image_url)
         # No idea how to test this
