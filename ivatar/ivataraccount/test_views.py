@@ -23,6 +23,8 @@ class Tester(TestCase):
     username = random_string()
     password = random_string()
     email = '%s@%s.%s' % (username, random_string(), random_string(2))
+    # Dunno why random tld doens't work, but I'm too lazy now to investigate
+    openid = 'http://%s.%s.%s' % (username, random_string(), 'org')
 
     def login(self):
         '''
@@ -726,7 +728,7 @@ class Tester(TestCase):
             'Importing with email that does not exist in Gravatar,\
             should return an error message!')
 
-    def test_add_and_confirm_openid(self):
+    def test_add_openid(self, confirm=True):
         '''
         Test if adding an OpenID works
         '''
@@ -741,19 +743,20 @@ class Tester(TestCase):
         response = self.client.post(
             reverse('add_openid'), {
                  # Whohu, static... :-[
-                'openid': 'http://oliver.id.fedoraproject.org',
+                'openid': self.openid,
             },
         )
         self.assertEqual(response.status_code, 302, 'OpenID must redirect')
 
-        # Manual confirm, since testing is _really_ hard!
-        unconfirmed = self.user.unconfirmedopenid_set.first()
-        confirmed = ConfirmedOpenId()
-        confirmed.user = unconfirmed.user
-        confirmed.ip_address = '127.0.0.1'
-        confirmed.openid = unconfirmed.openid
-        confirmed.save()
-        unconfirmed.delete()
+        if confirm:
+            # Manual confirm, since testing is _really_ hard!
+            unconfirmed = self.user.unconfirmedopenid_set.first()
+            confirmed = ConfirmedOpenId()
+            confirmed.user = unconfirmed.user
+            confirmed.ip_address = '127.0.0.1'
+            confirmed.openid = unconfirmed.openid
+            confirmed.save()
+            unconfirmed.delete()
 
     def test_add_openid_twice(self):
         '''
@@ -770,7 +773,7 @@ class Tester(TestCase):
         response = self.client.post(
             reverse('add_openid'), {
                  # Whohu, static... :-[
-                'openid': 'http://oliver.id.fedoraproject.org',
+                'openid': self.openid,
             },
         )
         self.assertEqual(response.status_code, 302, 'OpenID must redirect')
@@ -778,7 +781,7 @@ class Tester(TestCase):
         response = self.client.post(
             reverse('add_openid'), {
                  # Whohu, static... :-[
-                'openid': 'http://oliver.id.fedoraproject.org',
+                'openid': self.openid,
             },
         )
         self.assertEqual(response.status_code, 302, 'OpenID must redirect')
@@ -799,7 +802,7 @@ class Tester(TestCase):
         response = self.client.post(
             reverse('add_openid'), {
                  # Whohu, static... :-[
-                'openid': 'http://oliver.id.fedoraproject.org',
+                'openid': self.openid,
             },
         )
         self.assertEqual(response.status_code, 302, 'OpenID must redirect')
@@ -809,7 +812,7 @@ class Tester(TestCase):
                 already confirmed ID!')
 
     def test_assign_photo_to_openid(self):
-        self.test_add_and_confirm_openid()
+        self.test_add_openid()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedopenid_set.first().photo)
         url = reverse(
@@ -829,7 +832,7 @@ class Tester(TestCase):
             self.user.photo_set.first())
 
     def test_assign_invalid_photo_id_to_openid(self):
-        self.test_add_and_confirm_openid()
+        self.test_add_openid()
         self.assertIsNone(self.user.confirmedopenid_set.first().photo)
         url = reverse(
             'assign_photo_openid',
@@ -846,7 +849,7 @@ class Tester(TestCase):
             'Assign non existing photo, does not return error message?')
 
     def test_post_to_assign_photo_openid_without_photo_id(self):
-        self.test_add_and_confirm_openid()
+        self.test_add_openid()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedopenid_set.first().photo)
         url = reverse(
@@ -874,3 +877,56 @@ class Tester(TestCase):
             str(list(response.context[0]['messages'])[0]),
             'Invalid request',
             'Assign non existing photo, does not return error message?')
+
+    def test_remove_confirmed_openid(self):
+        '''
+        Remove confirmed openid
+        '''
+        self.test_add_openid()
+        url = reverse(
+            'remove_confirmed_openid',
+            args=[self.user.confirmedopenid_set.first().id])
+        response = self.client.post(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to remove confirmed openid?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[-1]),
+            'ID removed',
+            'Removing confirmed openid does not work?')
+
+    def test_remove_not_existing_confirmed_openid(self):
+        '''
+        Try removing confirmed openid that doesn't exist
+        '''
+        self.login()
+        url = reverse('remove_confirmed_openid', args=[1234])
+        response = self.client.post(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'removing id does not redirect to profile?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[0]),
+            'ID does not exist',
+            'Removing not existing (confirmed) address, should produce an\
+                error message!')
+
+    def test_remove_unconfirmed_openid(self):
+        '''
+        Remove unconfirmed openid
+        '''
+        self.test_add_openid(confirm=False)
+        url = reverse(
+            'remove_unconfirmed_openid',
+            args=[self.user.unconfirmedopenid_set.first().id])
+        response = self.client.post(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to remove unconfirmed address?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[-1]),
+            'ID removed',
+            'Removing unconfirmed mail does not work?')
