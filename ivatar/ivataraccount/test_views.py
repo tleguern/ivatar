@@ -40,7 +40,6 @@ class Tester(TestCase):
             password=self.password,
         )
 
-    # CreateView
     def test_new_user(self):
         """
         Create a new user
@@ -61,7 +60,6 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'unable to create user?')
         self.assertEqual(response.context[0]['user'].username, self.username)
 
-    # CreateView
     def test_new_user_twice(self):
         """
         Try to create a user that already exists
