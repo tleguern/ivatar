@@ -12,3 +12,4 @@ django-extensions
 PyMySQL
 django-ipware
 django-bootstrap4
+pyLibravatar
