@@ -947,7 +947,6 @@ class Tester(TestCase):
             response.status_code,
             200,
             'unable to remove unconfirmed address?')
-        print(response.content)
         self.assertEqual(
             str(list(response.context[0]['messages'])[0]),
             'ID does not exist',
@@ -1025,3 +1024,19 @@ class Tester(TestCase):
             response.content,
             self.user.photo_set.first().data,
             'Why is this not the same data?')
+
+    def test_avatar_url_inexisting_mail_digest(self):
+        '''
+        Test fetching avatar via inexisting mail digest
+        '''
+        self.test_upload_image()
+        self.test_confirm_email()
+        urlobj = urlsplit(libravatar_url(
+            email=self.user.confirmedemail_set.first().email)
+        )
+        # Simply delete it, then it digest is 'correct', but
+        # the hash is no longer there
+        self.user.confirmedemail_set.first().delete()
+        url = urlobj.path
+        self.assertRaises(Exception, lambda:
+                          self.client.get(url, follow=True))
