@@ -969,3 +969,18 @@ class Tester(TestCase):
  host is not 200. Got status 403',
             'This request must return an error in test mode'
         )
+
+    def test_set_photo_on_openid(self):
+        '''
+        Test the set_photo function on our ConfirmedOpenId model.
+        '''
+        self.test_add_openid()
+        self.test_upload_image()
+        self.assertIsNone(self.user.confirmedopenid_set.first().photo)
+        self.user.confirmedopenid_set.first().set_photo(
+            self.user.photo_set.first()
+        )
+        self.assertEqual(
+            self.user.confirmedopenid_set.first().photo,
+            self.user.photo_set.first(),
+            'set_photo did not work!?')
