@@ -654,6 +654,15 @@ class Tester(TestCase):
             self.user.confirmedemail_set.first().photo,
             self.user.photo_set.first())
 
+    def test_assign_photo_to_email_wo_photo_for_testing_template(self):
+        self.test_confirm_email()
+        url = reverse(
+            'assign_photo_email',
+            args=[self.user.confirmedemail_set.first().id])
+        # The get is for the view - test context data
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200, 'cannot fetch page?')
+
     def test_assign_invalid_photo_id_to_email(self):
         self.test_confirm_email()
         self.test_upload_image()
@@ -833,6 +842,14 @@ class Tester(TestCase):
         self.assertEqual(
             self.user.confirmedopenid_set.first().photo,
             self.user.photo_set.first())
+
+    def test_assign_photo_to_openid_wo_photo_for_testing_template(self):
+        self.test_add_openid()
+        url = reverse(
+            'assign_photo_openid',
+            args=[self.user.confirmedopenid_set.first().id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200, 'cannot fetch page?')
 
     def test_assign_invalid_photo_id_to_openid(self):
         self.test_add_openid()
