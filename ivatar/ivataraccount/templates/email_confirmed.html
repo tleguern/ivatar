@@ -1,4 +1,4 @@
-{% extends 'base.html' %}                                                                                                                      
+{% extends 'base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans 'Email confirmation' %} - Libravatar{% endblock title %}
@@ -22,7 +22,7 @@
   <br/>
   {% if photo.service_url %}
   <a href="{{ photo.service_url }}">{{ photo.service_name }}</a>
-  {% else %}
+  {% else %}  {# pragma: no cover #}
   {{ photo.service_name }}
   {% endif %}
   </li>
