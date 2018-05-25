@@ -963,10 +963,9 @@ class Tester(TestCase):
             response.status_code,
             200,
             'unable to remove unconfirmed address?')
-        self.assertEqual(
-            str(list(response.context[0]['messages'])[-1]),
-            'OpenID discovery failed: HTTP Response status from identity URL\
- host is not 200. Got status 403',
+        self.assertContains(
+            response,
+            'OpenID discovery failed: ', 1, 200,
             'This request must return an error in test mode'
         )
 
