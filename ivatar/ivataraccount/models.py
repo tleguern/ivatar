@@ -291,7 +291,7 @@ class DjangoOpenIDStore(OpenIDStore):
     related to OpenID authentications. This one uses our Django models.
     '''
 
-    def storeAssociation(self, server_url, association):
+    def storeAssociation(self, server_url, association):  # pragma: no cover
         '''
         Helper method to store associations
         TODO: Could be moved to classmethod
@@ -305,7 +305,7 @@ class DjangoOpenIDStore(OpenIDStore):
             assoc_type=association.assoc_type)
         assoc.save()
 
-    def getAssociation(self, server_url, handle=None):
+    def getAssociation(self, server_url, handle=None):  # pragma: no cover
         '''
         Helper method to get associations
         '''
@@ -339,7 +339,7 @@ class DjangoOpenIDStore(OpenIDStore):
             return None
         return associations[-1][1]
 
-    def removeAssociation(self, server_url, handle):
+    def removeAssociation(self, server_url, handle):  # pragma: no cover
         '''
         Helper method to remove associations
         TODO: Could be moved to classmethod
@@ -352,7 +352,7 @@ class DjangoOpenIDStore(OpenIDStore):
             assoc.delete()
         return assocs_exist
 
-    def useNonce(self, server_url, timestamp, salt):
+    def useNonce(self, server_url, timestamp, salt):  # pragma: no cover
         '''
         Helper method to 'use' nonces
         TODO: Could be moved to classmethod
@@ -372,7 +372,7 @@ class DjangoOpenIDStore(OpenIDStore):
         nonce.delete()
         return False
 
-    def cleanupNonces(self):
+    def cleanupNonces(self):  # pragma: no cover
         '''
         Helper method to cleanup nonces
         TODO: Could be moved to classmethod
@@ -380,7 +380,7 @@ class DjangoOpenIDStore(OpenIDStore):
         timestamp = int(time.time()) - oidnonce.SKEW
         OpenIDNonce.objects.filter(timestamp__lt=timestamp).delete()
 
-    def cleanupAssociations(self):
+    def cleanupAssociations(self):  # pragma: no cover
         '''
         Helper method to cleanup associations
         TODO: Could be moved to classmethod
