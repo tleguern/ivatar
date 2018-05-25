@@ -930,3 +930,42 @@ class Tester(TestCase):
             str(list(response.context[0]['messages'])[-1]),
             'ID removed',
             'Removing unconfirmed mail does not work?')
+
+    def test_remove_unconfirmed_inexisting_openid(self):
+        '''
+        Remove unconfirmed openid that doesn't exist
+        '''
+        self.login()
+        url = reverse(
+            'remove_unconfirmed_openid',
+            args=[1234])
+        response = self.client.post(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to remove unconfirmed address?')
+        print(response.content)
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[0]),
+            'ID does not exist',
+            'Removing an inexisting openid should return an error message')
+
+    def test_openid_redirect_view(self):
+        '''
+        Test redirect view
+        '''
+        self.test_add_openid(confirm=False)
+        url = reverse(
+            'openid_redirection',
+            args=[self.user.unconfirmedopenid_set.first().id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to remove unconfirmed address?')
+        self.assertEqual(
+            str(list(response.context[0]['messages'])[-1]),
+            'OpenID discovery failed: HTTP Response status from identity URL\
+ host is not 200. Got status 403',
+            'This request must return an error in test mode'
+        )
