@@ -13,7 +13,8 @@ def basepage(request):
     '''
     context = {}
     if 'openid_identifier' in request.GET:
-        context['openid_identifier'] = request.GET['openid_identifier']
+        context['openid_identifier'] = \
+            request.GET['openid_identifier']  # pragma: no cover
     client_ip, is_routable = get_client_ip(request)
     context['client_ip'] = client_ip
     context['ivatar_version'] = IVATAR_VERSION
