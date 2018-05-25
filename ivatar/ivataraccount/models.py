@@ -251,7 +251,7 @@ class ConfirmedOpenId(BaseAccountModel):
 
     def save(self, *args, **kwargs):
         url = urlsplit(self.openid)
-        if url.username:
+        if url.username:  # pragma: no cover
             password = url.password or ''
             netloc = url.username + ':' + password + '@' + url.hostname
         else:
