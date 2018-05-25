@@ -422,7 +422,7 @@ class RedirectOpenIDView(View):
         try:
             unconfirmed = self.model.objects.get(
                 user=request.user, id=kwargs['openid_id'])
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pragma: no cover
             messages.error(request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -437,20 +437,20 @@ class RedirectOpenIDView(View):
         except consumer.DiscoveryFailure as e:
             messages.error(request, _('OpenID discovery failed: %s' % e))
             return HttpResponseRedirect(reverse_lazy('profile'))
-        except UnicodeDecodeError as e:
+        except UnicodeDecodeError as e:  # pragma: no cover
             msg = _('OpenID discovery failed (userid=%s) for %s: %s' %
                     (request.user.id, user_url.encode('utf-8'), e))
             print(msg)
             messages.error(request, msg)
 
-        if auth_request is None:
+        if auth_request is None:  # pragma: no cover
             messages.error(request, _('OpenID discovery failed'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        realm = SITE_URL
-        return_url = realm + reverse(
+        realm = SITE_URL  # pragma: no cover
+        return_url = realm + reverse(  # pragma: no cover
             'confirm_openid', args=[kwargs['openid_id']])
-        return HttpResponseRedirect(
+        return HttpResponseRedirect(  # pragma: no cover
             auth_request.redirectURL(realm, return_url))
 
 
