@@ -26,10 +26,12 @@ class AvatarImageView(TemplateView):
         else:
             raise Exception('Digest provided is wrong: %s' % kwargs['digest'])
 
-        email = model.objects.get(digest=kwargs['digest'])
-        if not email.photo:
-            raise Exception('No photo assigned to "%s"' % email.email)
+        obj = model.objects.get(digest=kwargs['digest'])
+        if not obj.photo:
+            # That is hacky, but achieves what we want :-)
+            attr = getattr(obj, 'email', obj.openid)
+            raise Exception('No photo assigned to "%s"' % attr)
 
         return HttpResponse(
-            io.BytesIO(email.photo.data),
-            content_type='image/%s' % email.photo.format)
+            io.BytesIO(obj.photo.data),
+            content_type='image/%s' % obj.photo.format)
