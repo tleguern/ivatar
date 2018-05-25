@@ -2,8 +2,11 @@
 {% load static %}
 {% load bootstrap4 %}
 {% load i18n %}<!DOCTYPE HTML>
-{% block bootstrap4_extra_head %}{% include 'header.html' %}{% endblock bootstrap4_extra_head %}
 {% spaceless %}{% block bootstrap4_content %}
+{% block bootstrap4_extra_head %}
+{% include 'header.html' %}
+<title>{% block title %}Libravatar - {% trans 'Freeing the Web, one face at a time!' %}{% endblock title %}</title>
+{% endblock bootstrap4_extra_head %}
 <div id="header">
   <div>
   <div id="logo">
