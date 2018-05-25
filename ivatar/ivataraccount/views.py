@@ -391,7 +391,7 @@ class RemoveUnconfirmedOpenIDView(View):
                 user=request.user, id=kwargs['openid_id'])
             openid.delete()
             messages.success(request, _('ID removed'))
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pragma: no cover
             messages.error(request, _('ID does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -455,7 +455,7 @@ class RedirectOpenIDView(View):
 
 
 @method_decorator(login_required, name='dispatch')
-class ConfirmOpenIDView(View):
+class ConfirmOpenIDView(View):  # pragma: no cover
     model = UnconfirmedOpenId
     model_confirmed = ConfirmedOpenId
 
