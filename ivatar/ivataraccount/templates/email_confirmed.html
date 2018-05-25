@@ -23,8 +23,8 @@
   {% if photo.service_url %}
   <a href="{{ photo.service_url }}">{{ photo.service_name }}</a>
   {% else %}  {# pragma: no cover #}
-  {{ photo.service_name }}
-  {% endif %}
+  {{ photo.service_name }}  {# pragma: no cover #}
+  {% endif %}  {# pragma: no cover #}
   </li>
 {% endfor %}
 </ul>
