@@ -2,6 +2,9 @@ from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
 
+from libravatar import libravatar_url
+from urllib.parse import urlsplit
+
 import io
 import os
 import django
@@ -983,3 +986,42 @@ class Tester(TestCase):
             self.user.confirmedopenid_set.first().photo,
             self.user.photo_set.first(),
             'set_photo did not work!?')
+
+    def test_avatar_url_mail(self):
+        '''
+        Test fetching avatar via mail
+        '''
+        self.test_upload_image()
+        self.test_confirm_email()
+        urlobj = urlsplit(libravatar_url(
+            email=self.user.confirmedemail_set.first().email)
+        )
+        url = urlobj.path
+        response = self.client.get(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to fetch avatar?')
+        self.assertEqual(
+            response.content,
+            self.user.photo_set.first().data,
+            'Why is this not the same data?')
+
+    def test_avatar_url_openid(self):
+        '''
+        Test fetching avatar via openid
+        '''
+        self.test_assign_photo_to_openid()
+        urlobj = urlsplit(libravatar_url(
+            openid=self.user.confirmedopenid_set.first().openid)
+        )
+        url = urlobj.path
+        response = self.client.get(url, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to fetch avatar?')
+        self.assertEqual(
+            response.content,
+            self.user.photo_set.first().data,
+            'Why is this not the same data?')
