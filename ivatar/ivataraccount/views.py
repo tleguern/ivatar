@@ -21,7 +21,7 @@ from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
 
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE, SITE_URL
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 import io
 
@@ -461,7 +461,7 @@ class ConfirmOpenIDView(View):  # pragma: no cover
 
     def do_request(self, data, *args, **kwargs):
         session = {'id': self.request.session.session_key}
-        current_url = SITE_URL + self.request.path
+        current_url = self.request.build_absolute_uri('/') + self.request.path
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
         info = openid_consumer.complete(data, current_url)
         if info.status == consumer.FAILURE:

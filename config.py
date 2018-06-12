@@ -50,7 +50,6 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append(
 OPENID_CREATE_USERS = True
 OPENID_UPDATE_DETAILS_FROM_SREG = True
 
-SITE_URL = 'https://ivatar.io'
 SITE_NAME = 'ivatar'
 IVATAR_VERSION = '0.1'
 

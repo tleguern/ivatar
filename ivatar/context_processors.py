@@ -2,7 +2,7 @@
 Default: useful variables for the base page templates.
 '''
 
-from ivatar.settings import IVATAR_VERSION, SITE_NAME, SITE_URL
+from ivatar.settings import IVATAR_VERSION, SITE_NAME
 from ipware import get_client_ip
 
 
@@ -19,5 +19,5 @@ def basepage(request):
     context['client_ip'] = client_ip
     context['ivatar_version'] = IVATAR_VERSION
     context['site_name'] = SITE_NAME
-    context['site_url'] = SITE_URL
+    context['site_url'] = request.build_absolute_uri('/')
     return context
