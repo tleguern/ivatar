@@ -21,7 +21,7 @@ from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
 
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE, SITE_URL
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 import io
 
@@ -91,7 +91,7 @@ class AddEmailView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('profile')
 
     def form_valid(self, form):
-        if not form.save(self.request.user):
+        if not form.save(self.request):
             messages.error(self.request, _('Address not added'))
         else:
             messages.success(self.request, _('Address added successfully'))
@@ -447,7 +447,7 @@ class RedirectOpenIDView(View):
             messages.error(request, _('OpenID discovery failed'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        realm = SITE_URL  # pragma: no cover
+        realm = request.build_absolute_uri('/')  # pragma: no cover
         return_url = realm + reverse(  # pragma: no cover
             'confirm_openid', args=[kwargs['openid_id']])
         return HttpResponseRedirect(  # pragma: no cover
@@ -461,7 +461,7 @@ class ConfirmOpenIDView(View):  # pragma: no cover
 
     def do_request(self, data, *args, **kwargs):
         session = {'id': self.request.session.session_key}
-        current_url = SITE_URL + self.request.path
+        current_url = self.request.build_absolute_uri('/') + self.request.path
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
         info = openid_consumer.complete(data, current_url)
         if info.status == consumer.FAILURE:

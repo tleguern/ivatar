@@ -2,7 +2,7 @@ image: centos:centos7
 
 before_script:
   - yum install -y -t https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  - yum -y -t install python34 python34-pip python34-devel unzip mysql-devel gcc git
+  - yum -y -t install python34 python34-pip python34-devel unzip mysql-devel gcc git openldap-devel
   - pip3 install virtualenv --upgrade
   - virtualenv -p python3 /tmp/.virtualenv
   - source /tmp/.virtualenv/bin/activate

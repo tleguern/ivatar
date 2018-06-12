@@ -35,10 +35,11 @@ class AddEmailForm(forms.Form):
         # TODO: Domain restriction as in libravatar?
         return self.cleaned_data['email'].lower()
 
-    def save(self, user):
+    def save(self, request):
         '''
         Save the model, ensuring some safety
         '''
+        user = request.user
         # Enforce the maximum number of unconfirmed emails a user can have
         num_unconfirmed = user.unconfirmedemail_set.count()
 
@@ -66,7 +67,7 @@ class AddEmailForm(forms.Form):
         unconfirmed.user = user
         unconfirmed.save()
 
-        link = settings.SITE_URL + \
+        link = request.build_absolute_uri('/') + \
             reverse(
                 'confirm_email',
                 kwargs={'verification_key': unconfirmed.verification_key})
