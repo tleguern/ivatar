@@ -28,3 +28,4 @@ six
 social-auth-app-django
 wheel
 yapf
+django-anymail[mailgun]
