@@ -18,7 +18,6 @@ pydocstyle
 pyLibravatar
 pylint
 PyMySQL
-pyre-check
 python3-openid
 python-coveralls
 python-language-server
