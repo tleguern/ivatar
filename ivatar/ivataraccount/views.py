@@ -91,7 +91,7 @@ class AddEmailView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('profile')
 
     def form_valid(self, form):
-        if not form.save(self.request.user):
+        if not form.save(self.request):
             messages.error(self.request, _('Address not added'))
         else:
             messages.success(self.request, _('Address added successfully'))
@@ -447,7 +447,7 @@ class RedirectOpenIDView(View):
             messages.error(request, _('OpenID discovery failed'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        realm = SITE_URL  # pragma: no cover
+        realm = request.build_absolute_uri('/')[:-1].strip('/')  # pragma: no cover
         return_url = realm + reverse(  # pragma: no cover
             'confirm_openid', args=[kwargs['openid_id']])
         return HttpResponseRedirect(  # pragma: no cover
