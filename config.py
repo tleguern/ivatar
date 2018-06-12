@@ -20,6 +20,7 @@ INSTALLED_APPS.extend([
     'django_extensions',
     'django_openid_auth',
     'bootstrap4',
+    'anymail',
     'ivatar',
     'ivatar.ivataraccount',
 ])
@@ -79,6 +80,13 @@ BOOTSTRAP4 = {
         'crossorigin': 'anonymous',
     },
 }
+
+ANYMAIL = {
+    'MAILGUN_API_KEY': '9ea63b269bf14734e928f7aa99f7b891-47317c98-19591231',
+    'MAILGUN_SENDER_DOMAIN': 'sandbox86e598eae2de47bcac3926e6d24d789a.mailgun.org',
+}
+EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
 
 if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
     from config_local import *  # noqa # flake8: noqa # NOQA # pragma: no cover
