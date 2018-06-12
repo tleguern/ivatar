@@ -13,6 +13,7 @@ ALLOWED_HOSTS = [
     gethostname(),
     gethostbyname(gethostname()),
     '.openshiftapps.com',
+    '127.0.0.1',
 ]
 
 from ivatar.settings import INSTALLED_APPS  # noqa
@@ -92,7 +93,11 @@ try:
     from ivatar.settings import DATABASES
 except Exception:  # pragma: no cover
     DATABASES = []  # pragma: no cover
-DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
+if not 'default' in DATABASES:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 
 if 'MYSQL_DATABASE' in os.environ:
     DATABASES['default'] = {
