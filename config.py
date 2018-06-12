@@ -88,5 +88,13 @@ ANYMAIL = {
 EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
 
+if 'MYSQL_DATABASE' in os.environ:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ['MYSQL_DATABASE'],
+        'USER': os.environ['MYSQL_USER'],
+        'PASSWORD': os.environ['MYSQL_PASSWORD'],
+    }
+
 if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
     from config_local import *  # noqa # flake8: noqa # NOQA # pragma: no cover
