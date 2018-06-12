@@ -67,7 +67,7 @@ class AddEmailForm(forms.Form):
         unconfirmed.user = user
         unconfirmed.save()
 
-        link = request.build_absolute_uri('/')[:1].strip('/') + \
+        link = request.build_absolute_uri('/') + \
             reverse(
                 'confirm_email',
                 kwargs={'verification_key': unconfirmed.verification_key})

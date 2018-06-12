@@ -447,7 +447,7 @@ class RedirectOpenIDView(View):
             messages.error(request, _('OpenID discovery failed'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        realm = request.build_absolute_uri('/')[:-1].strip('/')  # pragma: no cover
+        realm = request.build_absolute_uri('/')  # pragma: no cover
         return_url = realm + reverse(  # pragma: no cover
             'confirm_openid', args=[kwargs['openid_id']])
         return HttpResponseRedirect(  # pragma: no cover
