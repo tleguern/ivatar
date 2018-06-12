@@ -1,10 +1,17 @@
+'''
+Configuration overrides for settings.py
+'''
+
 import os
-from ivatar.settings import BASE_DIR
+from socket import gethostname, gethostbyname
 from django.urls import reverse_lazy
+from ivatar.settings import BASE_DIR
 
 ADMIN_USERS = []
 ALLOWED_HOSTS = [
     'localhost',
+    gethostname(),
+    gethostbyname(gethostname()),
 ]
 
 from ivatar.settings import INSTALLED_APPS  # noqa
