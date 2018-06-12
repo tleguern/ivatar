@@ -88,6 +88,12 @@ ANYMAIL = {
 EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
 
+try:
+    from ivatar.settings import DATABASES
+except Exception:  # pragma: no cover
+    DATABASES = []  # pragma: no cover
+DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
+
 if 'MYSQL_DATABASE' in os.environ:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.mysql',
