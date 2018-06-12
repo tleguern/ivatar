@@ -105,7 +105,7 @@ if 'MYSQL_DATABASE' in os.environ:
         'NAME': os.environ['MYSQL_DATABASE'],
         'USER': os.environ['MYSQL_USER'],
         'PASSWORD': os.environ['MYSQL_PASSWORD'],
-        'HOST': '127.0.0.1',
+        'HOST': 'mysql',
     }
 
 if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
