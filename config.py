@@ -12,6 +12,7 @@ ALLOWED_HOSTS = [
     'localhost',
     gethostname(),
     gethostbyname(gethostname()),
+    '.openshiftapps.com',
 ]
 
 from ivatar.settings import INSTALLED_APPS  # noqa
