@@ -3,6 +3,7 @@ Configuration overrides for settings.py
 '''
 
 import os
+import sys
 from socket import gethostname, gethostbyname
 from django.urls import reverse_lazy
 from ivatar.settings import BASE_DIR
@@ -85,7 +86,8 @@ ANYMAIL = {
     'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
     'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
 }
-EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+if not 'test' in sys.argv:
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
 
 try:
