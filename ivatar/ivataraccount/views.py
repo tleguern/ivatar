@@ -447,7 +447,7 @@ class RedirectOpenIDView(View):
             messages.error(request, _('OpenID discovery failed'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        realm = request.build_absolute_uri('/')  # pragma: no cover
+        realm = request.build_absolute_uri('/')[:-1]  # pragma: no cover
         return_url = realm + reverse(  # pragma: no cover
             'confirm_openid', args=[kwargs['openid_id']])
         return HttpResponseRedirect(  # pragma: no cover
@@ -461,7 +461,8 @@ class ConfirmOpenIDView(View):  # pragma: no cover
 
     def do_request(self, data, *args, **kwargs):
         session = {'id': self.request.session.session_key}
-        current_url = self.request.build_absolute_uri('/') + self.request.path
+        current_url = self.request.build_absolute_uri('/')[:-1] + \
+            self.request.path
         openid_consumer = consumer.Consumer(session, DjangoOpenIDStore())
         info = openid_consumer.complete(data, current_url)
         if info.status == consumer.FAILURE:

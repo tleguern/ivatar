@@ -19,5 +19,5 @@ def basepage(request):
     context['client_ip'] = client_ip
     context['ivatar_version'] = IVATAR_VERSION
     context['site_name'] = SITE_NAME
-    context['site_url'] = request.build_absolute_uri('/')
+    context['site_url'] = request.build_absolute_uri('/')[:-1]
     return context
