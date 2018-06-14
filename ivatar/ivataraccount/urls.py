@@ -9,6 +9,7 @@ from . views import RemoveUnconfirmedOpenIDView, RemoveConfirmedOpenIDView
 from . views import ImportPhotoView, RawImageView, DeletePhotoView
 from . views import UploadPhotoView, AssignPhotoOpenIDView
 from . views import AddOpenIDView, RedirectOpenIDView, ConfirmOpenIDView
+from . views import CropPhotoView
 from django.contrib.auth.views import login, logout
 from django.urls import reverse_lazy
 
@@ -71,4 +72,5 @@ urlpatterns = [
         'delete_photo/(?P<pk>\d+)',
         DeletePhotoView.as_view(), name='delete_photo'),
     url('raw_image/(?P<pk>\d+)', RawImageView.as_view(), name='raw_image'),
+    url('crop_photo/(?P<pk>\d+)', CropPhotoView.as_view(), name='crop_photo'),
 ]

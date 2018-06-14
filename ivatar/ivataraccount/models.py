@@ -13,14 +13,19 @@ from urllib.parse import urlsplit, urlunsplit
 
 from PIL import Image
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.db import models
 from django.utils import timezone
+from django.http import HttpResponseRedirect
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from openid.association import Association as OIDAssociation
 from openid.store import nonce as oidnonce
 from openid.store.interface import OpenIDStore
+from ipware import get_client_ip
 
 from ivatar.settings import MAX_LENGTH_EMAIL, logger
+from ivatar.settings import MAX_PIXELS, AVATAR_MAX_SIZE, JPEG_QUALITY
 from .gravatar import get_photo as get_gravatar_photo
 
 
@@ -37,6 +42,17 @@ def file_format(image_type):
         return 'png'
     elif image_type == 'GIF':
         return 'gif'
+
+def pil_format(image_type):
+    '''
+    Helper method returning the 'encoder name' for PIL
+    '''
+    if image_type == 'jpg':
+        return 'JPEG'
+    elif image_type == 'png':
+        return 'PNG'
+    elif image_type == 'gif':
+        return 'GIF'
 
     logger.info('Unsupported file format: %s' % image_type)
     return None
@@ -122,12 +138,80 @@ class Photo(BaseAccountModel):
         # Testing? Ideas anyone?
         except Exception as e:  # pylint: disable=unused-variable
             # For debugging only
-            # print('Exception caught: %s' % e)
+            print('Exception caught: %s' % e)
             return False
         self.format = file_format(img.format)
         if not self.format:
+            print('Format not recognized')
             return False
         return super().save(*args, **kwargs)
+
+    def perform_crop(self, request, dimensions, email, openid):
+        if request.user.photo_set.count() == 1:
+            # This is the first photo, assign to all confirmed addresses
+            for email in request.user.confirmedemail_set.all():
+                email.photo = self
+                email.save()
+
+            for openid in request.user.confirmedopenid_set.all():
+                openid.photo = self
+                openid.save()
+
+        if email:
+            # Explicitely asked
+            email.photo = self
+            email.save()
+
+        if openid:
+            # Explicitely asked
+            openid.photo = self
+            openid.save()
+
+        # Do the real work cropping
+        img = Image.open(BytesIO(self.data))
+
+        # This should be anyway checked during save...
+        a, b = img.size
+        if a > MAX_PIXELS or b > MAX_PIXELS:
+            messages.error(request, _('Image dimensions are too big(max: %s x %s' % (MAX_PIXELS, MAX_PIXELS)))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        w = dimensions['w']
+        h = dimensions['h']
+        x = dimensions['x']
+        y = dimensions['y']
+
+        if w == 0 and h == 0:
+            w, h = a, b
+            i = min(w, h)
+            w, h = i, i
+        elif w < 0 or (x + w) > a or h < 0 or (y + h) > b:
+            messages.error(request, _('Crop outside of original image bounding box'))
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        cropped = img.crop((x, y, x + w, y + h))
+        # cropped.load()
+        # Resize the image only if it's larger than the specified max width.
+        cropped_w, cropped_h = cropped.size
+        max_w = AVATAR_MAX_SIZE
+        if cropped_w > max_w or cropped_h > max_w:
+            cropped = cropped.resize((max_w, max_w), Image.ANTIALIAS)
+
+        data = BytesIO()
+        cropped.save(data, pil_format(self.format), quality=JPEG_QUALITY)
+        data.seek(0)
+        # Create new photo?
+        # photo = Photo()
+        # photo.user = request.user
+        # photo.ip_address = get_client_ip(request)
+        # photo.data = data.read()
+        # photo.save()
+
+        # Overwrite the existing image
+        self.data = data.read()
+        self.save()
+
+        return HttpResponseRedirect(reverse_lazy('profile'))
 
 
 class ConfirmedEmailManager(models.Manager):

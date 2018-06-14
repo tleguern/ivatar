@@ -355,6 +355,8 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
             messages.error(self.request, _('Invalid Format'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
+        # Override success URL -> Redirect to crop page.
+        self.success_url = reverse_lazy('crop_photo', args=[photo.pk])
         return super().form_valid(form, *args, **kwargs)
 
 
@@ -513,3 +515,46 @@ class ConfirmOpenIDView(View):  # pragma: no cover
 
     def post(self, request, *args, **kwargs):
         return self.do_request(request.POST, *args, **kwargs)
+
+
+@method_decorator(login_required, name='dispatch')
+class CropPhotoView(TemplateView):
+    '''
+    View class for cropping photos
+    '''
+    template_name = 'crop_photo.html'
+    success_url = reverse_lazy('profile')
+    model = Photo
+
+    def get(self, request, *args, **kwargs):
+        photo = self.model.objects.get(pk=kwargs['pk'], user=request.user)
+        email = request.GET.get('email')
+        openid = request.GET.get('openid')
+        return render(self.request, self.template_name, {
+            'photo': photo,
+            'email': email,
+            'openid': openid,
+        })
+
+    def post(self, request, *args, **kwargs):
+        photo = self.model.objects.get(pk=kwargs['pk'], user=request.user)
+        dimensions = {
+            'x': int(request.POST['x']),
+            'y': int(request.POST['y']),
+            'w': int(request.POST['w']),
+            'h': int(request.POST['h'])
+        }
+        email = openid = None
+        if 'email' in request.POST:
+            try:
+                email = ConfirmedEmail.objects.get(email=request.POST['email'])
+            except:
+                pass # Ignore automatic assignment
+
+        if 'openid' in request.POST:
+            try:
+                openid = ConfirmedOpenId.objects.get(openid=request.POST['openid'])
+            except:
+                pass # Ignore automatic assignment
+
+        return photo.perform_crop(request, dimensions, email, openid)
