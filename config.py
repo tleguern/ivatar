@@ -82,8 +82,8 @@ BOOTSTRAP4 = {
 }
 
 ANYMAIL = {
-    'MAILGUN_API_KEY': '9ea63b269bf14734e928f7aa99f7b891-47317c98-19591231',
-    'MAILGUN_SENDER_DOMAIN': 'sandbox86e598eae2de47bcac3926e6d24d789a.mailgun.org',
+    'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
+    'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
 }
 EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
