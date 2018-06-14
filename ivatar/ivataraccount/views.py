@@ -13,6 +13,7 @@ from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
+from django.shortcuts import render
 
 from openid import oidutil
 from openid.consumer import consumer
@@ -92,7 +93,7 @@ class AddEmailView(SuccessMessageMixin, FormView):
 
     def form_valid(self, form):
         if not form.save(self.request):
-            messages.error(self.request, _('Address not added'))
+            return render(self.request, self.template_name, { 'form': form })
         else:
             messages.success(self.request, _('Address added successfully'))
         return super().form_valid(form)
@@ -369,7 +370,7 @@ class AddOpenIDView(SuccessMessageMixin, FormView):
     def form_valid(self, form):
         openid_id = form.save(self.request.user)
         if not openid_id:
-            messages.error(self.request, _('ID not added'))
+            return render(self.request, self.template_name, { 'form': form })
         else:
             messages.success(self.request, _('ID added successfully'))
             return HttpResponseRedirect(

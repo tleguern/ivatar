@@ -49,17 +49,20 @@ class AddEmailForm(forms.Form):
             MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT)
 
         if num_unconfirmed >= max_num_unconfirmed_emails:
+            self.add_error(None, _('Too many unconfirmed mail addresses!'))
             return False
 
         # Check whether or not a confirmation email has been
         # sent by this user already
         if UnconfirmedEmail.objects.filter(
                 user=user, email=self.cleaned_data['email']).exists():
+            self.add_error('email', _('Address already added, currently unconfirmed'))
             return False
 
         # Check whether or not the email is already confirmed by someone
         if ConfirmedEmail.objects.filter(
                 email=self.cleaned_data['email']).exists():
+            self.add_error('email', _('Address already confirmed (by someone else)'))
             return False
 
         unconfirmed = UnconfirmedEmail()
