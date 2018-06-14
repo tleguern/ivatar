@@ -407,20 +407,10 @@ class Tester(TestCase):
                 reverse('add_email'), {
                     'email': '%i.%s' % (i, self.email),
                 },
+                follow=True,
             )  # Create test addresses + 1 too much
-        response = self.client.get(reverse('profile'))
-        self.assertEqual(
-            response.status_code,
-            200,
-            'why does profile page not work!?')
-        # Take care, since we do did not fetch any pages after adding mail
-        # addresses, the messages still sit there waiting to be fetched!!
-        # Therefore the message index we need to use is max_num_unconfirmed!
-        self.assertEqual(
-            str(list(response.context[0]['messages'])[max_num_unconfirmed]),
-            'Address not added',
-            'Too many unconfirmed address, should return a\
-            "not added" messsage!')
+        self.assertFormError(response, 'form', None,
+            'Too many unconfirmed mail addresses!')
 
     def test_add_mail_address_twice(self):
         '''
@@ -436,18 +426,10 @@ class Tester(TestCase):
                 reverse('add_email'), {
                     'email': self.email,
                 },
-            )  # Request adding test address twice
-        response = self.client.get(reverse('profile'))
-        self.assertEqual(
-            response.status_code,
-            200,
-            'why does profile page not work!?')
-        # Take care, since we do did not fetch any pages after adding mail
-        # addresses, the messages still sit there waiting to be fetched!!
-        self.assertEqual(
-            str(list(response.context[0]['messages'])[1]),
-            'Address not added',
-            'Adding address twice must lead to "Address not added" message!')
+                follow=True
+            )
+        self.assertFormError(response, 'form', 'email',
+            'Address already added, currently unconfirmed')
 
     def test_add_already_confirmed_email(self):
         '''
@@ -461,14 +443,10 @@ class Tester(TestCase):
             reverse('add_email'), {
                 'email': self.email,
             },
-        )  # Request adding test address a second time
-        response = self.client.get(reverse('profile'))
-        self.assertEqual(response.status_code, 200, 'why does profile page not\
-                work!?')
-        self.assertEqual(
-            str(list(response.context[0]['messages'])[0]),
-            'Address not added', 'Adding already added address must lead to\
-            "Address not added" message!')
+            follow=True,
+        )
+        self.assertFormError(response, 'form', 'email',
+            'Address already confirmed (by someone else)')
 
     def test_remove_unconfirmed_non_existing_email(self):
         '''
@@ -795,11 +773,14 @@ class Tester(TestCase):
                  # Whohu, static... :-[
                 'openid': self.openid,
             },
+            follow=True,
         )
-        self.assertEqual(response.status_code, 302, 'OpenID must redirect')
         self.assertEqual(
             self.user.unconfirmedopenid_set.count(),
             1, 'There must only be one unconfirmed ID!')
+
+        self.assertFormError(response, 'form', 'openid',
+                    'OpenID already added, but not confirmed yet!')
 
         # Manual confirm, since testing is _really_ hard!
         unconfirmed = self.user.unconfirmedopenid_set.first()
@@ -816,12 +797,11 @@ class Tester(TestCase):
                  # Whohu, static... :-[
                 'openid': self.openid,
             },
+            follow=True,
         )
-        self.assertEqual(response.status_code, 302, 'OpenID must redirect')
-        self.assertEqual(
-            self.user.unconfirmedopenid_set.count(),
-            0, 'There must be no unconfirmed ID, since we tried adding an\
-                already confirmed ID!')
+        self.assertFormError(response, 'form', 'openid',
+                    'OpenID already added and confirmed!')
+
 
     def test_assign_photo_to_openid(self):
         self.test_add_openid()

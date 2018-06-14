@@ -160,10 +160,12 @@ class AddOpenIDForm(forms.Form):
         '''
         if ConfirmedOpenId.objects.filter(
                 openid=self.cleaned_data['openid']).exists():
+            self.add_error('openid', _('OpenID already added and confirmed!'))
             return False
 
         if UnconfirmedOpenId.objects.filter(
                 openid=self.cleaned_data['openid']).exists():
+            self.add_error('openid', _('OpenID already added, but not confirmed yet!'))
             return False
 
         unconfirmed = UnconfirmedOpenId()
