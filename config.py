@@ -56,7 +56,7 @@ IVATAR_VERSION = '0.1'
 
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
-SERVER_EMAIL = 'accounts@ivatar.io'
+SERVER_EMAIL = 'accounts@mg.linux-kernel.at'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 MAX_NUM_PHOTOS = 5
