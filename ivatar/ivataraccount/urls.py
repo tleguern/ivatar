@@ -2,6 +2,9 @@ from django.urls import path
 from django.conf.urls import url
 
 from django.views.generic import TemplateView
+from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.decorators import login_required
+
 from . views import CreateView, PasswordSetView, AddEmailView
 from . views import RemoveUnconfirmedEmailView, ConfirmEmailView
 from . views import RemoveConfirmedEmailView, AssignPhotoEmailView
@@ -10,19 +13,16 @@ from . views import ImportPhotoView, RawImageView, DeletePhotoView
 from . views import UploadPhotoView, AssignPhotoOpenIDView
 from . views import AddOpenIDView, RedirectOpenIDView, ConfirmOpenIDView
 from . views import CropPhotoView
-from django.contrib.auth.views import login, logout
-from django.urls import reverse_lazy
-
-from django.contrib.auth.decorators import login_required
 
 # Define URL patterns, self documenting
 # To see the fancy, colorful evaluation of these use:
 # ./manager show_urls
 urlpatterns = [
     path('new/', CreateView.as_view(), name='new_account'),
-    path('login/', login, {'template_name': 'login.html'}, name='login'),
+    path('login/', LoginView.as_view(template_name='login.html'),
+         name='login'),
     path(
-        'logout/', logout, {'next_page': reverse_lazy('login')},
+        'logout/', LogoutView.as_view(next_page='/'),
         name='logout'),
     path('export/', login_required(
         TemplateView.as_view(template_name='export.html')
