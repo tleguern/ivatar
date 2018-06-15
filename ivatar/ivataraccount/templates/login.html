@@ -7,6 +7,15 @@
 
 <h1>{% trans 'Login' %}</h1>
 
+{% if form.errors %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+
+
 <form action="{% url 'login' %}" method="post" name="login">{% csrf_token %}
 
 <table summary="">
