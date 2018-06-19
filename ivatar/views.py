@@ -5,6 +5,7 @@ import io
 from django.views.generic.base import TemplateView
 from django.http import HttpResponse
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class AvatarImageView(TemplateView):
@@ -29,13 +30,14 @@ class AvatarImageView(TemplateView):
 
         try:
             obj = model.objects.get(digest=kwargs['digest'])
-        except model.DoesNotExist:
+        except ObjectDoesNotExist:
             # TODO: Use default!?
             raise Exception('Mail/openid ("%s") does not exist"' %
                             kwargs['digest'])
         if not obj.photo:
             # That is hacky, but achieves what we want :-)
             attr = getattr(obj, 'email', obj.openid)
+            # TODO: Use default!?
             raise Exception('No photo assigned to "%s"' % attr)
 
         return HttpResponse(
