@@ -410,7 +410,7 @@ class Tester(TestCase):
                 follow=True,
             )  # Create test addresses + 1 too much
         self.assertFormError(response, 'form', None,
-            'Too many unconfirmed mail addresses!')
+                             'Too many unconfirmed mail addresses!')
 
     def test_add_mail_address_twice(self):
         '''

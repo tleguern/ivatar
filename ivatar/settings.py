@@ -5,15 +5,14 @@ Django settings for ivatar project.
 import os
 import logging
 
-log_level = logging.DEBUG
-logger = logging.getLogger('ivatar')
+log_level = logging.DEBUG  # pylint: disable=invalid-name
+logger = logging.getLogger('ivatar')  # pylint: disable=invalid-name
 logger.setLevel(log_level)
 
 PACKAGE_ROOT = os.path.abspath(os.path.dirname(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# TODO: Changeme
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '=v(+-^t#ahv^a&&e)uf36g8algj$d1@6ou^w(r0@%)#8mlc*zk'
 
@@ -119,4 +118,4 @@ PROJECT_ROOT = os.path.abspath(
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-from config import *  # noqa
+from config import *  # pylint: disable=wildcard-import,wrong-import-position,unused-wildcard-import

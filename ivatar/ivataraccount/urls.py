@@ -17,7 +17,7 @@ from . views import CropPhotoView
 # Define URL patterns, self documenting
 # To see the fancy, colorful evaluation of these use:
 # ./manager show_urls
-urlpatterns = [
+urlpatterns = [  # pylint: disable=invalid-name
     path('new/', CreateView.as_view(), name='new_account'),
     path('login/', LoginView.as_view(template_name='login.html'),
          name='login'),
@@ -38,39 +38,39 @@ urlpatterns = [
     path('upload_photo/', UploadPhotoView.as_view(), name='upload_photo'),
     path('password_set/', PasswordSetView.as_view(), name='password_set'),
     url(
-        'remove_unconfirmed_openid/(?P<openid_id>\d+)',
+        r'remove_unconfirmed_openid/(?P<openid_id>\d+)',
         RemoveUnconfirmedOpenIDView.as_view(),
         name='remove_unconfirmed_openid'),
     url(
-        'remove_confirmed_openid/(?P<openid_id>\d+)',
+        r'remove_confirmed_openid/(?P<openid_id>\d+)',
         RemoveConfirmedOpenIDView.as_view(), name='remove_confirmed_openid'),
     url(
-        'openid_redirection/(?P<openid_id>\d+)',
+        r'openid_redirection/(?P<openid_id>\d+)',
         RedirectOpenIDView.as_view(), name='openid_redirection'),
     url(
-        'confirm_openid/(?P<openid_id>\w+)',
+        r'confirm_openid/(?P<openid_id>\w+)',
         ConfirmOpenIDView.as_view(), name='confirm_openid'),
     url(
-        'confirm_email/(?P<verification_key>\w+)',
+        r'confirm_email/(?P<verification_key>\w+)',
         ConfirmEmailView.as_view(), name='confirm_email'),
     url(
-        'remove_unconfirmed_email/(?P<email_id>\d+)',
+        r'remove_unconfirmed_email/(?P<email_id>\d+)',
         RemoveUnconfirmedEmailView.as_view(), name='remove_unconfirmed_email'),
     url(
-        'remove_confirmed_email/(?P<email_id>\d+)',
+        r'remove_confirmed_email/(?P<email_id>\d+)',
         RemoveConfirmedEmailView.as_view(), name='remove_confirmed_email'),
     url(
-        'assign_photo_email/(?P<email_id>\d+)',
+        r'assign_photo_email/(?P<email_id>\d+)',
         AssignPhotoEmailView.as_view(), name='assign_photo_email'),
     url(
-        'assign_photo_openid/(?P<openid_id>\d+)',
+        r'assign_photo_openid/(?P<openid_id>\d+)',
         AssignPhotoOpenIDView.as_view(), name='assign_photo_openid'),
     url(
-        'import_photo/(?P<email_id>\d+)',
+        r'import_photo/(?P<email_id>\d+)',
         ImportPhotoView.as_view(), name='import_photo'),
     url(
-        'delete_photo/(?P<pk>\d+)',
+        r'delete_photo/(?P<pk>\d+)',
         DeletePhotoView.as_view(), name='delete_photo'),
-    url('raw_image/(?P<pk>\d+)', RawImageView.as_view(), name='raw_image'),
-    url('crop_photo/(?P<pk>\d+)', CropPhotoView.as_view(), name='crop_photo'),
+    url(r'raw_image/(?P<pk>\d+)', RawImageView.as_view(), name='raw_image'),
+    url(r'crop_photo/(?P<pk>\d+)', CropPhotoView.as_view(), name='crop_photo'),
 ]
