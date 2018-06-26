@@ -259,7 +259,8 @@ class ConfirmedEmail(BaseAccountModel):
         null=True,
         on_delete=models.deletion.CASCADE,
     )
-    digest = models.CharField(max_length=64)
+    digest = models.CharField(max_length=32)
+    digest_sha256 = models.CharField(max_length=64, null=True)
     objects = ConfirmedEmailManager()
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -284,6 +285,7 @@ class ConfirmedEmail(BaseAccountModel):
         self.digest = hashlib.md5(
             self.email.strip().lower().encode('utf-8')
         ).hexdigest()
+        self.digest_sha256 = hashlib.sha256(self.email.strip().lower().encode('utf-8')).hexdigest()
         return super().save(force_insert, force_update, using, update_fields)
 
 

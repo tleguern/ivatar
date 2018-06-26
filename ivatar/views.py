@@ -22,8 +22,9 @@ class AvatarImageView(TemplateView):
             # Fetch by digest from mail
             pass
         elif len(kwargs['digest']) == 64:
-            # Fetch by digest from OpenID
-            model = ConfirmedOpenId
+            if model.objects.filter(digest=kwargs['digest']).count():
+                # Fetch by digest from OpenID
+                model = ConfirmedOpenId
         else:  # pragma: no cover
             # We should actually never ever reach this code...
             raise Exception('Digest provided is wrong: %s' % kwargs['digest'])
@@ -31,9 +32,12 @@ class AvatarImageView(TemplateView):
         try:
             obj = model.objects.get(digest=kwargs['digest'])
         except ObjectDoesNotExist:
-            # TODO: Use default!?
-            raise Exception('Mail/openid ("%s") does not exist"' %
-                            kwargs['digest'])
+            try:
+                obj = model.objects.get(digest_sha256=kwargs['digest'])
+            except ObjectDoesNotExist:
+                # TODO: Use default!?
+                raise Exception('Mail/openid ("%s") does not exist"' %
+                                kwargs['digest'])
         if not obj.photo:
             # That is hacky, but achieves what we want :-)
             attr = getattr(obj, 'email', obj.openid)
