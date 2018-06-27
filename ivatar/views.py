@@ -22,7 +22,7 @@ class AvatarImageView(TemplateView):
             # Fetch by digest from mail
             pass
         elif len(kwargs['digest']) == 64:
-            if model.objects.filter(digest=kwargs['digest']).count():
+            if ConfirmedOpenId.objects.filter(digest=kwargs['digest']).count():
                 # Fetch by digest from OpenID
                 model = ConfirmedOpenId
         else:  # pragma: no cover
