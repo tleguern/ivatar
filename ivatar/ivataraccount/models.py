@@ -171,7 +171,7 @@ class Photo(BaseAccountModel):
             email.save()
 
         if openid:
-            # Explicitely asked
+            # Explicitly asked
             openid.photo = self
             openid.save()
 
