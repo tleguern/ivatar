@@ -257,10 +257,10 @@ class ConfirmedEmail(BaseAccountModel):
         related_name='emails',
         blank=True,
         null=True,
-        on_delete=models.deletion.CASCADE,
+        on_delete=models.deletion.SET_NULL,
     )
     digest = models.CharField(max_length=32)
-    digest_sha256 = models.CharField(max_length=64, null=True)
+    digest_sha256 = models.CharField(max_length=64)
     objects = ConfirmedEmailManager()
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -336,7 +336,7 @@ class ConfirmedOpenId(BaseAccountModel):
         related_name='openids',
         blank=True,
         null=True,
-        on_delete=models.deletion.CASCADE,
+        on_delete=models.deletion.SET_NULL,
     )
     digest = models.CharField(max_length=64)
 
