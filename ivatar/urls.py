@@ -1,5 +1,5 @@
 '''
-ivatar URL Configuration
+ivatar URL configuration
 '''
 from django.contrib import admin
 from django.urls import path, include
@@ -9,15 +9,15 @@ from django.views.generic import TemplateView
 from ivatar import settings
 from . views import AvatarImageView
 
-urlpatterns = [
+urlpatterns = [  # pylint: disable=invalid-name
     path('admin/', admin.site.urls),
     url('openid/', include('django_openid_auth.urls')),
     url('accounts/', include('ivatar.ivataraccount.urls')),
     url(
-        'avatar/(?P<digest>\w{64})',
+        r'avatar/(?P<digest>\w{64})',
         AvatarImageView.as_view(), name='avatar_view'),
     url(
-        'avatar/(?P<digest>\w{32})',
+        r'avatar/(?P<digest>\w{32})',
         AvatarImageView.as_view(), name='avatar_view'),
     url('', TemplateView.as_view(template_name='home.html')),
 ]

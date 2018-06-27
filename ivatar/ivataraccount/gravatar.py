@@ -1,3 +1,6 @@
+'''
+Helper method to fetch Gravatar image
+'''
 from ssl import SSLError
 from urllib.request import urlopen, HTTPError, URLError
 import hashlib
@@ -21,18 +24,18 @@ def get_photo(email):
 
     try:
         urlopen(image_url, timeout=URL_TIMEOUT)
-    except HTTPError as e:
+    except HTTPError as e:  # pylint: disable=invalid-name
         if e.code != 404 and e.code != 503:
             print(  # pragma: no cover
                 'Gravatar fetch failed with an unexpected %s HTTP error' %
                 e.code)
         return False
-    except URLError as e:  # pragma: no cover
+    except URLError as e:  # pragma: no cover  # pylint: disable=invalid-name
         print(
             'Gravatar fetch failed with URL error: %s' %
             e.reason)  # pragma: no cover
         return False  # pragma: no cover
-    except SSLError as e:   # pragma: no cover
+    except SSLError as e:   # pragma: no cover  # pylint: disable=invalid-name
         print(
             'Gravatar fetch failed with SSL error: %s' %
             e.reason)  # pragma: no cover

@@ -1,19 +1,21 @@
+'''
+Classes for our ivatar.ivataraccount.forms
+'''
+from urllib.parse import urlsplit, urlunsplit
+
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
-from urllib.parse import urlsplit, urlunsplit
+from ipware import get_client_ip
 
 from ivatar import settings
-from . models import UnconfirmedEmail, ConfirmedEmail, Photo
-from . models import UnconfirmedOpenId, ConfirmedOpenId
-
 from ivatar.settings import MAX_LENGTH_EMAIL
 from ivatar.ivataraccount.models import MAX_LENGTH_URL
-
-from ipware import get_client_ip
+from . models import UnconfirmedEmail, ConfirmedEmail, Photo
+from . models import UnconfirmedOpenId, ConfirmedOpenId
 
 MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT = 5
 
@@ -54,7 +56,7 @@ class AddEmailForm(forms.Form):
 
         # Check whether or not a confirmation email has been
         # sent by this user already
-        if UnconfirmedEmail.objects.filter(
+        if UnconfirmedEmail.objects.filter(  # pylint: disable=no-member
                 user=user, email=self.cleaned_data['email']).exists():
             self.add_error('email', _('Address already added, currently unconfirmed'))
             return False
@@ -112,7 +114,8 @@ class UploadPhotoForm(forms.Form):
               distribute photos to third parties.')
         })
 
-    def save(self, request, data):
+    @staticmethod
+    def save(request, data):
         '''
         Save the model and assign it to the current user
         '''
@@ -122,7 +125,7 @@ class UploadPhotoForm(forms.Form):
         photo.ip_address = get_client_ip(request)
         photo.data = data.read()
         photo.save()
-        if not photo.id:
+        if not photo.pk:
             return None
         return photo
 
@@ -151,19 +154,18 @@ class AddOpenIDForm(forms.Form):
              url.query, url.fragment))
 
         # TODO: Domain restriction as in libravatar?
-
         return data
 
     def save(self, user):
         '''
         Save the model, ensuring some safety
         '''
-        if ConfirmedOpenId.objects.filter(
+        if ConfirmedOpenId.objects.filter(  # pylint: disable=no-member
                 openid=self.cleaned_data['openid']).exists():
             self.add_error('openid', _('OpenID already added and confirmed!'))
             return False
 
-        if UnconfirmedOpenId.objects.filter(
+        if UnconfirmedOpenId.objects.filter(  # pylint: disable=no-member
                 openid=self.cleaned_data['openid']).exists():
             self.add_error('openid', _('OpenID already added, but not confirmed yet!'))
             return False
@@ -173,4 +175,4 @@ class AddOpenIDForm(forms.Form):
         unconfirmed.user = user
         unconfirmed.save()
 
-        return unconfirmed.id
+        return unconfirmed.pk

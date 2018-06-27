@@ -1,3 +1,6 @@
+'''
+Register models in admin
+'''
 from django.contrib import admin
 
 from . models import Photo, ConfirmedEmail, UnconfirmedEmail
