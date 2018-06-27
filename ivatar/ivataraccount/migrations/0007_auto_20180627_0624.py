@@ -10,7 +10,7 @@ def add_sha256(apps, schema_editor):
      '''
      ConfirmedEmail = apps.get_model('ivataraccount', 'ConfirmedEmail')
      for mail in ConfirmedEmail.objects.filter(digest_sha256=None):
-         mail.save()
+         mail.save()  # pragma: no cover
 
 
 class Migration(migrations.Migration):
