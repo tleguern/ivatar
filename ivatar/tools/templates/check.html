@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans 'Check e-mail or openid' %}{% endblock title %}
+
+{% block content %}
+
+<h1>{% trans 'Check e-mail or openid' %}</h1>
+
+<div style="width:600px;">
+<form method="post" name="check">{% csrf_token %}
+  {% bootstrap_form form %}
+  {% buttons %}
+      <button type="submit" class="btn btn-primary">{% trans 'Check' %}</button>
+      <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
+  {% endbuttons %}
+</form>
+</div>
+
+{% endblock content %}

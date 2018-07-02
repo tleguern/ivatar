@@ -25,6 +25,7 @@ INSTALLED_APPS.extend([
     'anymail',
     'ivatar',
     'ivatar.ivataraccount',
+    'ivatar.tools',
 ])
 
 from ivatar.settings import MIDDLEWARE  # noqa

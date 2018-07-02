@@ -13,6 +13,7 @@ urlpatterns = [  # pylint: disable=invalid-name
     path('admin/', admin.site.urls),
     url('openid/', include('django_openid_auth.urls')),
     url('accounts/', include('ivatar.ivataraccount.urls')),
+    url('tools/', include('ivatar.tools.urls')),
     url(
         r'avatar/(?P<digest>\w{64})',
         AvatarImageView.as_view(), name='avatar_view'),
