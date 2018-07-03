@@ -33,30 +33,89 @@
       {% endif %}
     </p>
 
-    <ul class="horizontal-list avatar-list centered">
+    <ul class="horizontal-list avatar-list centered" style="font-size:smaller;">
       {% if mailurl %}
         <li>
-          <img src="{{ mailurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-          <br/>
-          MD5
+          <div style="float:left;">
+            <a href="{{ mailurl }}">
+              <img src="{{ mailurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+            </a>
+            <div style="float:inline-end; font-size:{% widthratio size 3 1 %}px;">
+              <i class="fas fa-unlock" title="None-SSL connection (http)"></i>
+              <br/>
+              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+            </div>
+          </div>
+          <br/>MD5
         </li>
         <li>
-          <img src="{{ mailurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-          <br/>
-          MD5 <img src="{% static 'img/https_lock.png' %}">
+          <div style="float:left;">
+            <a href="{{ mailurl_secure }}">
+              <img src="{{ mailurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+            </a>
+            <div style="float:inline-end; font-size:{% widthratio size 3 1 %}px;">
+              <i class="fas fa-lock" title="Secure connection (https)"></i>
+              <br/>
+              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+            </div>
+          </div>
+          <br/>MD5
+        </li>
+
+        <li>
+          <div style="float:left;">
+            <a href="{{ BASE_URL }}{{ mail_hash256 }}?s={{ size }}">
+              <img src="{{ BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+            </a>
+            <div style="float:inline-end; font-size:{% widthratio size 3 1 %}px;">
+              <i class="fas fa-unlock" title="None-SSL connection (http)"></i>
+              <br/>
+              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+            </div>
+          </div>
+          <br/>SHA256
+        </li>
+        <li>
+          <div style="float:left;">
+            <a href="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}">
+              <img src="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+            </a>
+            <div style="float:inline-end; font-size:{% widthratio size 3 1 %}px;">
+              <i class="fas fa-lock" title="Secure connection (https)"></i>
+              <br/>
+              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+            </div>
+          </div>
+          <br/>SHA256
         </li>
       {% endif %}
 
       {% if openidurl %}
         <li>
-          <img src="{{ openidurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-          <br/>
-          SHA256
+          <div style="float:left;">
+            <a href="{{ openidurl }}">
+              <img src="{{ openidurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+            </a>
+            <div style="float:inline-end; font-size:{% widthratio size 3 1 %}px">
+              <i class="fas fa-unlock" title="None-SSL connection (http)"></i>
+              <br/>
+              <i class="fab fa-openid" title="openid: {{ form.openid.value }}"></i>
+            </div>
+          </div>
+          <br/>SHA256
         </li>
         <li>
-          <img src="{{ openidurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-          <br/>
-          SHA256 <img src="{% static 'img/https_lock.png' %}">
+          <div style="float:left;">
+            <a href="{{ openidurl_secure }}">
+              <img src="{{ openidurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+            </a>
+            <div style="float:inline-end; font-size:{% widthratio size 3 1 %}px">
+              <i class="fas fa-lock" title="Secure connection (http)"></i>
+              <br/>
+              <i class="fab fa-openid" title="openid: {{ form.openid.value }}"></i>
+            </div>
+          </div>
+          <br/>SHA256
         </li>
       {% endif %}
     </ul>
