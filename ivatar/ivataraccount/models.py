@@ -26,7 +26,7 @@ from openid.store.interface import OpenIDStore
 
 from ivatar.settings import MAX_LENGTH_EMAIL, logger
 from ivatar.settings import MAX_PIXELS, AVATAR_MAX_SIZE, JPEG_QUALITY
-from ivatar.settings import MIN_LENGTH_URL
+from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
 from .gravatar import get_photo as get_gravatar_photo
 
 
