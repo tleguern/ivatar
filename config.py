@@ -87,11 +87,11 @@ BOOTSTRAP4 = {
 }
 
 if not 'test' in sys.argv and not 'collectstatic' in sys.argv:
-    ANYMAIL = {
+    ANYMAIL = {  # pragma: no cover
         'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
         'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
     }
-    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
 DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
 
 try:
@@ -99,13 +99,13 @@ try:
 except Exception:  # pragma: no cover
     DATABASES = []  # pragma: no cover
 if not 'default' in DATABASES:
-    DATABASES['default'] = {
+    DATABASES['default'] = {  # pragma: no cover
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 
 if 'MYSQL_DATABASE' in os.environ:
-    DATABASES['default'] = {
+    DATABASES['default'] = {  # pragma: no cover
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ['MYSQL_DATABASE'],
         'USER': os.environ['MYSQL_USER'],

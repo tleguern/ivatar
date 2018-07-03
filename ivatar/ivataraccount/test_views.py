@@ -1,26 +1,37 @@
-from django.test import TestCase
-from django.test import Client
-from django.urls import reverse
-
-from libravatar import libravatar_url
+'''
+Test our views in ivatar.ivataraccount.views and ivatar.views
+'''
+# pylint: disable=too-many-lines
 from urllib.parse import urlsplit
-
+from io import BytesIO
 import io
 import os
 import django
+from django.test import TestCase
+from django.test import Client
+from django.urls import reverse
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+
+from libravatar import libravatar_url
+
+from PIL import Image
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ivatar.settings'
 django.setup()
 
-from ivatar import settings  # noqa
-from ivatar.ivataraccount.forms import MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT  # noqa
+# pylint: disable=wrong-import-position
+from ivatar import settings
+from ivatar.ivataraccount.forms import MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT
+from ivatar.ivataraccount.models import Photo, ConfirmedOpenId
+from ivatar.utils import random_string
+# pylint: enable=wrong-import-position
 
-from django.contrib.auth.models import User  # noqa
-from django.contrib.auth import authenticate  # noqa
-from ivatar.utils import random_string  # noqa
-from ivatar.ivataraccount.models import Photo, ConfirmedOpenId  # noqa
 
-
-class Tester(TestCase):
+class Tester(TestCase):  # pylint: disable=too-many-public-methods
+    '''
+    Main test class
+    '''
     client = Client()
     user = None
     username = random_string()
@@ -170,7 +181,7 @@ class Tester(TestCase):
             self.user.confirmedemail_set.count(), 1,
             'there must not be more or less than ONE (1) confirmed address!')
 
-    def test_confirm_email_w_invalid_auth_key(self):
+    def test_confirm_email_w_invalid_auth_key(self):  # pylint: disable=invalid-name
         '''
         Test confirmation with invalid auth key
         '''
@@ -193,7 +204,7 @@ class Tester(TestCase):
             'Verification key incorrect',
             'Confirm w/o verification key does not produce error message?')
 
-    def test_confirm_email_w_inexisting_auth_key(self):
+    def test_confirm_email_w_inexisting_auth_key(self):  # pylint: disable=invalid-name
         '''
         Test confirmation with inexisting auth key
         '''
@@ -246,7 +257,7 @@ class Tester(TestCase):
             'Address removed',
             'Removing confirmed mail does not work?')
 
-    def test_remove_not_existing_confirmed_email(self):
+    def test_remove_not_existing_confirmed_email(self):  # pylint: disable=invalid-name
         '''
         Try removing confirmed mail that doesn't exist
         '''
@@ -310,7 +321,8 @@ class Tester(TestCase):
         url = reverse(
             'import_photo',
             args=[self.user.confirmedemail_set.first().id])
-        response = self.client.post(url, {
+        response = self.client.post(
+            url, {
                 'photo_Gravatar': 1,
             },
             follow=True
@@ -340,7 +352,7 @@ class Tester(TestCase):
         self.assertEqual(response.status_code, 200, 'cannot fetch photo?')
         # Probably not the best way to access the content type
         self.assertEqual(
-            response._headers['content-type'][1],
+            response['Content-Type'],
             'image/jpg',
             'Content type wrong!?')
 
@@ -428,10 +440,13 @@ class Tester(TestCase):
                 },
                 follow=True
             )
-        self.assertFormError(response, 'form', 'email',
+        self.assertFormError(
+            response,
+            'form',
+            'email',
             'Address already added, currently unconfirmed')
 
-    def test_add_already_confirmed_email(self):
+    def test_add_already_confirmed_email(self):  # pylint: disable=invalid-name
         '''
         Request adding mail address that is already confirmed (by someone)
         '''
@@ -445,10 +460,13 @@ class Tester(TestCase):
             },
             follow=True,
         )
-        self.assertFormError(response, 'form', 'email',
+        self.assertFormError(
+            response,
+            'form',
+            'email',
             'Address already confirmed (by someone else)')
 
-    def test_remove_unconfirmed_non_existing_email(self):
+    def test_remove_unconfirmed_non_existing_email(self):  # pylint: disable=invalid-name
         '''
         Remove unconfirmed email that doesn't exist
         '''
@@ -464,15 +482,19 @@ class Tester(TestCase):
             'Address does not exist', 'Removing address that does not\
             exist, should return error message!')
 
-    def test_upload_image(self, test_only_one=True):
+    def test_upload_image(self, test_only_one=True):  # pylint: disable=inconsistent-return-statements
         '''
         Test uploading image
         '''
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(os.path.join(
-                settings.STATIC_ROOT, 'img', 'deadbeef.png'), 'rb') as photo:
+        with open(
+            os.path.join(
+                settings.STATIC_ROOT,
+                'img',
+                'deadbeef.png'),
+            'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -542,15 +564,19 @@ class Tester(TestCase):
             'Invalid Format',
             'Invalid img data should return error message!')
 
-    def test_upload_invalid_image_format(self):
+    def test_upload_invalid_image_format(self):  # pylint: disable=invalid-name
         '''
         Test if invalid format is correctly detected
         '''
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(os.path.join(
-                settings.STATIC_ROOT, 'img', 'mm.svg'), 'rb') as photo:
+        with open(
+            os.path.join(
+                settings.STATIC_ROOT,
+                'img',
+                'mm.svg'),
+            'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -568,10 +594,12 @@ class Tester(TestCase):
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(os.path.join(
+        with open(
+            os.path.join(
                 settings.STATIC_ROOT,
                 'img',
-                'broken.gif'), 'rb') as photo:
+                'broken.gif'),
+            'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -585,17 +613,19 @@ class Tester(TestCase):
             self.user.photo_set.first().format, 'gif',
             'Format must be gif, since we uploaded a GIF!')
 
-    def test_upload_unsupported_tif_image(self):
+    def test_upload_unsupported_tif_image(self):  # pylint: disable=invalid-name
         '''
         Test if unsupported format is correctly detected
         '''
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(os.path.join(
+        with open(
+            os.path.join(
                 settings.STATIC_ROOT,
                 'img',
-                'hackergotchi_test.tif'), 'rb') as photo:
+                'hackergotchi_test.tif'),
+            'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -606,13 +636,19 @@ class Tester(TestCase):
             'Invalid Format',
             'Invalid img data should return error message!')
 
-    def test_automatic_photo_assign_to_confirmed_mail(self):
+    def test_automatic_photo_assign_to_confirmed_mail(self):  # pylint: disable=invalid-name
+        '''
+        Test if automatic assignment of photo works
+        '''
         self.test_upload_image()
         self.test_confirm_email()
         confirmed = self.user.confirmedemail_set.first()
         self.assertEqual(confirmed.photo, self.user.photo_set.first())
 
     def test_assign_photo_to_email(self):
+        '''
+        Test assigning photo to mail address
+        '''
         self.test_confirm_email()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
@@ -632,7 +668,10 @@ class Tester(TestCase):
             self.user.confirmedemail_set.first().photo,
             self.user.photo_set.first())
 
-    def test_assign_photo_to_email_wo_photo_for_testing_template(self):
+    def test_assign_photo_to_email_wo_photo_for_testing_template(self):  # pylint: disable=invalid-name
+        '''
+        Test assign photo template
+        '''
         self.test_confirm_email()
         url = reverse(
             'assign_photo_email',
@@ -641,7 +680,10 @@ class Tester(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200, 'cannot fetch page?')
 
-    def test_assign_invalid_photo_id_to_email(self):
+    def test_assign_invalid_photo_id_to_email(self):  # pylint: disable=invalid-name
+        '''
+        Test if assigning an invalid photo id returns the correct error message
+        '''
         self.test_confirm_email()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
@@ -659,7 +701,10 @@ class Tester(TestCase):
             'Photo does not exist',
             'Assign non existing photo, does not return error message?')
 
-    def test_post_to_assign_photo_without_photo_id(self):
+    def test_post_to_assign_photo_without_photo_id(self):  # pylint: disable=invalid-name
+        '''
+        Test if assigning photo without id returns the correct error message
+        '''
         self.test_confirm_email()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedemail_set.first().photo)
@@ -675,7 +720,11 @@ class Tester(TestCase):
             'Invalid request [photo_id] missing',
             'Assign non existing photo, does not return error message?')
 
-    def test_assign_photo_to_inexisting_mail(self):
+    def test_assign_photo_to_inexisting_mail(self):  # pylint: disable=invalid-name
+        '''
+        Test if assigning photo to mail address that doesn't exist returns
+        the correct error message
+        '''
         self.test_upload_image()
         url = reverse('assign_photo_email', args=[1234])
         response = self.client.post(url, {
@@ -689,7 +738,11 @@ class Tester(TestCase):
             'Invalid request',
             'Assign non existing photo, does not return error message?')
 
-    def test_import_photo_with_inexisting_email(self):
+    def test_import_photo_with_inexisting_email(self):  # pylint: disable=invalid-name
+        '''
+        Test if import with inexisting mail address returns
+        the correct error message
+        '''
         self.login()
         url = reverse('import_photo', args=[1234])
         response = self.client.post(url, {}, follow=True)
@@ -703,6 +756,10 @@ class Tester(TestCase):
             does not return error message?')
 
     def test_import_nothing(self):
+        '''
+        Test if importing nothing causes the correct
+        error message to be returned
+        '''
         self.test_confirm_email()
         url = reverse(
             'import_photo',
@@ -732,7 +789,6 @@ class Tester(TestCase):
 
         response = self.client.post(
             reverse('add_openid'), {
-                 # Whohu, static... :-[
                 'openid': self.openid,
             },
         )
@@ -762,7 +818,6 @@ class Tester(TestCase):
 
         response = self.client.post(
             reverse('add_openid'), {
-                 # Whohu, static... :-[
                 'openid': self.openid,
             },
         )
@@ -770,7 +825,6 @@ class Tester(TestCase):
 
         response = self.client.post(
             reverse('add_openid'), {
-                 # Whohu, static... :-[
                 'openid': self.openid,
             },
             follow=True,
@@ -779,8 +833,11 @@ class Tester(TestCase):
             self.user.unconfirmedopenid_set.count(),
             1, 'There must only be one unconfirmed ID!')
 
-        self.assertFormError(response, 'form', 'openid',
-                    'OpenID already added, but not confirmed yet!')
+        self.assertFormError(
+            response,
+            'form',
+            'openid',
+            'OpenID already added, but not confirmed yet!')
 
         # Manual confirm, since testing is _really_ hard!
         unconfirmed = self.user.unconfirmedopenid_set.first()
@@ -794,16 +851,21 @@ class Tester(TestCase):
         # Try adding it again - although already confirmed
         response = self.client.post(
             reverse('add_openid'), {
-                 # Whohu, static... :-[
                 'openid': self.openid,
             },
             follow=True,
         )
-        self.assertFormError(response, 'form', 'openid',
-                    'OpenID already added and confirmed!')
+        self.assertFormError(
+            response,
+            'form',
+            'openid',
+            'OpenID already added and confirmed!')
 
 
     def test_assign_photo_to_openid(self):
+        '''
+        Test assignment of photo to openid
+        '''
         self.test_add_openid()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedopenid_set.first().photo)
@@ -823,7 +885,10 @@ class Tester(TestCase):
             self.user.confirmedopenid_set.first().photo,
             self.user.photo_set.first())
 
-    def test_assign_photo_to_openid_wo_photo_for_testing_template(self):
+    def test_assign_photo_to_openid_wo_photo_for_testing_template(self):  # pylint: disable=invalid-name
+        '''
+        Test openid/photo assignment template
+        '''
         self.test_add_openid()
         url = reverse(
             'assign_photo_openid',
@@ -831,7 +896,11 @@ class Tester(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200, 'cannot fetch page?')
 
-    def test_assign_invalid_photo_id_to_openid(self):
+    def test_assign_invalid_photo_id_to_openid(self):  # pylint: disable=invalid-name
+        '''
+        Test assigning invalid photo to openid returns
+        the correct error message
+        '''
         self.test_add_openid()
         self.assertIsNone(self.user.confirmedopenid_set.first().photo)
         url = reverse(
@@ -848,7 +917,11 @@ class Tester(TestCase):
             'Photo does not exist',
             'Assign non existing photo, does not return error message?')
 
-    def test_post_to_assign_photo_openid_without_photo_id(self):
+    def test_post_to_assign_photo_openid_without_photo_id(self):  # pylint: disable=invalid-name
+        '''
+        Test POST assign photo to openid without photo id
+        returns the correct error message
+        '''
         self.test_add_openid()
         self.test_upload_image()
         self.assertIsNone(self.user.confirmedopenid_set.first().photo)
@@ -864,7 +937,11 @@ class Tester(TestCase):
             'Invalid request [photo_id] missing',
             'Assign non existing photo, does not return error message?')
 
-    def test_assign_photo_to_openid_inexisting_openid(self):
+    def test_assign_photo_to_openid_inexisting_openid(self):  # pylint: disable=invalid-name
+        '''
+        Test assigning photo to openid that doesn't exist
+        returns the correct error message.
+        '''
         self.test_upload_image()
         url = reverse('assign_photo_openid', args=[1234])
         response = self.client.post(url, {
@@ -878,7 +955,7 @@ class Tester(TestCase):
             'Invalid request',
             'Assign non existing photo, does not return error message?')
 
-    def test_remove_confirmed_openid(self):
+    def test_remove_confirmed_openid(self):  # pylint: disable=invalid-name
         '''
         Remove confirmed openid
         '''
@@ -896,7 +973,7 @@ class Tester(TestCase):
             'ID removed',
             'Removing confirmed openid does not work?')
 
-    def test_remove_not_existing_confirmed_openid(self):
+    def test_remove_not_existing_confirmed_openid(self):  # pylint: disable=invalid-name
         '''
         Try removing confirmed openid that doesn't exist
         '''
@@ -931,7 +1008,7 @@ class Tester(TestCase):
             'ID removed',
             'Removing unconfirmed mail does not work?')
 
-    def test_remove_unconfirmed_inexisting_openid(self):
+    def test_remove_unconfirmed_inexisting_openid(self):  # pylint: disable=invalid-name
         '''
         Remove unconfirmed openid that doesn't exist
         '''
@@ -983,14 +1060,16 @@ class Tester(TestCase):
             self.user.photo_set.first(),
             'set_photo did not work!?')
 
-    def test_avatar_url_mail(self):
+    def test_avatar_url_mail(self, do_upload_and_confirm=True):
         '''
         Test fetching avatar via mail
         '''
-        self.test_upload_image()
-        self.test_confirm_email()
-        urlobj = urlsplit(libravatar_url(
-            email=self.user.confirmedemail_set.first().email)
+        if do_upload_and_confirm:
+            self.test_upload_image()
+            self.test_confirm_email()
+        urlobj = urlsplit(
+            libravatar_url(
+                email=self.user.confirmedemail_set.first().email)
         )
         url = urlobj.path
         response = self.client.get(url, follow=True)
@@ -1008,8 +1087,9 @@ class Tester(TestCase):
         Test fetching avatar via openid
         '''
         self.test_assign_photo_to_openid()
-        urlobj = urlsplit(libravatar_url(
-            openid=self.user.confirmedopenid_set.first().openid)
+        urlobj = urlsplit(
+            libravatar_url(
+                openid=self.user.confirmedopenid_set.first().openid)
         )
         url = urlobj.path
         response = self.client.get(url, follow=True)
@@ -1022,14 +1102,15 @@ class Tester(TestCase):
             self.user.photo_set.first().data,
             'Why is this not the same data?')
 
-    def test_avatar_url_inexisting_mail_digest(self):
+    def test_avatar_url_inexisting_mail_digest(self):  # pylint: disable=invalid-name
         '''
         Test fetching avatar via inexisting mail digest
         '''
         self.test_upload_image()
         self.test_confirm_email()
-        urlobj = urlsplit(libravatar_url(
-            email=self.user.confirmedemail_set.first().email)
+        urlobj = urlsplit(
+            libravatar_url(
+                email=self.user.confirmedemail_set.first().email)
         )
         # Simply delete it, then it digest is 'correct', but
         # the hash is no longer there
@@ -1037,3 +1118,24 @@ class Tester(TestCase):
         url = urlobj.path
         self.assertRaises(Exception, lambda:
                           self.client.get(url, follow=True))
+
+    def test_crop_photo(self):
+        '''
+        Test cropping photo
+        '''
+        self.test_upload_image()
+        self.test_confirm_email()
+        url = reverse('crop_photo', args=[self.user.photo_set.first().pk])
+        response = self.client.post(url, {
+            'x': 10,
+            'y': 10,
+            'w': 20,
+            'h': 20,
+        }, follow=True)
+        self.assertEqual(
+            response.status_code,
+            200,
+            'unable to crop?')
+        self.test_avatar_url_mail(do_upload_and_confirm=False)
+        img = Image.open(BytesIO(self.user.photo_set.first().data))
+        self.assertEqual(img.size, (20, 20), 'cropped to 20x20, but resulting image isn\'t 20x20!?')
