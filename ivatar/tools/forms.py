@@ -5,6 +5,10 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
+from ivatar.settings import AVATAR_MAX_SIZE
+from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
+from ivatar.settings import MIN_LENGTH_EMAIL, MAX_LENGTH_EMAIL
+
 
 class CheckDomainForm(forms.Form):
     '''
@@ -29,6 +33,8 @@ class CheckForm(forms.Form):
     mail = forms.EmailField(
         label=_('E-Mail'),
         required=False,
+        min_length=MIN_LENGTH_EMAIL,
+        max_length=MAX_LENGTH_EMAIL,
         error_messages={
             'required':
             _('Cannot check without a domain name.')
@@ -37,6 +43,8 @@ class CheckForm(forms.Form):
     openid = forms.CharField(
         label=_('OpenID'),
         required=False,
+        min_length=MIN_LENGTH_URL,
+        max_length=MAX_LENGTH_URL,
         error_messages={
             'required':
             _('Cannot check without an openid name.')
@@ -45,8 +53,8 @@ class CheckForm(forms.Form):
     size = forms.IntegerField(
         label=_('Size'),
         initial=80,
-        min_value=10,
-        max_value=160,
+        min_value=5,
+        max_value=AVATAR_MAX_SIZE,
         required=True,
     )
 
