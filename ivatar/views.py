@@ -22,7 +22,8 @@ class AvatarImageView(TemplateView):
             # Fetch by digest from mail
             pass
         elif len(kwargs['digest']) == 64:
-            if ConfirmedOpenId.objects.filter(digest=kwargs['digest']).count():  # pylint: disable=no-member
+            if ConfirmedOpenId.objects.filter(
+              digest=kwargs['digest']).count():  # pylint: disable=no-member
                 # Fetch by digest from OpenID
                 model = ConfirmedOpenId
         else:  # pragma: no cover
