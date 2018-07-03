@@ -96,7 +96,7 @@ BOOTSTRAP4 = {
     },
 }
 
-if not 'test' in sys.argv and not 'collectstatic' in sys.argv:
+if 'test' not in sys.argv and 'collectstatic' not in sys.argv:
     ANYMAIL = {  # pragma: no cover
         'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
         'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
@@ -108,7 +108,7 @@ try:
     from ivatar.settings import DATABASES
 except Exception:  # pragma: no cover
     DATABASES = []  # pragma: no cover
-if not 'default' in DATABASES:
+if 'default' not in DATABASES:
     DATABASES['default'] = {  # pragma: no cover
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),

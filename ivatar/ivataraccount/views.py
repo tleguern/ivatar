@@ -93,7 +93,7 @@ class AddEmailView(SuccessMessageMixin, FormView):
 
     def form_valid(self, form):
         if not form.save(self.request):
-            return render(self.request, self.template_name, { 'form': form })
+            return render(self.request, self.template_name, {'form': form})
         else:
             messages.success(self.request, _('Address added successfully'))
         return super().form_valid(form)
@@ -372,7 +372,7 @@ class AddOpenIDView(SuccessMessageMixin, FormView):
     def form_valid(self, form):
         openid_id = form.save(self.request.user)
         if not openid_id:
-            return render(self.request, self.template_name, { 'form': form })
+            return render(self.request, self.template_name, {'form': form})
         else:
             messages.success(self.request, _('ID added successfully'))
             return HttpResponseRedirect(
@@ -548,13 +548,14 @@ class CropPhotoView(TemplateView):
         if 'email' in request.POST:
             try:
                 email = ConfirmedEmail.objects.get(email=request.POST['email'])
-            except:
-                pass # Ignore automatic assignment
+            except Exception:
+                pass  # Ignore automatic assignment
 
         if 'openid' in request.POST:
             try:
-                openid = ConfirmedOpenId.objects.get(openid=request.POST['openid'])
-            except:
-                pass # Ignore automatic assignment
+                openid = ConfirmedOpenId.objects.get(
+                  openid=request.POST['openid'])
+            except Exception:
+                pass  # Ignore automatic assignment
 
         return photo.perform_crop(request, dimensions, email, openid)

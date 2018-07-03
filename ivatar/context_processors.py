@@ -4,6 +4,7 @@ Default: useful variables for the base page templates.
 
 from ipware import get_client_ip
 from ivatar.settings import IVATAR_VERSION, SITE_NAME, MAX_PHOTO_SIZE
+from ivatar.settings import BASE_URL, SECURE_BASE_URL
 
 def basepage(request):
     '''
@@ -20,4 +21,6 @@ def basepage(request):
     context['site_name'] = SITE_NAME
     context['site_url'] = request.build_absolute_uri('/')[:-1]
     context['max_file_size'] = MAX_PHOTO_SIZE
+    context['BASE_URL'] = BASE_URL
+    context['SECURE_BASE_URL'] = SECURE_BASE_URL
     return context

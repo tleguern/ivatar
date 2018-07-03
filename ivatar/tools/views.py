@@ -48,11 +48,22 @@ class CheckView(FormView):
             default_url = None
 
         if form.cleaned_data['mail']:
-            mailurl = libravatar_url(email=form.cleaned_data['mail'], size=form.cleaned_data['size'], default=default_url)
+            mailurl = libravatar_url(
+              email=form.cleaned_data['mail'],
+              size=form.cleaned_data['size'],
+              default=default_url)
             mailurl = mailurl.replace(LIBRAVATAR_BASE_URL, BASE_URL)
-            mailurl_secure = libravatar_url(email=form.cleaned_data['mail'], size=form.cleaned_data['size'], https=True, default=default_url)
-            mailurl_secure = mailurl_secure.replace(LIBRAVATAR_SECURE_BASE_URL, SECURE_BASE_URL)
-            mail_hash = parse_user_identity(email=form.cleaned_data['mail'], openid=None)[0]
+            mailurl_secure = libravatar_url(
+              email=form.cleaned_data['mail'],
+              size=form.cleaned_data['size'],
+              https=True,
+              default=default_url)
+            mailurl_secure = mailurl_secure.replace(
+              LIBRAVATAR_SECURE_BASE_URL,
+              SECURE_BASE_URL)
+            mail_hash = parse_user_identity(
+              email=form.cleaned_data['mail'],
+              openid=None)[0]
             hash_obj = hashlib.new('sha256')
             hash_obj.update(form.cleaned_data['mail'].encode('utf-8'))
             mail_hash256 = hash_obj.hexdigest()
@@ -60,11 +71,22 @@ class CheckView(FormView):
         if form.cleaned_data['openid']:
             if form.cleaned_data['openid'][-1] != '/':
                 form.cleaned_data['openid'] += '/'
-            openidurl = libravatar_url(openid=form.cleaned_data['openid'], size=form.cleaned_data['size'], default=default_url)
+            openidurl = libravatar_url(
+              openid=form.cleaned_data['openid'],
+              size=form.cleaned_data['size'],
+              default=default_url)
             openidurl = openidurl.replace(LIBRAVATAR_BASE_URL, BASE_URL)
-            openidurl_secure = libravatar_url(openid=form.cleaned_data['openid'], size=form.cleaned_data['size'], https=True, default=default_url)
-            openidurl_secure = openidurl_secure.replace(LIBRAVATAR_SECURE_BASE_URL, SECURE_BASE_URL)
-            openid_hash = parse_user_identity(openid=form.cleaned_data['openid'], email=None)[0]
+            openidurl_secure = libravatar_url(
+              openid=form.cleaned_data['openid'],
+              size=form.cleaned_data['size'],
+              https=True,
+              default=default_url)
+            openidurl_secure = openidurl_secure.replace(
+              LIBRAVATAR_SECURE_BASE_URL,
+              SECURE_BASE_URL)
+            openid_hash = parse_user_identity(
+              openid=form.cleaned_data['openid'],
+              email=None)[0]
             size = form.cleaned_data['size']
 
         return render(self.request, self.template_name, {

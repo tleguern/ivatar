@@ -14,7 +14,6 @@ from ipware import get_client_ip
 from ivatar import settings
 from ivatar.settings import MIN_LENGTH_EMAIL, MAX_LENGTH_EMAIL
 from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
-from ivatar.ivataraccount.models import MAX_LENGTH_URL
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
 from . models import UnconfirmedOpenId, ConfirmedOpenId
 
@@ -59,13 +58,17 @@ class AddEmailForm(forms.Form):
         # sent by this user already
         if UnconfirmedEmail.objects.filter(  # pylint: disable=no-member
                 user=user, email=self.cleaned_data['email']).exists():
-            self.add_error('email', _('Address already added, currently unconfirmed'))
+            self.add_error(
+              'email',
+              _('Address already added, currently unconfirmed'))
             return False
 
         # Check whether or not the email is already confirmed by someone
         if ConfirmedEmail.objects.filter(
                 email=self.cleaned_data['email']).exists():
-            self.add_error('email', _('Address already confirmed (by someone else)'))
+            self.add_error(
+              'email',
+              _('Address already confirmed (by someone else)'))
             return False
 
         unconfirmed = UnconfirmedEmail()
@@ -166,7 +169,9 @@ class AddOpenIDForm(forms.Form):
 
         if UnconfirmedOpenId.objects.filter(  # pylint: disable=no-member
                 openid=self.cleaned_data['openid']).exists():
-            self.add_error('openid', _('OpenID already added, but not confirmed yet!'))
+            self.add_error(
+              'openid',
+              _('OpenID already added, but not confirmed yet!'))
             return False
 
         unconfirmed = UnconfirmedOpenId()

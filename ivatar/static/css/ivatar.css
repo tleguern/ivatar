@@ -185,3 +185,7 @@ ul li {
 .clear-both {
   clear: both;
 }
+
+.fas, .fab {
+  color: #dbc40d;
+}
