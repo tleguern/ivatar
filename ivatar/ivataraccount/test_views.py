@@ -38,7 +38,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
     password = random_string()
     email = '%s@%s.%s' % (username, random_string(), random_string(2))
     # Dunno why random tld doens't work, but I'm too lazy now to investigate
-    openid = 'http://%s.%s.%s' % (username, random_string(), 'org')
+    openid = 'http://%s.%s.%s/' % (username, random_string(), 'org')
 
     def login(self):
         '''
@@ -822,7 +822,6 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             },
         )
         self.assertEqual(response.status_code, 302, 'OpenID must redirect')
-
         response = self.client.post(
             reverse('add_openid'), {
                 'openid': self.openid,

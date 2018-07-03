@@ -19,13 +19,16 @@
   </div>
 
   {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+  {# TODO: Fix URLs!!! #}
   <div id="account">
     {% if user.is_authenticated %}
     <a href="{% url 'profile' %}">{% trans 'Profile' %}</a>&nbsp;|&nbsp;
+    <a href="{% url 'tools_check' %}">{% trans 'Check' %}</a>&nbsp;|&nbsp;
     <a href="{{ contact_us }}">{% trans 'Contact Us' %}</a>&nbsp;|&nbsp;
     <a href="{{ security_url }}">{% trans 'Security' %}</a>&nbsp;|&nbsp;
     <a href="{% url 'logout' %}" id="logout-link">{% trans 'Logout' %}</a>
     {% else %}
+    <a href="{% url 'tools_check' %}">{% trans 'Check' %}</a>&nbsp;|&nbsp;
     <a href="{{ contact_us }}">{% trans 'Contact Us' %}</a>&nbsp;|&nbsp;
     <a href="{{ security_url }}">{% trans 'Security' %}</a>&nbsp;|&nbsp;
     <a href="{% url 'login' %}">{% trans 'Login' %}</a>

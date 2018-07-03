@@ -25,6 +25,7 @@ INSTALLED_APPS.extend([
     'anymail',
     'ivatar',
     'ivatar.ivataraccount',
+    'ivatar.tools',
 ])
 
 from ivatar.settings import MIDDLEWARE  # noqa
@@ -54,6 +55,9 @@ OPENID_UPDATE_DETAILS_FROM_SREG = True
 SITE_NAME = 'ivatar'
 IVATAR_VERSION = '0.1'
 
+SECURE_BASE_URL = 'https://avatars.linux-kernel.at/avatar/'
+BASE_URL = 'http://avatars.linux-kernel.at/avatar/'
+
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
 SERVER_EMAIL = 'accounts@mg.linux-kernel.at'
@@ -64,6 +68,13 @@ MAX_PHOTO_SIZE = 10485760  # in bytes
 MAX_PIXELS = 7000
 AVATAR_MAX_SIZE = 512
 JPEG_QUALITY = 85
+
+# I'm not 100% sure if single character domains are possible
+# under any tld... so MIN_LENGTH_EMAIL/_URL, might be +1
+MIN_LENGTH_URL = 11  # eg. http://a.io
+MAX_LENGTH_URL = 255  # MySQL can't handle more than that (LP: 1018682)
+MIN_LENGTH_EMAIL = 6  # eg. x@x.xx
+MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
 
 BOOTSTRAP4 = {
     'include_jquery': False,

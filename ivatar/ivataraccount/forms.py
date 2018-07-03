@@ -12,7 +12,8 @@ from django.core.mail import send_mail
 from ipware import get_client_ip
 
 from ivatar import settings
-from ivatar.settings import MAX_LENGTH_EMAIL
+from ivatar.settings import MIN_LENGTH_EMAIL, MAX_LENGTH_EMAIL
+from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
 from ivatar.ivataraccount.models import MAX_LENGTH_URL
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
 from . models import UnconfirmedOpenId, ConfirmedOpenId
@@ -26,8 +27,8 @@ class AddEmailForm(forms.Form):
     '''
     email = forms.EmailField(
         label=_('Email'),
+        min_length=MIN_LENGTH_EMAIL,
         max_length=MAX_LENGTH_EMAIL,
-        min_length=6,  # x@x.xx
     )
 
     def clean_email(self):
@@ -136,10 +137,8 @@ class AddOpenIDForm(forms.Form):
     '''
     openid = forms.URLField(
         label=_('OpenID'),
+        min_length=MIN_LENGTH_URL,
         max_length=MAX_LENGTH_URL,
-        # However, not 100% sure if single character domains are possible
-        # under any tld...
-        min_length=11,  # eg. http://a.io
         initial='http://'
     )
 
