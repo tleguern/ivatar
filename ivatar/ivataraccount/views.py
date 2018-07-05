@@ -374,7 +374,9 @@ class AddOpenIDView(SuccessMessageMixin, FormView):
         if not openid_id:
             return render(self.request, self.template_name, {'form': form})
         else:
-            messages.success(self.request, _('ID added successfully'))
+            # At this point we have an unconfirmed OpenID, but
+            # we do not add the message, that we successfully added it,
+            # since this is misleading
             return HttpResponseRedirect(
                 reverse_lazy('openid_redirection', args=[openid_id]))
 
