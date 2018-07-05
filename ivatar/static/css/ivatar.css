@@ -147,7 +147,6 @@ ul li {
 #id_openid, #id_openid_identifier {
   background : #FFFFFF url("../img/openid_logo.png") no-repeat scroll 0 50%;
   padding : 4px 18px;
-  width: 400px;
 }
 
 #contribute-button {
