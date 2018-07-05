@@ -2,7 +2,7 @@
 
 body {
   background-color: #FFE7B9;
-  margin: 0;
+  margin: 10px;
 }
 
 #site-name {
@@ -56,11 +56,6 @@ h2 {
 a {
   color: #F9711F;
   font-weight: bold;
-}
-
-#header {
-  height: 90px;
-  padding: 8px 8px 16px 8px;
 }
 
 #footer {
