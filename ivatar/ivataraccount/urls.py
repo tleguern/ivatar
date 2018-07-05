@@ -13,6 +13,7 @@ from . views import ImportPhotoView, RawImageView, DeletePhotoView
 from . views import UploadPhotoView, AssignPhotoOpenIDView
 from . views import AddOpenIDView, RedirectOpenIDView, ConfirmOpenIDView
 from . views import CropPhotoView
+from . views import UserPreferenceView
 
 # Define URL patterns, self documenting
 # To see the fancy, colorful evaluation of these use:
@@ -73,4 +74,5 @@ urlpatterns = [  # pylint: disable=invalid-name
         DeletePhotoView.as_view(), name='delete_photo'),
     url(r'raw_image/(?P<pk>\d+)', RawImageView.as_view(), name='raw_image'),
     url(r'crop_photo/(?P<pk>\d+)', CropPhotoView.as_view(), name='crop_photo'),
+    url(r'pref/$', UserPreferenceView.as_view(), name='user_preference'),
 ]

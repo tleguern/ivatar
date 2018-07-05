@@ -1,0 +1,20 @@
+{% extends 'base.html' %}                                                                                                                      
+{% load i18n %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block title %}{% trans 'Your Preferences' %}{% endblock title %}
+
+{% block content %}
+
+<div style="width:600px;">
+  <form method="post" name="check">{% csrf_token %}
+    {% bootstrap_form form %}
+    {% buttons %}
+      <button type="submit" class="btn btn-primary">{% trans 'Update' %}</button>
+      <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
+    {% endbuttons %}
+  </form>
+</div>
+
+{% endblock content %}

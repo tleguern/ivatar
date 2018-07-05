@@ -16,6 +16,7 @@ from ivatar.settings import MIN_LENGTH_EMAIL, MAX_LENGTH_EMAIL
 from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
 from . models import UnconfirmedOpenId, ConfirmedOpenId
+from . models import UserPreference
 
 MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT = 5
 
@@ -180,3 +181,16 @@ class AddOpenIDForm(forms.Form):
         unconfirmed.save()
 
         return unconfirmed.pk
+
+class UpdatePreferenceForm(forms.ModelForm):
+    '''
+    Form for updating user preferences
+    '''
+
+    class Meta:
+        '''
+        Meta class for UpdatePreferenceForm
+        '''
+        model = UserPreference
+        fields = ['theme']
+
