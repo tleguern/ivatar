@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
 from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.contrib.auth import authenticate, login
@@ -19,8 +19,10 @@ from openid import oidutil
 from openid.consumer import consumer
 
 from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
+from .forms import UpdatePreferenceForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
+from .models import UserPreference
 
 from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
@@ -374,7 +376,9 @@ class AddOpenIDView(SuccessMessageMixin, FormView):
         if not openid_id:
             return render(self.request, self.template_name, {'form': form})
         else:
-            messages.success(self.request, _('ID added successfully'))
+            # At this point we have an unconfirmed OpenID, but
+            # we do not add the message, that we successfully added it,
+            # since this is misleading
             return HttpResponseRedirect(
                 reverse_lazy('openid_redirection', args=[openid_id]))
 
@@ -559,3 +563,16 @@ class CropPhotoView(TemplateView):
                 pass  # Ignore automatic assignment
 
         return photo.perform_crop(request, dimensions, email, openid)
+
+@method_decorator(login_required, name='dispatch')
+class UserPreferenceView(FormView, UpdateView):
+    '''
+    View class for user preferences view/update
+    '''
+    template_name = 'preferences.html'
+    model = UserPreference
+    form_class = UpdatePreferenceForm
+    success_url = reverse_lazy('user_preference')
+
+    def get_object(self):
+        return self.request.user.userpreference

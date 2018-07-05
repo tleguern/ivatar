@@ -55,7 +55,7 @@
     {% endfor %}
     {% for openid in user.unconfirmedopenid_set.all %}
         <li><form action="{% url 'remove_unconfirmed_openid' openid.id %}" method="post">{% csrf_token %}{{ openid.openid }}
-        <input type="image" src="{% static '/static/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
+        <input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -72,7 +72,7 @@
 <p>{% trans 'Here are the photos you have uploaded/imported:' %}</p>
 <ul class="horizontal-list avatar-list centered">
 {% for photo in user.photo_set.all %}
-<li><img class="thumbnail" src="{% url 'raw_image' photo.id %}" title="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}" alt="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}"><br>
+<li><a href="{% url 'raw_image' photo.id %}"><img class="thumbnail" src="{% url 'raw_image' photo.id %}" title="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}" alt="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}"></a><br>
     <a href="{% url 'delete_photo' photo.id %}">{% trans 'Delete' %}</a></li>
 {% endfor %}
 </ul>

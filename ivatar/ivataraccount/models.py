@@ -57,6 +57,32 @@ def pil_format(image_type):
     return None
 
 
+class UserPreference(models.Model):
+    '''
+    Holds the user users preferences
+    '''
+    THEMES = (
+        ('default', 'Default theme'),
+        # ('clime', 'climes theme'), # Not yet available
+        ('falko', 'falkos theme'),
+    )
+
+    theme = models.CharField(
+        max_length=10,
+        choices=THEMES,
+        default='default',
+    )
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.deletion.CASCADE,
+        primary_key=True,
+    )
+
+    def __str__(self):
+        return '<UserPreference (%i) for %s>' % (self.pk, self.user)
+
+
 class BaseAccountModel(models.Model):
     '''
     Base, abstract model, holding fields we use in all cases
