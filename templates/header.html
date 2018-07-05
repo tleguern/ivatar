@@ -20,6 +20,11 @@
 <link rel="mask-icon" href="{% static '/img/safari-pinned-tab.svg' %}" color="#fa711f">
 <link rel="stylesheet" href="{% static '/css/ivatar.css' %}" type="text/css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+{% if user.is_authenticated %}
+  {% if user.userpreference and user.userpreference.theme != 'default' %}
+    <link rel="stylesheet" href="{% static 'css/' %}{{ user.userpreference.theme }}.css" type="text/css">
+  {% endif %}
+{% endif %}
 <link rel="manifest" href="/manifest.json">
 <meta name="msapplication-TileImage" content="{% static '/img/nobody/144.png' %}">
 <meta name="msapplication-TileColor" content="#fa711f">
