@@ -55,7 +55,7 @@
     {% endfor %}
     {% for openid in user.unconfirmedopenid_set.all %}
         <li><form action="{% url 'remove_unconfirmed_openid' openid.id %}" method="post">{% csrf_token %}{{ openid.openid }}
-        <input type="image" src="{% static '/static/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
+        <input type="image" src="{% static '/img/delete_button.png' %}" value="{% trans 'Remove' %}"></form>{# TODO: (expires in xx hours) #}</li>
     {% endfor %}
 </ul>
 {% endif %}
