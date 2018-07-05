@@ -9,7 +9,7 @@
 
 <h1>{% trans 'Check e-mail or openid' %}</h1>
 
-<div style="width:600px;">
+<div style="max-width:600px;">
 <form method="post" name="check">{% csrf_token %}
   {% bootstrap_form form %}
   {% buttons %}
