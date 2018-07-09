@@ -2,11 +2,13 @@
 {% load static %}
 {% load bootstrap4 %}
 {% load i18n %}<!DOCTYPE HTML>
-{% spaceless %}{% block bootstrap4_content %}
+
 {% block bootstrap4_extra_head %}
 {% include 'header.html' %}
 <title>iVatar :: {% block title %}{% trans 'Freeing the Web, one face at a time!' %}{% endblock title %}</title>
 {% endblock bootstrap4_extra_head %}
+
+{% spaceless %}{% block bootstrap4_content %}
 <div id="header">
   {% block topbar_base %}
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
