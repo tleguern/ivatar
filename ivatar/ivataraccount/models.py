@@ -80,7 +80,7 @@ class UserPreference(models.Model):
     )
 
     def __str__(self):
-        return '<UserPreference (%i) for %s>' % (self.pk, self.user)
+        return 'Preference (%i) for %s' % (self.pk, self.user)
 
 
 class BaseAccountModel(models.Model):
@@ -244,6 +244,9 @@ class Photo(BaseAccountModel):
 
         return HttpResponseRedirect(reverse_lazy('profile'))
 
+    def __str__(self):
+        return '%s (%i) from %s' % (self.format, self.pk, self.user)
+
 
 class ConfirmedEmailManager(models.Manager):  # pylint: disable=too-few-public-methods
     '''
@@ -312,6 +315,9 @@ class ConfirmedEmail(BaseAccountModel):
         self.digest_sha256 = hashlib.sha256(self.email.strip().lower().encode('utf-8')).hexdigest()
         return super().save(force_insert, force_update, using, update_fields)
 
+    def __str__(self):
+        return '%s (%i) from %s' % (self.email, self.pk, self.user)
+
 
 class UnconfirmedEmail(BaseAccountModel):
     '''
@@ -334,6 +340,9 @@ class UnconfirmedEmail(BaseAccountModel):
         self.verification_key = hash_object.hexdigest()
         super(UnconfirmedEmail, self).save(force_insert, force_update, using, update_fields)
 
+    def __str__(self):
+        return '%s (%i) from %s' % (self.email, self.pk, self.user)
+
 
 class UnconfirmedOpenId(BaseAccountModel):
     '''
@@ -347,6 +356,9 @@ class UnconfirmedOpenId(BaseAccountModel):
         '''
         verbose_name = _('unconfirmed OpenID')
         verbose_name_plural = ('unconfirmed_OpenIDs')
+
+    def __str__(self):
+        return '%s (%i) from %s' % (self.openid, self.pk, self.user)
 
 
 class ConfirmedOpenId(BaseAccountModel):
@@ -395,6 +407,9 @@ class ConfirmedOpenId(BaseAccountModel):
         self.digest = hashlib.sha256(lowercase_url.encode('utf-8')).hexdigest()
         return super().save(force_insert, force_update, using, update_fields)
 
+    def __str__(self):
+        return '%s (%i) (%s)' % (self.openid, self.pk, self.user)
+
 
 class OpenIDNonce(models.Model):
     '''
@@ -404,6 +419,9 @@ class OpenIDNonce(models.Model):
     server_url = models.CharField(max_length=255)
     timestamp = models.IntegerField()
     salt = models.CharField(max_length=128)
+
+    def __str__(self):
+        return '%s (%i) (timestamp: %i)' % (self.server_url, self.pk, self.timestamp)
 
 
 class OpenIDAssociation(models.Model):
@@ -417,6 +435,9 @@ class OpenIDAssociation(models.Model):
     lifetime = models.IntegerField()
     assoc_type = models.TextField(max_length=64)
 
+    def __str__(self):
+        return '%s (%i) (%s, lifetime: %i)' % (self.server_url, self.pk, self.assoc_type, self.lifetime)
+
 
 class DjangoOpenIDStore(OpenIDStore):
     '''
@@ -424,10 +445,10 @@ class DjangoOpenIDStore(OpenIDStore):
     related to OpenID authentications. This one uses our Django models.
     '''
 
-    def storeAssociation(self, server_url, association):  # pragma: no cover
+    @staticmethod
+    def storeAssociation(server_url, association):  # pragma: no cover
         '''
         Helper method to store associations
-        TODO: Could be moved to classmethod
         '''
         assoc = OpenIDAssociation(
             server_url=server_url,
@@ -472,10 +493,11 @@ class DjangoOpenIDStore(OpenIDStore):
             return None
         return associations[-1][1]
 
-    def removeAssociation(self, server_url, handle):  # pragma: no cover
+
+    @staticmethod
+    def removeAssociation(server_url, handle):  # pragma: no cover
         '''
         Helper method to remove associations
-        TODO: Could be moved to classmethod
         '''
         assocs = list(
             OpenIDAssociation.objects.filter(  # pylint: disable=no-member
@@ -485,10 +507,10 @@ class DjangoOpenIDStore(OpenIDStore):
             assoc.delete()
         return assocs_exist
 
-    def useNonce(self, server_url, timestamp, salt):  # pragma: no cover
+    @staticmethod
+    def useNonce(server_url, timestamp, salt):  # pragma: no cover
         '''
         Helper method to 'use' nonces
-        TODO: Could be moved to classmethod
         '''
         # Has nonce expired?
         if abs(timestamp - time.time()) > oidnonce.SKEW:
@@ -505,18 +527,18 @@ class DjangoOpenIDStore(OpenIDStore):
         nonce.delete()
         return False
 
-    def cleanupNonces(self):  # pragma: no cover
+    @staticmethod
+    def cleanupNonces():  # pragma: no cover
         '''
         Helper method to cleanup nonces
-        TODO: Could be moved to classmethod
         '''
         timestamp = int(time.time()) - oidnonce.SKEW
         OpenIDNonce.objects.filter(timestamp__lt=timestamp).delete()  # pylint: disable=no-member
 
-    def cleanupAssociations(self):  # pragma: no cover
+    @staticmethod
+    def cleanupAssociations():  # pragma: no cover
         '''
         Helper method to cleanup associations
-        TODO: Could be moved to classmethod
         '''
         OpenIDAssociation.objects.extra(  # pylint: disable=no-member
             where=['issued + lifetimeint < (%s)' % time.time()]).delete()
