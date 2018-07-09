@@ -5,7 +5,7 @@
 {% spaceless %}{% block bootstrap4_content %}
 {% block bootstrap4_extra_head %}
 {% include 'header.html' %}
-<title>{% block title %}Libravatar - {% trans 'Freeing the Web, one face at a time!' %}{% endblock title %}</title>
+<title>iVatar :: {% block title %}{% trans 'Freeing the Web, one face at a time!' %}{% endblock title %}</title>
 {% endblock bootstrap4_extra_head %}
 <div id="header">
   {% block topbar_base %}
@@ -15,9 +15,20 @@
           </button>
           {% block topbar %}
               {% block site_brand %}
-                <a class="navbar-brand d-none d-lg-block" href="/">
-                  <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top" alt="{% trans 'Home' %}">
-                </a>
+                <div id="logo">
+                  <a class="navbar-brand d-none d-lg-block" href="/">
+                    <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top" alt="{% trans 'Home' %}">
+                  </a>
+                </div>
+                <span class="d-none d-lg-block">
+                  <div id="site-branding">
+                    <span id="site-name">
+                      i<span class="bolder">vatar</span>
+                    </span>
+                    <br/>
+                    freeing the web one face at a time
+                  </div>
+                </span>
               {% endblock %}
               {% block nav %}
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
