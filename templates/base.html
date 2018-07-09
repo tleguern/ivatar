@@ -9,7 +9,8 @@
 {% endblock bootstrap4_extra_head %}
 
 {% spaceless %}{% block bootstrap4_content %}
-<div id="header">
+<div id="page">
+  <div id="header">
   {% block topbar_base %}
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,20 +18,20 @@
           </button>
           {% block topbar %}
               {% block site_brand %}
-                <div id="logo">
-                  <a class="navbar-brand d-none d-lg-block" href="/">
-                    <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top" alt="{% trans 'Home' %}">
-                  </a>
-                </div>
-                <span class="d-none d-lg-block">
-                  <div id="site-branding">
-                    <span id="site-name">
-                      i<span class="bolder">vatar</span>
-                    </span>
-                    <br/>
-                    freeing the web one face at a time
+                  <div id="logo">
+                    <a class="navbar-brand d-none d-lg-block" href="/">
+                      <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top" alt="{% trans 'Home' %}">
+                    </a>
                   </div>
-                </span>
+                  <span class="d-none d-lg-block">
+                    <div id="site-branding">
+                      <span id="site-name">
+                        i<span class="bolder">vatar</span>
+                      </span>
+                      <br/>
+                      freeing the web one face at a time
+                    </div>
+                  </span>
               {% endblock %}
               {% block nav %}
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
@@ -67,15 +68,18 @@
           {% endblock %}
       </nav>
   {% endblock %}
-{% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-
-<div id="outer">
-  <div id="content">
-    {% block content %}{% endblock content %}
   </div>
-</div>
 
-{% block footer %}{% include 'footer.html' %}{% endblock footer %}
+  {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+
+  <div id="outer">
+    <div id="content">
+      {% block content %}{% endblock content %}
+    </div>
+  </div>
+
+  {% block footer %}{% include 'footer.html' %}{% endblock footer %}
+</div>
 
 {% endblock %}{% endspaceless %}
 

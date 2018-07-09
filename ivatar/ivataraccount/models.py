@@ -63,7 +63,7 @@ class UserPreference(models.Model):
     '''
     THEMES = (
         ('default', 'Default theme'),
-        # ('clime', 'climes theme'), # Not yet available
+        ('clime', 'climes theme'),
         ('falko', 'falkos theme'),
     )
 
