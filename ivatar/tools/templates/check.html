@@ -42,9 +42,9 @@
               <img src="{{ mailurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
             </a>
             <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fas fa-unlock" title="None-SSL connection (http)"></i>
+              <i class="fa fa-unlock-alt" title="None-SSL connection (http)"></i>
               <br/>
-              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
             </div>
           </div>
           <br/>MD5
@@ -56,9 +56,9 @@
               <img src="{{ mailurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
             </a>
             <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fas fa-lock" title="Secure connection (https)"></i>
+              <i class="fa fa-unlock" title="Secure connection (https)"></i>
               <br/>
-              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
             </div>
           </div>
           <br/>MD5
@@ -70,9 +70,9 @@
               <img src="{{ BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
             </a>
             <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fas fa-unlock" title="None-SSL connection (http)"></i>
+              <i class="fa fa-unlock-alt" title="None-SSL connection (http)"></i>
               <br/>
-              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
             </div>
           </div>
           <br/>SHA256
@@ -84,9 +84,9 @@
               <img src="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
             </a>
             <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fas fa-lock" title="Secure connection (https)"></i>
+              <i class="fa fa-unlock" title="Secure connection (https)"></i>
               <br/>
-              <i class="fas fa-at" title="mail: {{ form.mail.value }}"></i>
+              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
             </div>
           </div>
           <br/>SHA256
@@ -101,9 +101,9 @@
               <img src="{{ openidurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
             </a>
             <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px">
-              <i class="fas fa-unlock" title="None-SSL connection (http)"></i>
+              <i class="fa fa-unlock-alt" title="None-SSL connection (http)"></i>
               <br/>
-              <i class="fab fa-openid" title="openid: {{ form.openid.value }}"></i>
+              <i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i>
             </div>
           </div>
           <br/>SHA256
@@ -115,9 +115,9 @@
               <img src="{{ openidurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
             </a>
             <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px">
-              <i class="fas fa-lock" title="Secure connection (http)"></i>
+              <i class="fa fa-unlock" title="Secure connection (http)"></i>
               <br/>
-              <i class="fab fa-openid" title="openid: {{ form.openid.value }}"></i>
+              <i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i>
             </div>
           </div>
           <br/>SHA256

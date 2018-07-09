@@ -1,0 +1,28 @@
+{% load i18n %}
+
+<ul class="nav navbar-nav" style="flex-direction: row;">
+    <li class="nav-item dropdown" id="tab_account">
+        <a class="nav-link dropdown-toggle" href="/" id="account_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {% if request.user.is_authenticated %}
+            <i class="fa fa-user" aria-hidden="true"></i> {{ request.user }}
+          {% else %}
+            <i class="fa fa-sign-in" aria-hidden="true"></i> Login
+          {% endif %}
+        </a>
+        <div class="dropdown-menu dropdown-menu-right" style="position: absolute; right:0; left: auto;" aria-labelledby="navbarDropdownMenuLink">
+          {% if request.user.is_authenticated %}
+            <a class="dropdown-item" href="{% url 'profile' %}"><i class="fa fa-image" aria-hidden="true"></i> {% trans 'Profile' %}</a>
+            <a class="dropdown-item" href="{% url 'user_preference' %}"><i class="fa fa-cog" aria-hidden="true"></i> {% trans 'Preferences' %}</a>
+            <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> {% trans 'Logout' %}</a>
+          {% else %}
+            <a class="dropdown-item" href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i> {% trans 'Local' %}</a>
+            <a class="dropdown-item" href="{% url 'new_account' %}"><i class="fa fa-user-plus" aria-hidden="true"></i> {% trans 'Create account' %}</a>
+          {% endif %}
+        </div>
+    </li>
+    {% if user.is_staff %}
+      <li class="nav-item" style="margin-left: 5px;">
+        <a class="nav-link" href="{% url 'admin:index' %}" target="_new"><i class="fa fa-user-secret" aria-hidden="true"></i> {% trans 'Admin' %}</a>
+      </li>
+    {% endif %}
+</ul>
