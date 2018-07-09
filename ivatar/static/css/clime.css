@@ -1,0 +1,131 @@
+body {
+  background-image: url("../img/pattern.jpg");
+  margin: 0;
+}
+
+h1, h2, h3 {
+  font-weight: bold;
+}
+
+h1 {
+  color: #8c8c11;
+}
+
+#contribute-button a {
+  background-color: #938411;
+}
+
+#outer {
+  background-color: #AB9F58;
+}
+
+#account a {
+  color: white;
+}
+
+#site-name {
+  color: #fff;
+}
+
+#site-branding {
+  color: #fff;
+  margin-right: 20%;
+}
+
+.error, .errorlist li {
+  border-radius: 0px;
+}
+
+#page {
+  background-color: #7e3700cc;
+  padding: 10px 18px;
+  margin: 12px;
+}
+
+#header, #footer {
+  color: #fff;
+}
+
+a {
+  color: #F9711F;
+  font-weight: bold;
+}
+
+#header {
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+#footer {
+  font-size: small;
+  padding: 5px;
+  min-height: 40px;
+  margin-top: 30px;
+  position: relative;
+}
+
+#account {
+  float: right;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 2px;
+  margin-bottom: 10px;
+}
+
+#content {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 0px;
+  clear: both;
+}
+
+#content a {
+  color: #938411;
+}
+
+ul li {
+  list-style-type: none;
+}
+
+.horizontal-list li {
+  display: inline;
+  float: left;
+  margin: 0 15px 15px 0;
+}
+
+.centered li {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.fas, .fab {
+  color: #dbc40d;
+}
+
+.btn {
+  border-radius: 0px;
+}
+
+.navbar {
+    padding: 0px;
+}
+
+.bg-light {
+    background-color: transparent !important;
+}
+
+.nav-link {
+    color: #eee !important;
+}
+
+.nav-link:hover {
+    color: #fff !important;
+}
+
+.form-control {
+    border-radius: 0px;
+}
+
+.dropdown-menu {
+    border-radius: 0px;
+}
