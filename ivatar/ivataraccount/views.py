@@ -57,6 +57,8 @@ class CreateView(SuccessMessageMixin, FormView):
             password=form.cleaned_data['password1'])
         if user is not None:
             login(self.request, user)
+            pref = UserPreference.objects.create(user_id=user.pk)
+            pref.save()
             return HttpResponseRedirect(reverse_lazy('profile'))
         else:
             return HttpResponseRedirect(
