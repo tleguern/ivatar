@@ -1059,7 +1059,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             self.user.photo_set.first(),
             'set_photo did not work!?')
 
-    def test_avatar_url_mail(self, do_upload_and_confirm=True):
+    def test_avatar_url_mail(self, do_upload_and_confirm=True, size=(80, 80)):
         '''
         Test fetching avatar via mail
         '''
@@ -1068,18 +1068,21 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             self.test_confirm_email()
         urlobj = urlsplit(
             libravatar_url(
-                email=self.user.confirmedemail_set.first().email)
+                email=self.user.confirmedemail_set.first().email,
+                size=size[0],
+            )
         )
-        url = urlobj.path
+        url = '%s?%s' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=True)
         self.assertEqual(
             response.status_code,
             200,
             'unable to fetch avatar?')
+        photodata = Image.open(BytesIO(response.content))
         self.assertEqual(
-            response.content,
-            self.user.photo_set.first().data,
-            'Why is this not the same data?')
+            photodata.size,
+            size,
+            'Why is this not the correct size?')
 
     def test_avatar_url_openid(self):
         '''
@@ -1088,18 +1091,21 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.test_assign_photo_to_openid()
         urlobj = urlsplit(
             libravatar_url(
-                openid=self.user.confirmedopenid_set.first().openid)
+                openid=self.user.confirmedopenid_set.first().openid,
+                size=80,
+            )
         )
-        url = urlobj.path
+        url = '%s?%s' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=True)
         self.assertEqual(
             response.status_code,
             200,
             'unable to fetch avatar?')
+        photodata = Image.open(BytesIO(response.content))
         self.assertEqual(
-            response.content,
-            self.user.photo_set.first().data,
-            'Why is this not the same data?')
+            photodata.size,
+            (80, 80),
+            'Why is this not the correct size?')
 
     def test_avatar_url_inexisting_mail_digest(self):  # pylint: disable=invalid-name
         '''
@@ -1109,14 +1115,20 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.test_confirm_email()
         urlobj = urlsplit(
             libravatar_url(
-                email=self.user.confirmedemail_set.first().email)
+                email=self.user.confirmedemail_set.first().email,
+                size=80,
+            )
         )
         # Simply delete it, then it digest is 'correct', but
         # the hash is no longer there
         self.user.confirmedemail_set.first().delete()
-        url = urlobj.path
-        self.assertRaises(Exception, lambda:
-                          self.client.get(url, follow=True))
+        url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertEqual(
+            response['Content-Type'],
+            'image/png',
+            'Content type wrong!?')
+        # Eventually one should check if the data is the same
 
     def test_crop_photo(self):
         '''
@@ -1135,6 +1147,6 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             response.status_code,
             200,
             'unable to crop?')
-        self.test_avatar_url_mail(do_upload_and_confirm=False)
+        self.test_avatar_url_mail(do_upload_and_confirm=False, size=(20, 20))
         img = Image.open(BytesIO(self.user.photo_set.first().data))
         self.assertEqual(img.size, (20, 20), 'cropped to 20x20, but resulting image isn\'t 20x20!?')

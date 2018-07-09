@@ -1,29 +1,42 @@
 '''
 views under /
 '''
-import io
+from io import BytesIO
+from os import path
+from PIL import Image
 from django.views.generic.base import TemplateView
 from django.http import HttpResponse
-from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
 from django.core.exceptions import ObjectDoesNotExist
+from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY
+from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
+from . ivataraccount.models import pil_format
 
 
 class AvatarImageView(TemplateView):
     '''
-    View to return (binary) image, based for OpenID/Email (both by digest)
+    View to return (binary) image, based on OpenID/Email (both by digest)
     '''
+    # TODO: Do cache resize images!! Memcached?
 
     def get(self, request, *args, **kwargs):
         '''
         Override get from parent class
         '''
         model = ConfirmedEmail
+        size = 80
+        imgformat = 'png'
+        obj = None
+        if 's' in request.GET:
+            size = request.GET['s']
+        size = int(size)
+        if size > int(AVATAR_MAX_SIZE):
+            size = int(AVATAR_MAX_SIZE)
         if len(kwargs['digest']) == 32:
             # Fetch by digest from mail
             pass
         elif len(kwargs['digest']) == 64:
-            if ConfirmedOpenId.objects.filter(
-              digest=kwargs['digest']).count():  # pylint: disable=no-member
+            if ConfirmedOpenId.objects.filter(  # pylint: disable=no-member
+                    digest=kwargs['digest']).count():
                 # Fetch by digest from OpenID
                 model = ConfirmedOpenId
         else:  # pragma: no cover
@@ -36,15 +49,26 @@ class AvatarImageView(TemplateView):
             try:
                 obj = model.objects.get(digest_sha256=kwargs['digest'])
             except ObjectDoesNotExist:
-                # TODO: Use default!?
-                raise Exception('Mail/openid ("%s") does not exist"' %
-                                kwargs['digest'])
-        if not obj.photo:
-            # That is hacky, but achieves what we want :-)
-            attr = getattr(obj, 'email', obj.openid)
-            # TODO: Use default!?
-            raise Exception('No photo assigned to "%s"' % attr)
+                pass
+
+        if not obj or not obj.photo:
+            static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
+            if path.isfile(static_img):
+                photodata = Image.open(static_img)
+            else:
+                # TODO: Resize it!?
+                static_img = path.join('static', 'img', 'mm', '512.png')
+        else:
+            imgformat = obj.photo.format
+            photodata = Image.open(BytesIO(obj.photo.data))
+
+        photodata.thumbnail((size, size), Image.ANTIALIAS)
+        data = BytesIO()
+        photodata.save(data, pil_format(imgformat), quality=JPEG_QUALITY)
+        data.seek(0)
 
         return HttpResponse(
-            io.BytesIO(obj.photo.data),
-            content_type='image/%s' % obj.photo.format)
+            data,
+            content_type='image/%s' % imgformat)
+        # One eventually also wants to check if the DATA is correct,
+        # not only the size
