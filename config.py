@@ -102,7 +102,7 @@ if 'test' not in sys.argv and 'collectstatic' not in sys.argv:
         'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
     }
     EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
-DEFAULT_FROM_EMAIL = 'ivatar@linux-kernel.at'
+DEFAULT_FROM_EMAIL = 'ivatar@mg.linux-kernel.at'
 
 try:
     from ivatar.settings import DATABASES
