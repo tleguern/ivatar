@@ -1124,11 +1124,51 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.user.confirmedemail_set.first().delete()
         url = '%s?%s' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=True)
-        self.assertEqual(
-            response['Content-Type'],
-            'image/png',
-            'Content type wrong!?')
+        self.assertRedirects(
+            response=response,
+            expected_url='/static/img/mm/80.png',
+            msg_prefix='Why does this not redirect to the default img?')
         # Eventually one should check if the data is the same
+
+    def test_avatar_url_default(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar for not existing mail with default specified
+        '''
+        urlobj = urlsplit(
+            libravatar_url(
+                'xxx@xxx.xxx',
+                size=80,
+                default='/static/img/nobody.png',
+            )
+        )
+        url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
+            expected_url='/static/img/nobody.png',
+            msg_prefix='Why does this not redirect to the default img?')
+
+    def test_avatar_url_default_external(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar for not existing mail with external default specified
+        '''
+        default = 'http://host.tld/img.png'
+        urlobj = urlsplit(
+            libravatar_url(
+                'xxx@xxx.xxx',
+                size=80,
+                default=default,
+            )
+        )
+        url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=False)
+        print(response)
+        print(response.content)
+        self.assertRedirects(
+            response=response,
+            expected_url=default,
+            fetch_redirect_response=False,
+            msg_prefix='Why does this not redirect to the default img?')
 
     def test_crop_photo(self):
         '''
