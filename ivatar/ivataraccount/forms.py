@@ -127,7 +127,7 @@ class UploadPhotoForm(forms.Form):
         # Link this file to the user's profile
         photo = Photo()
         photo.user = request.user
-        photo.ip_address, _ = get_client_ip(request)
+        photo.ip_address = get_client_ip(request)[0]
         photo.data = data.read()
         photo.save()
         if not photo.pk:
