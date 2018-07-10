@@ -279,7 +279,7 @@ class ImportPhotoView(SuccessMessageMixin, View):
         if 'photo_Gravatar' in request.POST:
             photo = Photo()
             photo.user = request.user
-            photo.ip_address = get_client_ip(request)
+            photo.ip_address = get_client_ip(request)[0]
             if photo.import_image('Gravatar', email.email):
                 messages.success(request,
                                  _('Image successfully imported'))
@@ -496,7 +496,7 @@ class ConfirmOpenIDView(View):  # pragma: no cover
         # TODO: Check for a reasonable expiration time
         confirmed = self.model_confirmed()
         confirmed.user = unconfirmed.user
-        confirmed.ip_address = get_client_ip(self.request)
+        confirmed.ip_address = get_client_ip(self.request)[0]
         confirmed.openid = unconfirmed.openid
         confirmed.save()
 
