@@ -67,6 +67,12 @@ urlpatterns = [  # pylint: disable=invalid-name
         r'assign_photo_openid/(?P<openid_id>\d+)',
         AssignPhotoOpenIDView.as_view(), name='assign_photo_openid'),
     url(
+        r'import_photo/$',
+        ImportPhotoView.as_view(), name='import_photo'),
+    url(
+        r'import_photo/(?P<email_addr>[\w.]+@[\w.]+.[\w.]+)',
+        ImportPhotoView.as_view(), name='import_photo'),
+    url(
         r'import_photo/(?P<email_id>\d+)',
         ImportPhotoView.as_view(), name='import_photo'),
     url(

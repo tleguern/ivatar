@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load bootstrap4 %}
 
 {% block title %}{% trans 'Import photo' %} - Libravatar{% endblock title %}
 
@@ -8,6 +9,18 @@
 <h1>{% trans 'Import photo' %}</h1>
 
 {% include '_import_photo_form.html' %}
+
+{# Code not ready yet
+{% if not email_id %}
+<form action="{% url 'import_photo' %}" method="post">{% csrf_token %}
+  <label for="email_addr">{% trans 'Email Address' %}</label>
+  <input type="text" name="email_addr" value="{{ email_addr }}">
+  {% buttons %}
+    <button type="submit" class="btn btn-primary">{% trans 'Check' %}</button>
+  {% endbuttons %}
+</form>
+{% endif %}
+#}
 
 <p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
 

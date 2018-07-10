@@ -4,12 +4,20 @@
 {% if not user.is_anonymous %}
   {% if photos %}
     <p>{% trans 'Would you like to import some of these externally hosted photos?' %}</p>
-    <form action="{% url 'import_photo' email_id %}" method="post">{% csrf_token %}
+    {% if email_id %}
+      <form action="{% url 'import_photo' email_id %}" method="post">{% csrf_token %}
       <input type="hidden" name="email_id" value="{{ email_id }}">
+    {% else %}
+      <form action="{% url 'import_photo' %}" method="post">{% csrf_token %}
+      <input type="hidden" name="email_addr" value="{{ email_addr }}">
+    {% endif %}
       <ul class="horizontal-list imported-list centered">
       {% for photo in photos %}
         <li><input type="checkbox" name="photo_{{photo.service_name}}" id="photo_{{photo.service_name}}" checked="checked">
-        <br/><label for="photo_{{photo.service_name}}"><img src="{{ photo.thumbnail_url }}" class="thumbnail" alt="{{photo.service_name}} image"></label>
+        <br/>
+        <label for="photo_{{photo.service_name}}">
+          <img src="{{ photo.thumbnail_url }}" class="thumbnail" alt="{{ photo.service_name }} image">
+        </label>
         <br/>
         {% if photo.service_url %}
         <a href="{{ photo.service_url }}">{{ photo.service_name }}</a>
@@ -25,5 +33,7 @@
         {% endbuttons %}
       </p>
     </form>
+  {% else %}
+    <p>{% trans 'Nothing importable found' %}</p>
   {% endif %}
 {% endif %}

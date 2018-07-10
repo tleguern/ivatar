@@ -24,6 +24,8 @@ from openid.association import Association as OIDAssociation
 from openid.store import nonce as oidnonce
 from openid.store.interface import OpenIDStore
 
+from libravatar import libravatar_url
+
 from ivatar.settings import MAX_LENGTH_EMAIL, logger
 from ivatar.settings import MAX_PIXELS, AVATAR_MAX_SIZE, JPEG_QUALITY
 from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
@@ -126,6 +128,9 @@ class Photo(BaseAccountModel):
             gravatar = get_gravatar_photo(email_address)
             if gravatar:
                 image_url = gravatar['image_url']
+
+        if service_name == 'Libravatar':
+            image_url = libravatar_url(email_address)
 
         if not image_url:
             return False  # pragma: no cover

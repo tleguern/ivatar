@@ -5,8 +5,10 @@ from io import BytesIO
 from os import path
 from PIL import Image
 from django.views.generic.base import TemplateView
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import ugettext_lazy as _
+
 from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
 from . ivataraccount.models import pil_format
@@ -58,10 +60,12 @@ class AvatarImageView(TemplateView):
 
         # If that mail/openid doesn't exist, or has no photo linked to it
         if not obj or not obj.photo:
-            # Return the default URL, as specified
+            # Return the default URL, as specified, or 404 Not Found, if default=404
             if default:
+                if str(default) == str(404):
+                    return HttpResponseNotFound(_('<h1>Image not found</h1>'))
                 return HttpResponseRedirect(default)
-            # Return our default URl
+            # Return our default URL
             else:
                 static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
                 if not path.isfile(static_img):
