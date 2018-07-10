@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans 'Email confirmation' %} - Libravatar{% endblock title %}
+{% block title %}{% trans 'Import photo' %} - Libravatar{% endblock title %}
 
 {% block content %}
 
-<h1>{% trans 'Email confirmation' %}</h1>
-
-<p><b>{% trans 'Your email address was successfully confirmed!' %}</b></p>
+<h1>{% trans 'Import photo' %}</h1>
 
 {% include '_import_photo_form.html' %}
 

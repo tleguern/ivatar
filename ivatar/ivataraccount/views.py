@@ -1,6 +1,9 @@
 '''
 View classes for ivatar/ivataraccount/
 '''
+
+import io
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.messages.views import SuccessMessageMixin
@@ -14,23 +17,21 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import render
+from django_openid_auth.models import UserOpenID
 
 from openid import oidutil
 from openid.consumer import consumer
+
+from ipware import get_client_ip
+
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
 from .forms import UpdatePreferenceForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
 from .models import UserPreference
-
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
-
-import io
-
-from ipware import get_client_ip
-
-from django_openid_auth.models import UserOpenID
+from .gravatar import get_photo as get_gravatar_photo
 
 
 def openid_logging(message, level=0):
@@ -57,12 +58,12 @@ class CreateView(SuccessMessageMixin, FormView):
             password=form.cleaned_data['password1'])
         if user is not None:
             login(self.request, user)
-            pref = UserPreference.objects.create(user_id=user.pk)
+            pref = UserPreference.objects.create(user_id=user.pk)  # pylint: disable=no-member
             pref.save()
             return HttpResponseRedirect(reverse_lazy('profile'))
-        else:
-            return HttpResponseRedirect(
-                reverse_lazy('login'))  # pragma: no cover
+
+        return HttpResponseRedirect(
+            reverse_lazy('login'))  # pragma: no cover
 
 
 @method_decorator(login_required, name='dispatch')
@@ -111,11 +112,11 @@ class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
 
     def post(self, request, *args, **kwargs):
         try:
-            email = UnconfirmedEmail.objects.get(
+            email = UnconfirmedEmail.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['email_id'])
             email.delete()
             messages.success(request, _('Address removed'))
-        except UnconfirmedEmail.DoesNotExist:
+        except UnconfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -136,8 +137,8 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            unconfirmed = UnconfirmedEmail.objects.get(verification_key=key)
-        except UnconfirmedEmail.DoesNotExist:
+            unconfirmed = UnconfirmedEmail.objects.get(verification_key=key)  # pylint: disable=no-member
+        except UnconfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Verification key does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -172,7 +173,7 @@ class RemoveConfirmedEmailView(SuccessMessageMixin, View):
                 user=request.user, id=kwargs['email_id'])
             email.delete()
             messages.success(request, _('Address removed'))
-        except ConfirmedEmail.DoesNotExist:
+        except ConfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -193,16 +194,16 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            photo = self.model.objects.get(
+            photo = self.model.objects.get(  # pylint: disable=no-member
                 id=request.POST['photo_id'], user=request.user)
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             email = ConfirmedEmail.objects.get(
                 user=request.user, id=kwargs['email_id'])
-        except ConfirmedEmail.DoesNotExist:
+        except ConfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -234,16 +235,16 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            photo = self.model.objects.get(
+            photo = self.model.objects.get(  # pylint: disable=no-member
                 id=request.POST['photo_id'], user=request.user)
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            openid = ConfirmedOpenId.objects.get(
+            openid = ConfirmedOpenId.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
-        except ConfirmedOpenId.DoesNotExist:
+        except ConfirmedOpenId.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -255,22 +256,34 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['openid'] = ConfirmedOpenId.objects.get(pk=kwargs['openid_id'])
+        data['openid'] = ConfirmedOpenId.objects.get(pk=kwargs['openid_id'])  # pylint: disable=no-member
         return data
 
 
 @method_decorator(login_required, name='dispatch')
-class ImportPhotoView(SuccessMessageMixin, View):
+class ImportPhotoView(SuccessMessageMixin, TemplateView):
     '''
     View class to import a photo from another service
     Currently only Gravatar is supported
     '''
+    template_name = 'import_photo.html'
 
-    def post(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['photos'] = []
+        gravatar = get_gravatar_photo(ConfirmedEmail.objects.get(pk=kwargs['email_id']).email)
+        if gravatar:
+            context['photos'].append(gravatar)
+        return context
+
+    def post(self, request, *args, **kwargs):  # pylint: disable=no-self-use,unused-argument
+        '''
+        Handle post to photo import
+        '''
         try:
             email = ConfirmedEmail.objects.get(
                 id=kwargs['email_id'], user=request.user)
-        except Exception as e:
+        except ConfirmedEmail.DoesNotExist as e:  # pylint: disable=no-member
             messages.error(
                 request,
                 _('Address does not exist'))
@@ -301,7 +314,7 @@ class RawImageView(DetailView):
     model = Photo
 
     def get(self, request, *args, **kwargs):
-        photo = self.model.objects.get(pk=kwargs['pk'])
+        photo = self.model.objects.get(pk=kwargs['pk'])  # pylint: disable=no-member
         return HttpResponse(
             io.BytesIO(photo.data), content_type='image/%s' % photo.format)
 
