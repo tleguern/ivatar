@@ -108,6 +108,7 @@ try:
     from ivatar.settings import DATABASES
 except Exception:  # pragma: no cover
     DATABASES = []  # pragma: no cover
+
 if 'default' not in DATABASES:
     DATABASES['default'] = {  # pragma: no cover
         'ENGINE': 'django.db.backends.sqlite3',
@@ -121,6 +122,15 @@ if 'MYSQL_DATABASE' in os.environ:
         'USER': os.environ['MYSQL_USER'],
         'PASSWORD': os.environ['MYSQL_PASSWORD'],
         'HOST': 'mysql',
+    }
+
+if 'POSTGRESQL_DATABASE' in os.environ:
+    DATABASES['default'] = {  # pragma: no cover
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ['POSTGRESQL_DATABASE'],
+        'USER': os.environ['POSTGRESQL_USER'],
+        'PASSWORD': os.environ['POSTGRESQL_PASSWORD'],
+        'HOST': 'postgresql',
     }
 
 if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
