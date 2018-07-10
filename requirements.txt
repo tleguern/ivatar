@@ -30,3 +30,4 @@ wheel
 yapf
 django-anymail[mailgun]
 mysqlclient
+psycopg2
