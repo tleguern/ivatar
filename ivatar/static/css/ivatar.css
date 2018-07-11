@@ -183,3 +183,12 @@ ul li {
 .fas, .fab {
   color: #dbc40d;
 }
+
+@media screen and (max-width: 320px) {
+  body {
+    font-size: 90%;
+  }
+  h1 {
+    font-size: 1.2em;
+  }
+}
