@@ -276,7 +276,14 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         context['photos'] = []
         addr = None
         if 'email_id' in kwargs:
-            addr = ConfirmedEmail.objects.get(pk=kwargs['email_id']).email
+            try:
+                addr = ConfirmedEmail.objects.get(pk=kwargs['email_id']).email
+            except:
+                messages.error(
+                    self.request,
+                    _('Address does not exist'))
+                return context
+
         if 'email_addr' in kwargs:
             addr = kwargs['email_addr']
 
@@ -324,12 +331,11 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
             addr = request.POST['email_addr']
 
         if email_id:
-            try:
-                email = ConfirmedEmail.objects.filter(
-                    id=email_id, user=request.user)
-                if email.count() > 0:
-                    addr = email.first().email
-            except ConfirmedEmail.DoesNotExist:  # pylint: disable=no-member
+            email = ConfirmedEmail.objects.filter(
+                id=email_id, user=request.user)
+            if email.count() > 0:
+                addr = email.first().email
+            else:
                 messages.error(
                     request,
                     _('Address does not exist'))
