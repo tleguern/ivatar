@@ -79,7 +79,11 @@
 {% endif %}
 
 {% if not max_photos %}
-<p><a href="{% url 'upload_photo' %}">{% trans 'Upload a new photo' %}</a></p>
+<p>
+  <br/>
+  <a href="{% url 'upload_photo' %}">{% trans 'Upload a new photo' %}</a><br/>
+  <a href="{% url 'import_photo' %}">{% trans 'Import photo from other services' %}</a>
+</p>
 {% endif %}
 
 <h2>{% trans 'Account settings' %}</h2>

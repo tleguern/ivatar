@@ -333,7 +333,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             'unable to import photo from Gravatar?')
         self.assertEqual(
             str(list(response.context[0]['messages'])[0]),
-            'Image successfully imported',
+            'Gravatar image successfully imported',
             'Importing gravatar photo did not work?')
         self.assertIsInstance(
             self.user.photo_set.first(),
@@ -1162,8 +1162,6 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         )
         url = '%s?%s' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=False)
-        print(response)
-        print(response.content)
         self.assertRedirects(
             response=response,
             expected_url=default,

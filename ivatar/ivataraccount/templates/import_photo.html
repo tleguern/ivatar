@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans 'Import photo' %} - Libravatar{% endblock title %}
+
+{% block content %}
+
+<h1>{% trans 'Import photo' %}</h1>
+
+{% include '_import_photo_form.html' %}
+
+{% if not email_id %}
+  <form action="{% url 'import_photo' %}" method="get" id="check_mail_form">
+    <label for="check_email_addr">{% trans 'Email Address' %}</label>
+    <input type="text" name="check_email_addr" value="{{ email_addr }}">
+    {% buttons %}
+      <button type="submit" class="btn btn-primary">{% trans 'Check' %}</button>
+    {% endbuttons %}
+  </form>
+  <script>
+    document.getElementById('check_mail_form').onsubmit = 
+      function(self) {
+        window.location.href = "{% url 'import_photo' %}" + document.getElementsByName('check_email_addr')[0].value;
+        return false;
+    };
+  </script>
+
+{% endif %}
+
+<p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
+
+{% endblock content %}

@@ -37,7 +37,12 @@
   </form></li>
 </ul>
 
-<p><a href="{% url 'upload_photo' %}">{% blocktrans %}upload a new one{% endblocktrans %}</a></p>
+<p>
+  <br/>
+  <a href="{% url 'upload_photo' %}">{% blocktrans %}Upload a new one{% endblocktrans %}</a>
+  <br/>
+  <a href="{% url 'import_photo' email.pk %}">{% blocktrans %}Import from other services{% endblocktrans %}</a>
+</p>
 
 {% endif %}
 
