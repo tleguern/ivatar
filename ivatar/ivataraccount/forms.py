@@ -60,16 +60,16 @@ class AddEmailForm(forms.Form):
         if UnconfirmedEmail.objects.filter(  # pylint: disable=no-member
                 user=user, email=self.cleaned_data['email']).exists():
             self.add_error(
-              'email',
-              _('Address already added, currently unconfirmed'))
+                'email',
+                _('Address already added, currently unconfirmed'))
             return False
 
         # Check whether or not the email is already confirmed by someone
         if ConfirmedEmail.objects.filter(
                 email=self.cleaned_data['email']).exists():
             self.add_error(
-              'email',
-              _('Address already confirmed (by someone else)'))
+                'email',
+                _('Address already confirmed (by someone else)'))
             return False
 
         unconfirmed = UnconfirmedEmail()
@@ -171,8 +171,8 @@ class AddOpenIDForm(forms.Form):
         if UnconfirmedOpenId.objects.filter(  # pylint: disable=no-member
                 openid=self.cleaned_data['openid']).exists():
             self.add_error(
-              'openid',
-              _('OpenID already added, but not confirmed yet!'))
+                'openid',
+                _('OpenID already added, but not confirmed yet!'))
             return False
 
         unconfirmed = UnconfirmedOpenId()
@@ -187,10 +187,9 @@ class UpdatePreferenceForm(forms.ModelForm):
     Form for updating user preferences
     '''
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         '''
         Meta class for UpdatePreferenceForm
         '''
         model = UserPreference
         fields = ['theme']
-

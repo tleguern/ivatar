@@ -1,6 +1,8 @@
 '''
 View classes for ivatar/ivataraccount/
 '''
+import io
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.messages.views import SuccessMessageMixin
@@ -15,22 +17,19 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import render
 
+from django_openid_auth.models import UserOpenID
 from openid import oidutil
 from openid.consumer import consumer
+
+from ipware import get_client_ip
+
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
 from .forms import UpdatePreferenceForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
 from .models import UserPreference
-
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
-
-import io
-
-from ipware import get_client_ip
-
-from django_openid_auth.models import UserOpenID
 
 
 def openid_logging(message, level=0):
@@ -57,12 +56,11 @@ class CreateView(SuccessMessageMixin, FormView):
             password=form.cleaned_data['password1'])
         if user is not None:
             login(self.request, user)
-            pref = UserPreference.objects.create(user_id=user.pk)
+            pref = UserPreference.objects.create(user_id=user.pk)  # pylint: disable=no-member
             pref.save()
             return HttpResponseRedirect(reverse_lazy('profile'))
-        else:
-            return HttpResponseRedirect(
-                reverse_lazy('login'))  # pragma: no cover
+        return HttpResponseRedirect(
+            reverse_lazy('login'))  # pragma: no cover
 
 
 @method_decorator(login_required, name='dispatch')
@@ -109,13 +107,17 @@ class RemoveUnconfirmedEmailView(SuccessMessageMixin, View):
     View class for removing a unconfirmed email address
     '''
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post request - removing unconfirmed email
+        '''
         try:
-            email = UnconfirmedEmail.objects.get(
+            email = UnconfirmedEmail.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['email_id'])
             email.delete()
             messages.success(request, _('Address removed'))
-        except UnconfirmedEmail.DoesNotExist:
+        except UnconfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -136,8 +138,8 @@ class ConfirmEmailView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            unconfirmed = UnconfirmedEmail.objects.get(verification_key=key)
-        except UnconfirmedEmail.DoesNotExist:
+            unconfirmed = UnconfirmedEmail.objects.get(verification_key=key)  # pylint: disable=no-member
+        except UnconfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Verification key does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -166,13 +168,17 @@ class RemoveConfirmedEmailView(SuccessMessageMixin, View):
     View class for removing a confirmed email address
     '''
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post request - removing confirmed email
+        '''
         try:
             email = ConfirmedEmail.objects.get(
                 user=request.user, id=kwargs['email_id'])
             email.delete()
             messages.success(request, _('Address removed'))
-        except ConfirmedEmail.DoesNotExist:
+        except ConfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Address does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -185,7 +191,10 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
     model = Photo
     template_name = 'assign_photo_email.html'
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post request - assign photo to email
+        '''
         photo = None
         if 'photo_id' not in request.POST:
             messages.error(request,
@@ -193,16 +202,16 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            photo = self.model.objects.get(
+            photo = self.model.objects.get(  # pylint: disable=no-member
                 id=request.POST['photo_id'], user=request.user)
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             email = ConfirmedEmail.objects.get(
                 user=request.user, id=kwargs['email_id'])
-        except ConfirmedEmail.DoesNotExist:
+        except ConfirmedEmail.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -226,7 +235,10 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
     model = Photo
     template_name = 'assign_photo_openid.html'
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post - assign photo to openid
+        '''
         photo = None
         if 'photo_id' not in request.POST:
             messages.error(request,
@@ -234,16 +246,16 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            photo = self.model.objects.get(
+            photo = self.model.objects.get(  # pylint: disable=no-member
                 id=request.POST['photo_id'], user=request.user)
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Photo does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            openid = ConfirmedOpenId.objects.get(
+            openid = ConfirmedOpenId.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
-        except ConfirmedOpenId.DoesNotExist:
+        except ConfirmedOpenId.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -255,7 +267,7 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['openid'] = ConfirmedOpenId.objects.get(pk=kwargs['openid_id'])
+        data['openid'] = ConfirmedOpenId.objects.get(pk=kwargs['openid_id'])  # pylint: disable=no-member
         return data
 
 
@@ -266,11 +278,15 @@ class ImportPhotoView(SuccessMessageMixin, View):
     Currently only Gravatar is supported
     '''
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post - import photo
+        '''
         try:
             email = ConfirmedEmail.objects.get(
                 id=kwargs['email_id'], user=request.user)
-        except Exception as e:
+        except Exception:  # pylint: disable=broad-except
             messages.error(
                 request,
                 _('Address does not exist'))
@@ -301,7 +317,7 @@ class RawImageView(DetailView):
     model = Photo
 
     def get(self, request, *args, **kwargs):
-        photo = self.model.objects.get(pk=kwargs['pk'])
+        photo = self.model.objects.get(pk=kwargs['pk'])  # pylint: disable=no-member
         return HttpResponse(
             io.BytesIO(photo.data), content_type='image/%s' % photo.format)
 
@@ -313,12 +329,15 @@ class DeletePhotoView(SuccessMessageMixin, View):
     '''
     model = Photo
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle get - delete photo
+        '''
         try:
-            photo = self.model.objects.get(
+            photo = self.model.objects.get(  # pylint: disable=no-member
                 pk=kwargs['pk'], user=request.user)
             photo.delete()
-        except Exception as e:
+        except Exception:  # pylint: disable=broad-except
             messages.error(
                 request,
                 _('No such image or no permission to delete it'))
@@ -347,7 +366,7 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
             return HttpResponseRedirect(reverse_lazy('profile'))
         return super().post(request, *args, **kwargs)
 
-    def form_valid(self, form, *args, **kwargs):
+    def form_valid(self, form):
         photo_data = self.request.FILES['photo']
         if photo_data.size > MAX_PHOTO_SIZE:
             messages.error(self.request, _('Image too big'))
@@ -361,7 +380,7 @@ class UploadPhotoView(SuccessMessageMixin, FormView):
 
         # Override success URL -> Redirect to crop page.
         self.success_url = reverse_lazy('crop_photo', args=[photo.pk])
-        return super().form_valid(form, *args, **kwargs)
+        return super().form_valid(form)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -377,14 +396,12 @@ class AddOpenIDView(SuccessMessageMixin, FormView):
         openid_id = form.save(self.request.user)
         if not openid_id:
             return render(self.request, self.template_name, {'form': form})
-        else:
-            # At this point we have an unconfirmed OpenID, but
-            # we do not add the message, that we successfully added it,
-            # since this is misleading
-            return HttpResponseRedirect(
-                reverse_lazy('openid_redirection', args=[openid_id]))
 
-        return super().form_valid(form)
+        # At this point we have an unconfirmed OpenID, but
+        # we do not add the message, that we successfully added it,
+        # since this is misleading
+        return HttpResponseRedirect(
+            reverse_lazy('openid_redirection', args=[openid_id]))
 
 
 @method_decorator(login_required, name='dispatch')
@@ -394,13 +411,16 @@ class RemoveUnconfirmedOpenIDView(View):
     '''
     model = UnconfirmedOpenId
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post - remove unconfirmed openid
+        '''
         try:
-            openid = self.model.objects.get(
+            openid = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
             openid.delete()
             messages.success(request, _('ID removed'))
-        except self.model.DoesNotExist:  # pragma: no cover
+        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
             messages.error(request, _('ID does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -412,26 +432,35 @@ class RemoveConfirmedOpenIDView(View):
     '''
     model = ConfirmedOpenId
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post - remove confirmed openid
+        '''
         try:
-            openid = self.model.objects.get(
+            openid = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
             openid.delete()
             messages.success(request, _('ID removed'))
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pylint: disable=no-member
             messages.error(request, _('ID does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
 
 @method_decorator(login_required, name='dispatch')
 class RedirectOpenIDView(View):
+    '''
+    Redirect view for OpenID
+    '''
     model = UnconfirmedOpenId
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle get for OpenID redirect view
+        '''
         try:
-            unconfirmed = self.model.objects.get(
+            unconfirmed = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
-        except self.model.DoesNotExist:  # pragma: no cover
+        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
             messages.error(request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -443,10 +472,10 @@ class RedirectOpenIDView(View):
 
         try:
             auth_request = openid_consumer.begin(user_url)
-        except consumer.DiscoveryFailure as e:
+        except consumer.DiscoveryFailure as e:  # pylint: disable=invalid-name
             messages.error(request, _('OpenID discovery failed: %s' % e))
             return HttpResponseRedirect(reverse_lazy('profile'))
-        except UnicodeDecodeError as e:  # pragma: no cover
+        except UnicodeDecodeError as e:  # pragma: no cover pylint: disable=invalid-name
             msg = _('OpenID discovery failed (userid=%s) for %s: %s' %
                     (request.user.id, user_url.encode('utf-8'), e))
             print(msg)
@@ -465,10 +494,16 @@ class RedirectOpenIDView(View):
 
 @method_decorator(login_required, name='dispatch')
 class ConfirmOpenIDView(View):  # pragma: no cover
+    '''
+    Confirm OpenID view
+    '''
     model = UnconfirmedOpenId
     model_confirmed = ConfirmedOpenId
 
-    def do_request(self, data, *args, **kwargs):
+    def do_request(self, data, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle request, called by get() or post()
+        '''
         session = {'id': self.request.session.session_key}
         current_url = self.request.build_absolute_uri('/')[:-1] + \
             self.request.path
@@ -487,9 +522,9 @@ class ConfirmOpenIDView(View):  # pragma: no cover
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
-            unconfirmed = self.model.objects.get(
+            unconfirmed = self.model.objects.get(  # pylint: disable=no-member
                 user=self.request.user, id=kwargs['openid_id'])
-        except self.model.DoesNotExist:
+        except self.model.DoesNotExist:  # pylint: disable=no-member
             messages.error(self.request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -508,7 +543,7 @@ class ConfirmOpenIDView(View):  # pragma: no cover
             confirmed.set_photo(self.request.user.photo_set.first())
 
         # Also allow user to login using this OPenID (if not already taken)
-        if not UserOpenID.objects.filter(claimed_id=confirmed.openid).exists():
+        if not UserOpenID.objects.filter(claimed_id=confirmed.openid).exists():  # pylint: disable=no-member
             user_openid = UserOpenID()
             user_openid.user = self.request.user
             user_openid.claimed_id = confirmed.openid
@@ -517,9 +552,15 @@ class ConfirmOpenIDView(View):  # pragma: no cover
         return HttpResponseRedirect(reverse_lazy('profile'))
 
     def get(self, request, *args, **kwargs):
+        '''
+        Handle get - confirm openid
+        '''
         return self.do_request(request.GET, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        '''
+        Handle post - confirm openid
+        '''
         return self.do_request(request.POST, *args, **kwargs)
 
 
@@ -542,7 +583,10 @@ class CropPhotoView(TemplateView):
             'openid': openid,
         })
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post - crop photo
+        '''
         photo = self.model.objects.get(pk=kwargs['pk'], user=request.user)  # pylint: disable=no-member
         dimensions = {
             'x': int(request.POST['x']),
@@ -554,19 +598,19 @@ class CropPhotoView(TemplateView):
         if 'email' in request.POST:
             try:
                 email = ConfirmedEmail.objects.get(email=request.POST['email'])
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass  # Ignore automatic assignment
 
         if 'openid' in request.POST:
             try:
-                openid = ConfirmedOpenId.objects.get(
-                  openid=request.POST['openid'])
-            except Exception:
+                openid = ConfirmedOpenId.objects.get(  # pylint: disable=no-member
+                    openid=request.POST['openid'])
+            except Exception:  # pylint: disable=broad-except
                 pass  # Ignore automatic assignment
 
         return photo.perform_crop(request, dimensions, email, openid)
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name='dispatch')  # pylint: disable=too-many-ancestors
 class UserPreferenceView(FormView, UpdateView):
     '''
     View class for user preferences view/update
@@ -576,5 +620,5 @@ class UserPreferenceView(FormView, UpdateView):
     form_class = UpdatePreferenceForm
     success_url = reverse_lazy('user_preference')
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return self.request.user.userpreference
