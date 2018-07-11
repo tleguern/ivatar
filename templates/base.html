@@ -19,9 +19,17 @@
           {% block topbar %}
               {% block site_brand %}
                   <div id="logo">
-                    <a class="navbar-brand d-none d-lg-block" href="/">
-                      <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top" alt="{% trans 'Home' %}">
-                    </a>
+                    {% if user.is_anonymous %}
+                      <a class="navbar-brand d-none d-lg-block" href="/">
+                        <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top"
+                          alt="{% trans 'Home' %}">
+                      </a>
+                    {% else %}
+                    <a class="navbar-brand d-none d-lg-block" href="{% url 'profile' %}">
+                        <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top"
+                          alt="{% trans 'Profile' %}">
+                      </a>
+                    {% endif %}
                   </div>
                   <span class="d-none d-lg-block">
                     <div id="site-branding">
@@ -36,6 +44,13 @@
               {% block nav %}
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                   <ul class="navbar-nav mr-auto nav">
+                     {% if not user.is_anonymous %}
+                       <li class="nav-item" style="margin-left: 5px;">
+                         <a class="nav-link" href="/" target="_new"><i class="fa fa-home" aria-hidden="true"></i>
+                           {% trans 'Home' %}
+                         </a>
+                       </li>
+                     {% endif %}
                      <li class="nav-item" style="margin-left: 5px;">
                        <a class="nav-link" href="TODO contact" target="_new"><i class="fa fa-envelope" aria-hidden="true"></i>
                          {% trans 'Contact' %}
