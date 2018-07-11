@@ -1,6 +1,7 @@
 {% extends 'base.html' %}                                                                                                                      
 {% load i18n %}
 {% load static %}
+{% load bootstrap4 %}
 
 {% block title %}{% trans 'Upload a new photo' %} - ivatar{% endblock title %}
 
@@ -8,25 +9,35 @@
 <link rel="prefetch" href="{% static '/js/jcrop.js' %}">{% endblock header %}
 
 {% block content %}
+  <h1>{% trans 'Upload a new photo' %}</h1>
 
-<h1>{% trans 'Upload a new photo' %}</h1>
+  <form enctype="multipart/form-data" action="{% url 'upload_photo' %}" method="post">{% csrf_token %}
+    {% if email %}<input type="hidden" name="email" value="{{ email }}">{% endif %}
+    {% if openid %}<input type="hidden" name="openid" value="{{ openid }}">{% endif %}
 
-<form enctype="multipart/form-data" action="{% url 'upload_photo' %}" method="post">{% csrf_token %}
-{% if email %}<input type="hidden" name="email" value="{{email}}">{% endif %}
-{% if openid %}<input type="hidden" name="openid" value="{{openid}}">{% endif %}
+    {{ form.photo.errors }}
+    <div class="form-group">
+      {{ form.photo.label_tag }}
+      <input id="id_photo" type="file" name="photo" accept="image/*">
+    </div>
+    {% blocktrans with max_file_size|filesizeformat as max_size %}Maximum file size of {{ max_size }}.{% endblocktrans %}</p>
 
-{{ form.photo.errors }}
-<p class="aligned wide">{{ form.photo.label_tag }} <input id="id_photo" type="file" name="photo" accept="image/*">
-<br>{% blocktrans with max_file_size|filesizeformat as max_size %}Maximum file size of {{ max_size }}.{% endblocktrans %}</p>
+    <div class="form-group">
+      <ul class="conditions">
+        <li>
+          {{ form.not_porn.errors }} {{ form.not_porn }}
+          <label for="id_not_porn">{{ form.not_porn.label }}</label>
+        </li>
+        <li>
+          {{ form.can_distribute.errors }} {{ form.can_distribute }}
+          <label for="id_can_distribute">{{ form.can_distribute.label }}</label>
+        </li>
+      </ul>
+    </div>
 
-<ul class="conditions">
-  <li>{{ form.not_porn.errors }}{{ form.not_porn }} <label for="id_not_porn">{{ form.not_porn.label }}</label></li>
-  <li>{{ form.can_distribute.errors }}{{ form.can_distribute }} <label for="id_can_distribute">{{ form.can_distribute.label }}</label></li>
-</ul>
-
-<p><input type="submit" value="{% trans 'Upload' %}" />
-&nbsp;<a id="cancel-link" href="{% url 'profile' %}">{% trans 'Cancel' %}</a></p>
-
-</form>
-
+    {% buttons %}
+      <button type="submit" class="btn btn-primary">{% trans 'Upload' %}</button>
+      <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
+    {% endbuttons %}
+  </form>
 {% endblock content %}
