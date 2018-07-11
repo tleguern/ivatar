@@ -23,33 +23,20 @@
     <p>
       This is what the avatars will look like depending on the hash and protocol you use:<br/>
 
-      {% if mail_hash %}
-        MD5 hash (mail): {{ mail_hash }}<br/>
-        SHA256 hash (mail): {{ mail_hash256 }}<br/>
-      {% endif %}
+      <div class="d-none d-lg-block">
+        {% if mail_hash %}
+          MD5 hash (mail): {{ mail_hash }}<br/>
+          SHA256 hash (mail): {{ mail_hash256 }}<br/>
+        {% endif %}
 
-      {% if openid_hash %}
-        SHA256 hash (OpenID): {{ openid_hash }}<br/>
-      {% endif %}
+        {% if openid_hash %}
+          SHA256 hash (OpenID): {{ openid_hash }}<br/>
+        {% endif %}
+      </div>
     </p>
 
     <ul class="horizontal-list avatar-list centered" style="font-size:smaller;">
       {% if mailurl %}
-        {% if not request.is_secure %}
-        <li>
-          <div style="float:left;">
-            <a href="{{ mailurl }}">
-              <img src="{{ mailurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-            </a>
-            <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fa fa-unlock-alt" title="None-SSL connection (http)"></i>
-              <br/>
-              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
-            </div>
-          </div>
-          <br/>MD5
-        </li>
-        {% endif %}
         <li>
           <div style="float:left;">
             <a href="{{ mailurl_secure }}">
@@ -63,21 +50,6 @@
           </div>
           <br/>MD5
         </li>
-        {% if not request.is_secure %}
-        <li>
-          <div style="float:left;">
-            <a href="{{ BASE_URL }}{{ mail_hash256 }}?s={{ size }}">
-              <img src="{{ BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-            </a>
-            <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fa fa-unlock-alt" title="None-SSL connection (http)"></i>
-              <br/>
-              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
-            </div>
-          </div>
-          <br/>SHA256
-        </li>
-        {% endif %}
         <li>
           <div style="float:left;">
             <a href="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}">
@@ -94,21 +66,6 @@
       {% endif %}
 
       {% if openidurl %}
-        {% if not request.is_secure %}
-        <li>
-          <div style="float:left;">
-            <a href="{{ openidurl }}">
-              <img src="{{ openidurl }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
-            </a>
-            <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px">
-              <i class="fa fa-unlock-alt" title="None-SSL connection (http)"></i>
-              <br/>
-              <i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i>
-            </div>
-          </div>
-          <br/>SHA256
-        </li>
-        {% endif %}
         <li>
           <div style="float:left;">
             <a href="{{ openidurl_secure }}">

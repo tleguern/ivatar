@@ -5,7 +5,7 @@ from io import BytesIO
 from os import path
 from PIL import Image
 from django.views.generic.base import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
@@ -26,6 +26,11 @@ class AvatarImageView(TemplateView):
         size = 80
         imgformat = 'png'
         obj = None
+        default = None
+
+        if 'd' in request.GET:
+            default = request.GET['d']
+
         if 's' in request.GET:
             size = request.GET['s']
         size = int(size)
@@ -51,13 +56,19 @@ class AvatarImageView(TemplateView):
             except ObjectDoesNotExist:
                 pass
 
+        # If that mail/openid doesn't exist, or has no photo linked to it
         if not obj or not obj.photo:
-            static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
-            if path.isfile(static_img):
-                photodata = Image.open(static_img)
+            # Return the default URL, as specified
+            if default:
+                return HttpResponseRedirect(default)
+            # Return our default URl
             else:
-                # TODO: Resize it!?
-                static_img = path.join('static', 'img', 'mm', '512.png')
+                static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
+                if not path.isfile(static_img):
+                    # We trust this exists!!!
+                    static_img = path.join('static', 'img', 'mm', '512.png')
+                # We trust static/ is mapped to /static/
+                return HttpResponseRedirect('/' + static_img)
         else:
             imgformat = obj.photo.format
             photodata = Image.open(BytesIO(obj.photo.data))
@@ -70,5 +81,3 @@ class AvatarImageView(TemplateView):
         return HttpResponse(
             data,
             content_type='image/%s' % imgformat)
-        # One eventually also wants to check if the DATA is correct,
-        # not only the size
