@@ -355,7 +355,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
             photo.ip_address = get_client_ip(request)
             if photo.import_image('Libravatar', addr):
                 messages.success(request,
-                                 _('Libravatar successfully imported'))
+                                 _('Libravatar image successfully imported'))
             else:
                 # Honestly, I'm not sure how to test this...
                 messages.error(
