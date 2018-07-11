@@ -2,6 +2,7 @@
 View classes for ivatar/ivataraccount/
 '''
 import io
+from urllib.request import urlopen
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -16,12 +17,16 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import render
+from django_openid_auth.models import UserOpenID
 
 from django_openid_auth.models import UserOpenID
 from openid import oidutil
 from openid.consumer import consumer
 
 from ipware import get_client_ip
+
+from libravatar import libravatar_url
+from .gravatar import get_photo as get_gravatar_photo
 
 from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
@@ -272,39 +277,111 @@ class AssignPhotoOpenIDView(SuccessMessageMixin, TemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
-class ImportPhotoView(SuccessMessageMixin, View):
+class ImportPhotoView(SuccessMessageMixin, TemplateView):
     '''
     View class to import a photo from another service
     Currently only Gravatar is supported
     '''
+    template_name = 'import_photo.html'
 
-    @staticmethod
-    def post(request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['photos'] = []
+        addr = None
+        if 'email_id' in kwargs:
+            try:
+                addr = ConfirmedEmail.objects.get(pk=kwargs['email_id']).email
+            except:
+                messages.error(
+                    self.request,
+                    _('Address does not exist'))
+                return context
+
+        if 'email_addr' in kwargs:
+            addr = kwargs['email_addr']
+
+        if addr:
+            gravatar = get_gravatar_photo(addr)
+            if gravatar:
+                context['photos'].append(gravatar)
+
+            libravatar_service_url = libravatar_url(
+                email=addr,
+                default=404,
+            )
+            try:
+                if libravatar_service_url:
+                    response = urlopen(libravatar_service_url)
+                    context['photos'].append({
+                        'service_url': libravatar_service_url,
+                        'thumbnail_url': libravatar_service_url + '?s=80',
+                        'image_url': libravatar_service_url + '?s=512',
+                        'width': 80,
+                        'height': 80,
+                        'service_name': 'Libravatar',
+                    })
+            except Exception:
+                pass
+
+        return context
+
+    def post(self, request, *args, **kwargs):  # pylint: disable=no-self-use,unused-argument
         '''
-        Handle post - import photo
+        Handle post to photo import
         '''
-        try:
-            email = ConfirmedEmail.objects.get(
-                id=kwargs['email_id'], user=request.user)
-        except Exception:  # pylint: disable=broad-except
-            messages.error(
-                request,
-                _('Address does not exist'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        addr = None
+        email_id = None
+        imported = None
+
+        if 'email_id' in kwargs:
+            email_id = kwargs['email_id']
+        if 'email_id' in request.POST:
+            email_id = request.POST['email_id']
+        if 'email_addr' in kwargs:
+            addr = kwargs['email_addr']
+        if 'email_addr' in request.POST:
+            addr = request.POST['email_addr']
+
+        if email_id:
+            email = ConfirmedEmail.objects.filter(
+                id=email_id, user=request.user)
+            if email.count() > 0:
+                addr = email.first().email
+            else:
+                messages.error(
+                    request,
+                    _('Address does not exist'))
+                return HttpResponseRedirect(reverse_lazy('profile'))
 
         if 'photo_Gravatar' in request.POST:
             photo = Photo()
             photo.user = request.user
-            photo.ip_address = get_client_ip(request)[0]
-            if photo.import_image('Gravatar', email.email):
+            photo.ip_address = get_client_ip(request)
+            if photo.import_image('Gravatar', addr):
                 messages.success(request,
-                                 _('Image successfully imported'))
+                                 _('Gravatar image successfully imported'))
             else:
                 # Honestly, I'm not sure how to test this...
                 messages.error(
                     request,
-                    _('Image import not successful'))  # pragma: no cover
-        else:
+                    _('Gravatar image import not successful'))  # pragma: no cover
+            imported = True
+
+        if 'photo_Libravatar' in request.POST:
+            photo = Photo()
+            photo.user = request.user
+            photo.ip_address = get_client_ip(request)
+            if photo.import_image('Libravatar', addr):
+                messages.success(request,
+                                 _('Libravatar image successfully imported'))
+            else:
+                # Honestly, I'm not sure how to test this...
+                messages.error(
+                    request,
+                    _('Libravatar image import not successful'))  # pragma: no cover
+            imported = True
+        if not imported:
             messages.warning(request, _('Nothing importable'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
