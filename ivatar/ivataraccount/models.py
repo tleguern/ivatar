@@ -26,7 +26,7 @@ from openid.store.interface import OpenIDStore
 
 from ivatar.settings import MAX_LENGTH_EMAIL, logger
 from ivatar.settings import MAX_PIXELS, AVATAR_MAX_SIZE, JPEG_QUALITY
-from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
+from ivatar.settings import MAX_LENGTH_URL
 from .gravatar import get_photo as get_gravatar_photo
 
 
@@ -41,6 +41,7 @@ def file_format(image_type):
     elif image_type == 'GIF':
         return 'gif'
     return None
+
 
 def pil_format(image_type):
     '''
@@ -132,12 +133,14 @@ class Photo(BaseAccountModel):
         try:
             image = urlopen(image_url)
         # No idea how to test this
-        except HTTPError as e:  # pragma: no cover  # pylint: disable=invalid-name
+        # pragma: no cover  # pylint: disable=invalid-name
+        except HTTPError as e:
             print('%s import failed with an HTTP error: %s' %
                   (service_name, e.code))
             return False
         # No idea how to test this
-        except URLError as e:  # pragma: no cover  # pylint: disable=invalid-name
+        # pragma: no cover
+        except URLError as e:  # pylint: disable=invalid-name
             print('%s import failed: %s' % (service_name, e.reason))
             return False
         data = image.read()
@@ -203,7 +206,8 @@ class Photo(BaseAccountModel):
         img = Image.open(BytesIO(self.data))
 
         # This should be anyway checked during save...
-        dimensions['a'], dimensions['b'] = img.size  # pylint: disable=invalid-name
+        dimensions['a'], \
+            dimensions['b'] = img.size  # pylint: disable=invalid-name
         if dimensions['a'] > MAX_PIXELS or dimensions['b'] > MAX_PIXELS:
             messages.error(
                 request,
@@ -215,11 +219,14 @@ class Photo(BaseAccountModel):
             dimensions['w'], dimensions['h'] = dimensions['a'], dimensions['b']
             min_from_w_h = min(dimensions['w'], dimensions['h'])
             dimensions['w'], dimensions['h'] = min_from_w_h, min_from_w_h
-        elif dimensions['w'] < 0 or \
-            (dimensions['x'] + dimensions['w']) > dimensions['a'] or \
-             dimensions['h'] < 0 or \
-             (dimensions['y'] + dimensions['h']) > dimensions['b']:
-            messages.error(request, _('Crop outside of original image bounding box'))
+        elif dimensions['w'] < 0 or (
+                dimensions['x'] + dimensions['w']
+            ) > dimensions['a'] or dimensions['h'] < 0 or (
+                dimensions['y'] + dimensions['h']
+            ) > dimensions['b']:
+            messages.error(
+                request,
+                _('Crop outside of original image bounding box'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
         cropped = img.crop((
@@ -248,7 +255,8 @@ class Photo(BaseAccountModel):
         return '%s (%i) from %s' % (self.format, self.pk, self.user)
 
 
-class ConfirmedEmailManager(models.Manager):  # pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
+class ConfirmedEmailManager(models.Manager):
     '''
     Manager for our confirmed email addresses model
     '''
@@ -312,7 +320,9 @@ class ConfirmedEmail(BaseAccountModel):
         self.digest = hashlib.md5(
             self.email.strip().lower().encode('utf-8')
         ).hexdigest()
-        self.digest_sha256 = hashlib.sha256(self.email.strip().lower().encode('utf-8')).hexdigest()
+        self.digest_sha256 = hashlib.sha256(
+            self.email.strip().lower().encode('utf-8')
+        ).hexdigest()
         return super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
@@ -336,9 +346,15 @@ class UnconfirmedEmail(BaseAccountModel):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         hash_object = hashlib.new('sha256')
-        hash_object.update(urandom(1024) + self.user.username.encode('utf-8'))  # pylint: disable=no-member
+        hash_object.update(
+            urandom(1024) + self.user.username.encode('utf-8')  # pylint: disable=no-member
+        )  # pylint: disable=no-member
         self.verification_key = hash_object.hexdigest()
-        super(UnconfirmedEmail, self).save(force_insert, force_update, using, update_fields)
+        super(UnconfirmedEmail, self).save(
+            force_insert,
+            force_update,
+            using,
+            update_fields)
 
     def __str__(self):
         return '%s (%i) from %s' % (self.email, self.pk, self.user)
@@ -421,7 +437,10 @@ class OpenIDNonce(models.Model):
     salt = models.CharField(max_length=128)
 
     def __str__(self):
-        return '%s (%i) (timestamp: %i)' % (self.server_url, self.pk, self.timestamp)
+        return '%s (%i) (timestamp: %i)' % (
+            self.server_url,
+            self.pk,
+            self.timestamp)
 
 
 class OpenIDAssociation(models.Model):
@@ -436,7 +455,11 @@ class OpenIDAssociation(models.Model):
     assoc_type = models.TextField(max_length=64)
 
     def __str__(self):
-        return '%s (%i) (%s, lifetime: %i)' % (self.server_url, self.pk, self.assoc_type, self.lifetime)
+        return '%s (%i) (%s, lifetime: %i)' % (
+            self.server_url,
+            self.pk,
+            self.assoc_type,
+            self.lifetime)
 
 
 class DjangoOpenIDStore(OpenIDStore):
@@ -466,9 +489,11 @@ class DjangoOpenIDStore(OpenIDStore):
         assocs = []
         if handle is not None:
             assocs = OpenIDAssociation.objects.filter(  # pylint: disable=no-member
-                server_url=server_url, handle=handle)
+                server_url=server_url,
+                handle=handle)
         else:
-            assocs = OpenIDAssociation.objects.filter(server_url=server_url)  # pylint: disable=no-member
+            assocs = OpenIDAssociation.objects.filter(  # pylint: disable=no-member
+                server_url=server_url)
         if not assocs:
             return None
         associations = []
@@ -482,8 +507,10 @@ class DjangoOpenIDStore(OpenIDStore):
                                          assoc.assoc_type)
             expires = 0
             try:
-                expires = association.getExpiresIn()  # pylint: disable=no-member
-            except Exception as e:  # pylint: disable=invalid-name,broad-except,unused-variable
+                # pylint: disable=no-member
+                expires = association.getExpiresIn()
+            # pylint: disable=invalid-name,broad-except,unused-variable
+            except Exception as e:
                 expires = association.expiresIn
             if expires == 0:
                 self.removeAssociation(server_url, assoc.handle)
@@ -492,7 +519,6 @@ class DjangoOpenIDStore(OpenIDStore):
         if not associations:
             return None
         return associations[-1][1]
-
 
     @staticmethod
     def removeAssociation(server_url, handle):  # pragma: no cover
@@ -533,7 +559,8 @@ class DjangoOpenIDStore(OpenIDStore):
         Helper method to cleanup nonces
         '''
         timestamp = int(time.time()) - oidnonce.SKEW
-        OpenIDNonce.objects.filter(timestamp__lt=timestamp).delete()  # pylint: disable=no-member
+        # pylint: disable=no-member
+        OpenIDNonce.objects.filter(timestamp__lt=timestamp).delete()
 
     @staticmethod
     def cleanupAssociations():  # pragma: no cover
