@@ -17,9 +17,11 @@ from django.contrib import messages
 from django.db import models
 from django.utils import timezone
 from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from openid.association import Association as OIDAssociation
 from openid.store import nonce as oidnonce
 from openid.store.interface import OpenIDStore
@@ -29,6 +31,7 @@ from libravatar import libravatar_url
 from ivatar.settings import MAX_LENGTH_EMAIL, logger
 from ivatar.settings import MAX_PIXELS, AVATAR_MAX_SIZE, JPEG_QUALITY
 from ivatar.settings import MAX_LENGTH_URL
+from ivatar.settings import SECURE_BASE_URL, SITE_NAME, SERVER_EMAIL
 from .gravatar import get_photo as get_gravatar_photo
 
 
@@ -257,7 +260,7 @@ class Photo(BaseAccountModel):
         return HttpResponseRedirect(reverse_lazy('profile'))
 
     def __str__(self):
-        return '%s (%i) from %s' % (self.format, self.pk, self.user)
+        return '%s (%i) from %s' % (self.format, self.pk or 0, self.user)
 
 
 # pylint: disable=too-few-public-methods
@@ -360,6 +363,27 @@ class UnconfirmedEmail(BaseAccountModel):
             force_update,
             using,
             update_fields)
+
+    def send_confirmation_mail(self, url=SECURE_BASE_URL):
+        '''
+        Send confirmation mail to that mail address
+        '''
+        link = url + \
+            reverse(
+                'confirm_email',
+                kwargs={'verification_key': self.verification_key})
+        email_subject = _('Confirm your email address on %s') % \
+            SITE_NAME
+        email_body = render_to_string('email_confirmation.txt', {
+            'verification_link': link,
+            'site_name': SITE_NAME,
+        })
+        # if settings.DEBUG:
+        #    print('DEBUG: %s' % link)
+        send_mail(
+            email_subject, email_body, SERVER_EMAIL,
+            [self.email])
+        return True
 
     def __str__(self):
         return '%s (%i) from %s' % (self.email, self.pk, self.user)

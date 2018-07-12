@@ -5,6 +5,7 @@ import io
 from urllib.request import urlopen
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
@@ -31,7 +32,7 @@ from .gravatar import get_photo as get_gravatar_photo
 from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
-from .forms import UpdatePreferenceForm
+from .forms import UpdatePreferenceForm, UploadLibravatarExportForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
 from .models import UserPreference
@@ -690,6 +691,7 @@ class CropPhotoView(TemplateView):
 
         return photo.perform_crop(request, dimensions, email, openid)
 
+
 @method_decorator(login_required, name='dispatch')  # pylint: disable=too-many-ancestors
 class UserPreferenceView(FormView, UpdateView):
     '''
@@ -702,3 +704,21 @@ class UserPreferenceView(FormView, UpdateView):
 
     def get_object(self, queryset=None):
         return self.request.user.userpreference
+
+
+@method_decorator(login_required, name='dispatch')
+class UploadLibravatarExportView(SuccessMessageMixin, FormView):
+    '''
+    View class responsible for libravatar user data export upload
+    '''
+    template_name = 'upload_libravatar_export.html'
+    form_class = UploadLibravatarExportForm
+    success_message = _('Successfully uploaded')
+    success_url = reverse_lazy('profile')
+    model = User
+
+    def form_valid(self, form):
+        data = self.request.FILES['export_file']
+
+        form.save(self.request, data)
+        return super().form_valid(form)

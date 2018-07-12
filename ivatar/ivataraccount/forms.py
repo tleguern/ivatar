@@ -2,21 +2,26 @@
 Classes for our ivatar.ivataraccount.forms
 '''
 from urllib.parse import urlsplit, urlunsplit
+from io import BytesIO
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.contrib import messages
 
 from ipware import get_client_ip
 
 from ivatar import settings
 from ivatar.settings import MIN_LENGTH_EMAIL, MAX_LENGTH_EMAIL
 from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
+from ivatar.settings import JPEG_QUALITY
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
 from . models import UnconfirmedOpenId, ConfirmedOpenId
 from . models import UserPreference
+from . models import pil_format, file_format
+from . read_libravatar_export import read_gzdata as libravatar_read_gzdata
 
 MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT = 5
 
@@ -76,22 +81,7 @@ class AddEmailForm(forms.Form):
         unconfirmed.email = self.cleaned_data['email']
         unconfirmed.user = user
         unconfirmed.save()
-
-        link = request.build_absolute_uri('/')[:-1] + \
-            reverse(
-                'confirm_email',
-                kwargs={'verification_key': unconfirmed.verification_key})
-        email_subject = _('Confirm your email address on %s') % \
-            settings.SITE_NAME
-        email_body = render_to_string('email_confirmation.txt', {
-            'verification_link': link,
-            'site_name': settings.SITE_NAME,
-        })
-        # if settings.DEBUG:
-        #    print('DEBUG: %s' % link)
-        send_mail(
-            email_subject, email_body, settings.SERVER_EMAIL,
-            [unconfirmed.email])
+        unconfirmed.send_confirmation_mail(url=request.build_absolute_uri('/')[:-1])
         return True
 
 
@@ -182,6 +172,7 @@ class AddOpenIDForm(forms.Form):
 
         return unconfirmed.pk
 
+
 class UpdatePreferenceForm(forms.ModelForm):
     '''
     Form for updating user preferences
@@ -193,3 +184,68 @@ class UpdatePreferenceForm(forms.ModelForm):
         '''
         model = UserPreference
         fields = ['theme']
+
+
+class UploadLibravatarExportForm(forms.Form):
+    '''
+    Form handling libravatar user export upload
+    '''
+    export_file = forms.FileField(
+        label=_('Export file'),
+        error_messages={'required': _('You must choose an export file to upload.')})
+    not_porn = forms.BooleanField(
+        label=_('suitable for all ages (i.e. no offensive content)'),
+        required=True,
+        error_messages={
+            'required':
+            _('We only host "G-rated" images and so this field must\
+              be checked.')
+        })
+    can_distribute = forms.BooleanField(
+        label=_('can be freely copied'),
+        required=True,
+        error_messages={
+            'required':
+            _('This field must be checked since we need to be able to\
+              distribute photos to third parties.')
+        })
+
+    @staticmethod
+    def save(request, data):
+        '''
+        Save the models and assign it to the current user
+        '''
+        items = libravatar_read_gzdata(data.read())
+        for email in items['emails']:
+            if not ConfirmedEmail.objects.filter(email=email) and \
+                    not UnconfirmedEmail.objects.filter(email=email):  # pylint: disable=no-member
+                try:
+                    unconfirmed = UnconfirmedEmail.objects.create(  # pylint: disable=no-member
+                        user=request.user,
+                        email=email
+                    )
+                    unconfirmed.save()
+                    unconfirmed.send_confirmation_mail(url=request.build_absolute_uri('/')[:-1])
+                except Exception as e:   # pylint: disable=broad-except,invalid-name
+                    # Debugging only
+                    print('Exception while trying to import mail addresses: %s' % e)
+        if 'openids' in items:
+            messages.warning(
+                request,
+                _('You have OpenIDs in your export file, but we cannot\
+                        import those at the moment'))
+
+        for pilobj in items['photos']:
+            # Is there a reasonable way to check if that photo already exists!?
+            try:
+                data = BytesIO()
+                pilobj.save(data, pilobj.format, quality=JPEG_QUALITY)
+                data.seek(0)
+                photo = Photo()
+                photo.user = request.user
+                photo.ip_address = get_client_ip(request)[0]
+                photo.format = file_format(pilobj.format)
+                photo.data = data.read()
+                photo.save()
+            except Exception:  # pylint: disable=broad-except
+                pass
