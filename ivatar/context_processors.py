@@ -26,8 +26,9 @@ def basepage(request):
     context['SECURE_BASE_URL'] = SECURE_BASE_URL
     context['max_emails'] = False
     if request.user:
-        unconfirmed = request.user.unconfirmedemail_set.count()
-        if unconfirmed >= MAX_NUM_UNCONFIRMED_EMAILS:
-            context['max_emails'] = True
+        if not request.user.is_anonymous:
+            unconfirmed = request.user.unconfirmedemail_set.count()
+            if unconfirmed >= MAX_NUM_UNCONFIRMED_EMAILS:
+                context['max_emails'] = True
         
     return context
