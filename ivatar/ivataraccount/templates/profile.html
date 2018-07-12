@@ -19,55 +19,71 @@
 <style>
 .action-item:hover span {
     display: inline !important;
+}
+@media screen and (max-width: 320px) {
+  .action-item, .btn {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+  }
+}
 </style>
 
 {% if user.confirmedemail_set.count or user.confirmedopenid_set.count %}
 <p>{% trans 'You have the following confirmed identities:' %}</p>
 <ul class="horizontal-list avatar-list">
     {% for email in user.confirmedemail_set.all %}
-      <li>
+      <li style="float:left;">
         <form action="{% url 'remove_confirmed_email' email.id %}" method="post">{% csrf_token %}
-          <a href="{% url 'assign_photo_email' email.id %}">
-            {% if email.photo %}
-                <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' email.photo.id %}" alt="">
-            {% else %}
-                <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/64.png' %}" alt="Nobody">
-            {% endif %}
-          </a>
-          <div style="min-width: 280px;">{{ email.email }}</div>
-          <br/>
-          <a class="btn btn-light action-item" href="{% url 'assign_photo_email' email.id %}"
-            role="button" title="{% trans 'Change photo' %}">
-            <i class="fa fa-edit"></i>
-            <span class="d-none">{% trans 'Change' %}</span>
-          </a>
-          <button type="submit" class="btn btn-danger action-item" title="{% trans 'Remove' %}">
-            <i class="fa fa-trash"></i>
-            <span class="d-none">{% trans 'Delete' %}</span>
-          </button>
+            <div style="float:left; min-width: 80px; min-height: 80px;">
+              <a href="{% url 'assign_photo_email' email.id %}">
+                {% if email.photo %}
+                  <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' email.photo.id %}" alt="">
+                {% else %}
+                  <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/80.png' %}" alt="Nobody">
+                {% endif %}
+              </a>
+            </div>
+            <div class="d-none d-sm-block" style="min-width: 320px;">{{ email.email|truncatechars:40 }}</div>
+            <div style="display:flex;">
+              <a class="btn btn-light action-item" href="{% url 'assign_photo_email' email.id %}"
+                role="button" title="{% trans 'Change photo' %}">
+                <i class="fa fa-edit"></i>
+                <span class="d-none">{% trans 'Change' %}</span>
+              </a>
+              <button type="submit" class="btn btn-danger action-item" title="{% trans 'Remove' %}">
+                <i class="fa fa-trash"></i>
+                <span class="d-none">{% trans 'Delete' %}</span>
+              </button>
+            </div>
+            <div class="d-block d-sm-none" style="min-width: 320;">{{ email.email|truncatechars:40 }}</div>
         </form>
       </li>
     {% endfor %}
     {% for openid in user.confirmedopenid_set.all %}
-      <li>
+      <li style="float:left;">
         <form action="{% url 'remove_confirmed_openid' openid.id %}" method="post">{% csrf_token %}
-          <a href="{% url 'assign_photo_openid' openid.id %}">
-          {% if openid.photo %}
-            <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' openid.photo.id %}" alt=""></a>
-          {% else %}
-            <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/64.png' %}" alt=""></a>
-          {% endif %}
-          {{ openid.openid }}
-          <br/>
-          <a class="btn btn-light action-item" href="{% url 'assign_photo_openid' openid.pk %}"
-            role="button" title="{% trans 'Change photo' %}">
-            <i class="fa fa-edit"></i>
-            <span class="d-none">{% trans 'Change' %}</span>
-          </a>
-          <button type="submit" class="btn btn-danger action-item" title="{% trans 'Remove' %}">
-            <i class="fa fa-trash"></i>
-            <span class="d-none">{% trans 'Delete' %}</span>
-          </button>
+            <div style="float:left; min-width: 80px; min-height: 80px;">
+              <a href="{% url 'assign_photo_openid' openid.id %}">
+                {% if openid.photo %}
+                  <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' openid.photo.id %}" alt="">
+                {% else %}
+                  <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/80.png' %}" alt="">
+                {% endif %}
+              </a>
+            </div>
+            <div class="d-none d-sm-block" style="min-width: 320px;">{{ openid.openid|truncatechars:40 }}</div>
+            <div style="display:flex;">
+              <a class="btn btn-light action-item" href="{% url 'assign_photo_openid' openid.pk %}"
+                role="button" title="{% trans 'Change photo' %}">
+                <i class="fa fa-edit"></i>
+                <span class="d-none">{% trans 'Change' %}</span>
+              </a>
+              <button type="submit" class="btn btn-danger action-item" title="{% trans 'Remove' %}">
+                <i class="fa fa-trash"></i>
+                <span class="d-none">{% trans 'Delete' %}</span>
+              </button>
+            </div>
+            <div class="d-block d-sm-none" style="min-width: 320;">{{ openid.openid|truncatechars:40 }}</div>
         </form>
       </li>
     {% endfor %}

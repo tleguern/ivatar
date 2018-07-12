@@ -201,17 +201,6 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
         Handle post request - assign photo to email
         '''
         photo = None
-        if 'photo_id' not in request.POST:
-            messages.error(request,
-                           _('Invalid request [photo_id] missing'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
-
-        try:
-            photo = self.model.objects.get(  # pylint: disable=no-member
-                id=request.POST['photo_id'], user=request.user)
-        except self.model.DoesNotExist:  # pylint: disable=no-member
-            messages.error(request, _('Photo does not exist'))
-            return HttpResponseRedirect(reverse_lazy('profile'))
 
         try:
             email = ConfirmedEmail.objects.get(
@@ -220,7 +209,21 @@ class AssignPhotoEmailView(SuccessMessageMixin, TemplateView):
             messages.error(request, _('Invalid request'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
-        email.photo = photo
+        if 'photoNone' in request.POST:
+            email.photo = None
+        else:
+            if 'photo_id' not in request.POST:
+                messages.error(request,
+                               _('Invalid request [photo_id] missing'))
+                return HttpResponseRedirect(reverse_lazy('profile'))
+
+            try:
+                photo = self.model.objects.get(  # pylint: disable=no-member
+                    id=request.POST['photo_id'], user=request.user)
+            except self.model.DoesNotExist:  # pylint: disable=no-member
+                messages.error(request, _('Photo does not exist'))
+                return HttpResponseRedirect(reverse_lazy('profile'))
+            email.photo = photo
         email.save()
 
         messages.success(request, _('Successfully changed photo'))
