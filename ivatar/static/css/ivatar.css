@@ -162,10 +162,9 @@ ul li {
   border-color: #000;
   border-radius: 8px;
   border-style: solid;
-  color: #fff;
   font-size: 1.5em;
+  color: black !important;
   padding: 3px 5px 5px 5px;
-  text-decoration: none;
 }
 
 #agpl-button {
