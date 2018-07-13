@@ -93,6 +93,14 @@ a {
   margin: 0 8px 0 0;
 }
 
+@media screen and (max-width: 414px) {
+  .avatar-list {
+    position: relative;
+    left: -30px;
+  }
+}
+
+
 ul li {
   list-style-type: none;
 }
