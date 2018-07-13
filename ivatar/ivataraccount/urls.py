@@ -17,6 +17,7 @@ from . views import UploadPhotoView, AssignPhotoOpenIDView
 from . views import AddOpenIDView, RedirectOpenIDView, ConfirmOpenIDView
 from . views import CropPhotoView
 from . views import UserPreferenceView, UploadLibravatarExportView
+from . views import ResendConfirmationMailView
 
 # Define URL patterns, self documenting
 # To see the fancy, colorful evaluation of these use:
@@ -87,4 +88,6 @@ urlpatterns = [  # pylint: disable=invalid-name
     url(r'upload_export/$', UploadLibravatarExportView.as_view(), name='upload_export'),
     url(r'upload_export/(?P<save>save)$',
         UploadLibravatarExportView.as_view(), name='upload_export'),
+    url(r'resend_confirmation_mail/(?P<email_id>\d+)',
+        ResendConfirmationMailView.as_view(), name='resend_confirmation_mail'),
 ]
