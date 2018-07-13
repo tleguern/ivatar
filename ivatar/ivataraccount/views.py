@@ -4,8 +4,8 @@ View classes for ivatar/ivataraccount/
 from io import BytesIO
 from urllib.request import urlopen
 import base64
-
 from PIL import Image
+from urllib.request import urlopen
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
