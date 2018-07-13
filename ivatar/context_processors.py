@@ -30,5 +30,5 @@ def basepage(request):
             unconfirmed = request.user.unconfirmedemail_set.count()
             if unconfirmed >= MAX_NUM_UNCONFIRMED_EMAILS:
                 context['max_emails'] = True
-        
+
     return context

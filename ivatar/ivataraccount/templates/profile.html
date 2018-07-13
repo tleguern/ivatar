@@ -34,7 +34,7 @@
     {% for email in user.confirmedemail_set.all %}
       <li style="float:left;">
         <form action="{% url 'remove_confirmed_email' email.id %}" method="post">{% csrf_token %}
-            <div style="float:left; min-width: 80px; min-height: 80px;">
+            <div style="float:left; width: 80px; height: 80px;">
               <a href="{% url 'assign_photo_email' email.id %}">
                 {% if email.photo %}
                   <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' email.photo.id %}" alt="">
@@ -55,7 +55,7 @@
                 <span class="d-none">{% trans 'Delete' %}</span>
               </button>
             </div>
-            <div class="d-block d-sm-none" style="min-width: 320px;">{{ email.email|truncatechars:40 }}</div>
+            <div class="d-block d-sm-none" style="min-width: 320px;">{{ email.email|truncatechars:30 }}</div>
         </form>
       </li>
     {% endfor %}
@@ -83,7 +83,7 @@
                 <span class="d-none">{% trans 'Delete' %}</span>
               </button>
             </div>
-            <div class="d-block d-sm-none" style="min-width: 320px;">{{ openid.openid|truncatechars:40 }}</div>
+            <div class="d-block d-sm-none" style="min-width: 320px;">{{ openid.openid|truncatechars:30 }}</div>
         </form>
       </li>
     {% endfor %}

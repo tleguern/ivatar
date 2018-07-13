@@ -1,0 +1,20 @@
+{% extends 'base.html' %}                                                                                                                      
+{% load i18n %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans 'Upload an export from libravatar' %} - ivatar{% endblock title %}
+
+{% block content %}
+  <h1>{% trans 'Upload an export from libravatar' %}</h1>
+
+  <div style="max-width:600px;">
+    <form enctype="multipart/form-data" method="post">{% csrf_token %}
+      {% bootstrap_form form %}
+      {% buttons %}
+        <button type="submit" class="btn btn-primary">{% trans 'Upload' %}</button>
+        <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
+      {% endbuttons %}
+    </form>
+  </div>
+{% endblock content %}
