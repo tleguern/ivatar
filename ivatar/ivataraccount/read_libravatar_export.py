@@ -49,13 +49,17 @@ def read_gzdata(gzdata=None):
                     photo.attrib['encoding'], photo.attrib['format'], e))
                 continue
             try:
-                img = Image.open(BytesIO(data))
+                Image.open(BytesIO(data))
+                # If it is a working image, we can use it
+                photo.text.replace('\n', '')
+                photos.append({
+                    'data': photo.text,
+                    'format': photo.attrib['format'],
+                })
             except Exception as e:  # pylint: disable=broad-except,invalid-name
                 print('Cannot decode photo; Encoding: %s, Format: %s: %s' % (
                     photo.attrib['encoding'], photo.attrib['format'], e))
                 continue
-
-            photos.append(img)
 
     return {
         'emails': emails,

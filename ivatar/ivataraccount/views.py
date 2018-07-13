@@ -1,8 +1,11 @@
 '''
 View classes for ivatar/ivataraccount/
 '''
-import io
+from io import BytesIO
 from urllib.request import urlopen
+import base64
+
+from PIL import Image
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -20,22 +23,22 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import render
 from django_openid_auth.models import UserOpenID
 
-from django_openid_auth.models import UserOpenID
 from openid import oidutil
 from openid.consumer import consumer
 
 from ipware import get_client_ip
 
 from libravatar import libravatar_url
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE, JPEG_QUALITY
 from .gravatar import get_photo as get_gravatar_photo
-
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE
 
 from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
 from .forms import UpdatePreferenceForm, UploadLibravatarExportForm
 from .models import UnconfirmedEmail, ConfirmedEmail, Photo
 from .models import UnconfirmedOpenId, ConfirmedOpenId, DjangoOpenIDStore
 from .models import UserPreference
+from .models import file_format
+from . read_libravatar_export import read_gzdata as libravatar_read_gzdata
 
 
 def openid_logging(message, level=0):
@@ -295,7 +298,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         if 'email_id' in kwargs:
             try:
                 addr = ConfirmedEmail.objects.get(pk=kwargs['email_id']).email
-            except:
+            except Exception:  # pylint: disable=broad-except
                 messages.error(
                     self.request,
                     _('Address does not exist'))
@@ -315,7 +318,8 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
             )
             try:
                 if libravatar_service_url:
-                    response = urlopen(libravatar_service_url)
+                    # if it doesn't work, it will be catched by except
+                    urlopen(libravatar_service_url)
                     context['photos'].append({
                         'service_url': libravatar_service_url,
                         'thumbnail_url': libravatar_service_url + '?s=80',
@@ -324,12 +328,13 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
                         'height': 80,
                         'service_name': 'Libravatar',
                     })
-            except Exception:
+            except Exception as e:  # pylint: disable=broad-except,invalid-name
+                print('Exception caught during photo import: %s' % e)
                 pass
 
         return context
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=no-self-use,unused-argument
+    def post(self, request, *args, **kwargs):  # pylint: disable=no-self-use,unused-argument,too-many-branches
         '''
         Handle post to photo import
         '''
@@ -400,7 +405,7 @@ class RawImageView(DetailView):
     def get(self, request, *args, **kwargs):
         photo = self.model.objects.get(pk=kwargs['pk'])  # pylint: disable=no-member
         return HttpResponse(
-            io.BytesIO(photo.data), content_type='image/%s' % photo.format)
+            BytesIO(photo.data), content_type='image/%s' % photo.format)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -717,8 +722,64 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('profile')
     model = User
 
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post request - choose items to import
+        '''
+        if 'save' in kwargs:  # pylint: disable=too-many-nested-blocks
+            if kwargs['save'] == 'save':
+                for arg in request.POST:
+                    if arg.startswith('email_'):
+                        email = request.POST[arg]
+                        if not ConfirmedEmail.objects.filter(email=email) and \
+                            not UnconfirmedEmail.objects.filter(email=email):  # pylint: disable=no-member
+                            try:
+                                unconfirmed = UnconfirmedEmail.objects.create(  # pylint: disable=no-member
+                                    user=request.user,
+                                    email=email
+                                )
+                                unconfirmed.save()
+                                unconfirmed.send_confirmation_mail(
+                                    url=request.build_absolute_uri('/')[:-1])
+                                messages.info(
+                                    request,
+                                    '%s: %s' %(
+                                        email,
+                                        _('address added successfully,\
+                                            confirmation mail sent')))
+                            except Exception as e:  # pylint: disable=broad-except,invalid-name
+                                # DEBUG
+                                print('Exception during adding mail address (%s): %s' % (email, e))
+
+                    if arg.startswith('photo'):
+                        try:
+                            data = base64.decodebytes(bytes(request.POST[arg], 'utf-8'))
+                        except Exception as e:  # pylint: disable=broad-except,invalid-name
+                            print('Cannot decode photo: %s' % e)
+                            continue
+                        try:
+                            pilobj = Image.open(BytesIO(data))
+                            out = BytesIO()
+                            pilobj.save(out, pilobj.format, quality=JPEG_QUALITY)
+                            out.seek(0)
+                            photo = Photo()
+                            photo.user = request.user
+                            photo.ip_address = get_client_ip(request)[0]
+                            photo.format = file_format(pilobj.format)
+                            photo.data = out.read()
+                            photo.save()
+                        except Exception as e:  # pylint: disable=broad-except,invalid-name
+                            print('Exception during save: %s' % e)
+                            continue
+
+                return HttpResponseRedirect(reverse_lazy('profile'))
+        return super().post(request, args, kwargs)
+
     def form_valid(self, form):
         data = self.request.FILES['export_file']
-
-        form.save(self.request, data)
-        return super().form_valid(form)
+        items = libravatar_read_gzdata(data.read())
+        # DEBUG print(items)
+        return render(self.request, 'choose_libravatar_export.html', {
+            'emails': items['emails'],
+            'photos': items['photos'],
+        })

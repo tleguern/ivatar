@@ -1,0 +1,40 @@
+{% extends 'base.html' %}                                                                                                                      
+{% load i18n %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans 'Choose items to be uploaded' %}{% endblock title %}
+
+{% block content %}
+  <h1>{% trans 'Choose items to be imported' %}</h1>
+
+  <div style="max-width:600px;">
+    <form method="post" action="{% url 'upload_export' 'save' %}">{% csrf_token %}
+      {% if emails %}
+        <p>
+          {% trans 'Email addresses we found in the export - existing ones will not be re-added' %}:
+        </p>
+        {% for email in emails %}
+          <input type="checkbox" checked name="email_{{ forloop.counter }}" value="{{ email }}"> {{ email }}</input><br/>
+        {% endfor %}
+      {% endif %}
+      <p/>
+      {% if photos %}
+        <p>
+          {% trans 'Photos we found in the export' %}:
+        </p>
+        {% for photo in photos %}
+        <input type="checkbox" checked name="photo_{{ forloop.counter }}" value="{{ photo.data }}">
+            <img style="max-width: 80px; max-height: 80px;" src="data:image/{{ photo.format }};base64,{{ photo.data }}"/>
+          </input>
+          <br/>
+        {% endfor %}
+      {% endif %}
+      <br/>
+      {% buttons %}
+        <button type="submit" class="btn btn-primary">{% trans 'Upload' %}</button>
+        <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
+      {% endbuttons %}
+    </form>
+  </div>
+{% endblock content %}

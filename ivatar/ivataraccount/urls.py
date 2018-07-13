@@ -85,4 +85,6 @@ urlpatterns = [  # pylint: disable=invalid-name
     url(r'crop_photo/(?P<pk>\d+)', CropPhotoView.as_view(), name='crop_photo'),
     url(r'pref/$', UserPreferenceView.as_view(), name='user_preference'),
     url(r'upload_export/$', UploadLibravatarExportView.as_view(), name='upload_export'),
+    url(r'upload_export/(?P<save>save)$',
+        UploadLibravatarExportView.as_view(), name='upload_export'),
 ]
