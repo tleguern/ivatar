@@ -100,7 +100,7 @@
           {{ email.email }}
           <br/>
           <!-- TODO: Confirmation mail URL -->
-          <a class="btn btn-info btn-sm action-item" href="resend_confirmation_mail"
+          <a class="btn btn-info btn-sm action-item" href="{% url 'resend_confirmation_mail' email.pk %}"
             role="button" title="{% trans 'Resend confirmation mail' %}" style="color:white;">
             <i class="fa fa-envelope"></i>
             <span class="d-none">{% trans 'Resend confirmation mail' %}</span>

@@ -783,3 +783,33 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
             'emails': items['emails'],
             'photos': items['photos'],
         })
+
+
+@method_decorator(login_required, name='dispatch')
+class ResendConfirmationMailView(View):
+    '''
+    View class for resending confirmation mail
+    '''
+    model = UnconfirmedEmail
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        '''
+        Handle post - resend confirmation mail for unconfirmed e-mail address
+        '''
+        try:
+            email = self.model.objects.get(  # pylint: disable=no-member
+                user=request.user, id=kwargs['email_id'])
+            try:
+                email.send_confirmation_mail(
+                    url=request.build_absolute_uri('/')[:-1])
+                messages.success(
+                    request, '%s: %s' %
+                    (_('Confirmation mail sent to'), email.email))
+            except Exception as e:  # pylint: disable=broad-except,invalid-name
+                messages.error(
+                    request, '%s %s: %s' %
+                    (_('Unable to send confirmation email for'),
+                     email.email, e))
+        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
+            messages.error(request, _('ID does not exist'))
+        return HttpResponseRedirect(reverse_lazy('profile'))
