@@ -13,6 +13,8 @@
           {% if request.user.is_authenticated %}
             <a class="dropdown-item" href="{% url 'profile' %}"><i class="fa fa-image" aria-hidden="true"></i> {% trans 'Profile' %}</a>
             <a class="dropdown-item" href="{% url 'user_preference' %}"><i class="fa fa-cog" aria-hidden="true"></i> {% trans 'Preferences' %}</a>
+            <a class="dropdown-item" href="{% url 'import_photo' %}"><i class="fa fa-envelope-square" aria-hidden="true"></i> {% trans 'Import photo via mail address' %}</a>
+            <a class="dropdown-item" href="{% url 'upload_export' %}"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {% trans 'Import libravatar XML export' %}</a>
             <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> {% trans 'Logout' %}</a>
           {% else %}
             <a class="dropdown-item" href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i> {% trans 'Local' %}</a>
