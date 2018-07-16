@@ -8,3 +8,6 @@ htmlcov/
 .pyre
 .vscode
 **.pyc
+.ropeproject/
+db.sqlite3.SAVE
+
