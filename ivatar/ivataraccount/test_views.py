@@ -489,12 +489,8 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(
-            os.path.join(
-                settings.STATIC_ROOT,
-                'img',
-                'deadbeef.png'),
-            'rb') as photo:
+        with open(os.path.join(settings.STATIC_ROOT, 'img', 'deadbeef.png'),
+                  'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -571,12 +567,8 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(
-            os.path.join(
-                settings.STATIC_ROOT,
-                'img',
-                'mm.svg'),
-            'rb') as photo:
+        with open(os.path.join(settings.STATIC_ROOT, 'img', 'mm.svg'),
+                  'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -594,12 +586,8 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(
-            os.path.join(
-                settings.STATIC_ROOT,
-                'img',
-                'broken.gif'),
-            'rb') as photo:
+        with open(os.path.join(settings.STATIC_ROOT, 'img', 'broken.gif'),
+                  'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -620,12 +608,9 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.login()
         url = reverse('upload_photo')
         # rb => Read binary
-        with open(
-            os.path.join(
-                settings.STATIC_ROOT,
-                'img',
-                'hackergotchi_test.tif'),
-            'rb') as photo:
+        with open(os.path.join(settings.STATIC_ROOT, 'img',
+                               'hackergotchi_test.tif'),
+                  'rb') as photo:
             response = self.client.post(url, {
                 'photo': photo,
                 'not_porn': True,
@@ -859,7 +844,6 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             'form',
             'openid',
             'OpenID already added and confirmed!')
-
 
     def test_assign_photo_to_openid(self):
         '''

@@ -4,8 +4,8 @@ View classes for ivatar/ivataraccount/
 from io import BytesIO
 from urllib.request import urlopen
 import base64
+
 from PIL import Image
-from urllib.request import urlopen
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -731,8 +731,8 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
                 for arg in request.POST:
                     if arg.startswith('email_'):
                         email = request.POST[arg]
-                        if not ConfirmedEmail.objects.filter(email=email) and \
-                            not UnconfirmedEmail.objects.filter(email=email):  # pylint: disable=no-member
+                        if (not ConfirmedEmail.objects.filter(email=email)
+                                and not UnconfirmedEmail.objects.filter(email=email)):  # pylint: disable=no-member
                             try:
                                 unconfirmed = UnconfirmedEmail.objects.create(  # pylint: disable=no-member
                                     user=request.user,
@@ -743,7 +743,7 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
                                     url=request.build_absolute_uri('/')[:-1])
                                 messages.info(
                                     request,
-                                    '%s: %s' %(
+                                    '%s: %s' % (
                                         email,
                                         _('address added successfully,\
                                             confirmation mail sent')))

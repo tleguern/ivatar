@@ -227,11 +227,10 @@ class Photo(BaseAccountModel):
             dimensions['w'], dimensions['h'] = dimensions['a'], dimensions['b']
             min_from_w_h = min(dimensions['w'], dimensions['h'])
             dimensions['w'], dimensions['h'] = min_from_w_h, min_from_w_h
-        elif dimensions['w'] < 0 or (
-                dimensions['x'] + dimensions['w']
-            ) > dimensions['a'] or dimensions['h'] < 0 or (
-                dimensions['y'] + dimensions['h']
-            ) > dimensions['b']:
+        elif ((dimensions['w'] < 0)
+              or ((dimensions['x'] + dimensions['w']) > dimensions['a'])
+              or (dimensions['h'] < 0)
+              or ((dimensions['y'] + dimensions['h']) > dimensions['b'])):
             messages.error(
                 request,
                 _('Crop outside of original image bounding box'))

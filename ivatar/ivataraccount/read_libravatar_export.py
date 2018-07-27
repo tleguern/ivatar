@@ -8,7 +8,9 @@ import xml.etree.ElementTree
 import base64
 from PIL import Image
 
+
 SCHEMAROOT = 'https://www.libravatar.org/schemas/export/0.2'
+
 
 def read_gzdata(gzdata=None):
     '''

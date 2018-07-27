@@ -7,6 +7,7 @@ from ivatar.settings import IVATAR_VERSION, SITE_NAME, MAX_PHOTO_SIZE
 from ivatar.settings import BASE_URL, SECURE_BASE_URL
 from ivatar.settings import MAX_NUM_UNCONFIRMED_EMAILS
 
+
 def basepage(request):
     '''
     Our contextprocessor adds additional context variables
