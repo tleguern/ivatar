@@ -141,15 +141,15 @@ class Photo(BaseAccountModel):
         try:
             image = urlopen(image_url)
         # No idea how to test this
-        # pragma: no cover  # pylint: disable=invalid-name
-        except HTTPError as e:
+        # pragma: no cover
+        except HTTPError as exc:
             print('%s import failed with an HTTP error: %s' %
-                  (service_name, e.code))
+                  (service_name, exc.code))
             return False
         # No idea how to test this
         # pragma: no cover
-        except URLError as e:  # pylint: disable=invalid-name
-            print('%s import failed: %s' % (service_name, e.reason))
+        except URLError as exc:
+            print('%s import failed: %s' % (service_name, exc.reason))
             return False
         data = image.read()
 
