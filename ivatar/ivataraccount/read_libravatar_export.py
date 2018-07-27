@@ -2,6 +2,7 @@
 Reading libravatar export
 '''
 
+import binascii
 from io import BytesIO
 import gzip
 import xml.etree.ElementTree
@@ -46,22 +47,23 @@ def read_gzdata(gzdata=None):
         if photo.tag == '{%s}photo' % SCHEMAROOT:
             try:
                 data = base64.decodebytes(bytes(photo.text, 'utf-8'))
-            except Exception as e:  # pylint: disable=broad-except,invalid-name
+            except binascii.Error as exc:
                 print('Cannot decode photo; Encoding: %s, Format: %s: %s' % (
-                    photo.attrib['encoding'], photo.attrib['format'], e))
+                    photo.attrib['encoding'], photo.attrib['format'], exc))
                 continue
             try:
                 Image.open(BytesIO(data))
+            except Exception as exc:  # pylint: disable=broad-except
+                print('Cannot decode photo; Encoding: %s, Format: %s: %s' % (
+                    photo.attrib['encoding'], photo.attrib['format'], exc))
+                continue
+            else:
                 # If it is a working image, we can use it
                 photo.text.replace('\n', '')
                 photos.append({
                     'data': photo.text,
                     'format': photo.attrib['format'],
                 })
-            except Exception as e:  # pylint: disable=broad-except,invalid-name
-                print('Cannot decode photo; Encoding: %s, Format: %s: %s' % (
-                    photo.attrib['encoding'], photo.attrib['format'], e))
-                continue
 
     return {
         'emails': emails,

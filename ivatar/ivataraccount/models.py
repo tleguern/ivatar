@@ -176,9 +176,9 @@ class Photo(BaseAccountModel):
         try:
             img = Image.open(BytesIO(self.data))
         # Testing? Ideas anyone?
-        except Exception as e:  # pylint: disable=invalid-name,broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             # For debugging only
-            print('Exception caught: %s' % e)
+            print('Exception caught: %s' % exc)
             return False
         self.format = file_format(img.format)
         if not self.format:
@@ -537,8 +537,7 @@ class DjangoOpenIDStore(OpenIDStore):
             try:
                 # pylint: disable=no-member
                 expires = association.getExpiresIn()
-            # pylint: disable=invalid-name,broad-except,unused-variable
-            except Exception as e:
+            except AttributeError:
                 expires = association.expiresIn
             if expires == 0:
                 self.removeAssociation(server_url, assoc.handle)
