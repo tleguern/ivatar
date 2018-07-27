@@ -4,9 +4,11 @@ View classes for ivatar/ivataraccount/
 from io import BytesIO
 from urllib.request import urlopen
 import base64
-from PIL import Image
-from urllib.request import urlopen
+import binascii
 
+from PIL import Image
+
+from django.db.models import ProtectedError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
@@ -298,7 +300,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         if 'email_id' in kwargs:
             try:
                 addr = ConfirmedEmail.objects.get(pk=kwargs['email_id']).email
-            except Exception:  # pylint: disable=broad-except
+            except ConfirmedEmail.ObjectDoesNotExist:
                 messages.error(
                     self.request,
                     _('Address does not exist'))
@@ -316,10 +318,12 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
                 email=addr,
                 default=404,
             )
-            try:
-                if libravatar_service_url:
-                    # if it doesn't work, it will be catched by except
+            if libravatar_service_url:
+                try:
                     urlopen(libravatar_service_url)
+                except OSError as exc:
+                    print('Exception caught during photo import: {}'.format(exc))
+                else:
                     context['photos'].append({
                         'service_url': libravatar_service_url,
                         'thumbnail_url': libravatar_service_url + '?s=80',
@@ -328,9 +332,6 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
                         'height': 80,
                         'service_name': 'Libravatar',
                     })
-            except Exception as e:  # pylint: disable=broad-except,invalid-name
-                print('Exception caught during photo import: %s' % e)
-                pass
 
         return context
 
@@ -423,7 +424,7 @@ class DeletePhotoView(SuccessMessageMixin, View):
             photo = self.model.objects.get(  # pylint: disable=no-member
                 pk=kwargs['pk'], user=request.user)
             photo.delete()
-        except Exception:  # pylint: disable=broad-except
+        except (self.model.DoesNotExist, ProtectedError):
             messages.error(
                 request,
                 _('No such image or no permission to delete it'))
@@ -558,12 +559,12 @@ class RedirectOpenIDView(View):
 
         try:
             auth_request = openid_consumer.begin(user_url)
-        except consumer.DiscoveryFailure as e:  # pylint: disable=invalid-name
-            messages.error(request, _('OpenID discovery failed: %s' % e))
+        except consumer.DiscoveryFailure as exc:
+            messages.error(request, _('OpenID discovery failed: %s' % exc))
             return HttpResponseRedirect(reverse_lazy('profile'))
-        except UnicodeDecodeError as e:  # pragma: no cover pylint: disable=invalid-name
+        except UnicodeDecodeError as exc:  # pragma: no cover
             msg = _('OpenID discovery failed (userid=%s) for %s: %s' %
-                    (request.user.id, user_url.encode('utf-8'), e))
+                    (request.user.id, user_url.encode('utf-8'), exc))
             print(msg)
             messages.error(request, msg)
 
@@ -684,14 +685,14 @@ class CropPhotoView(TemplateView):
         if 'email' in request.POST:
             try:
                 email = ConfirmedEmail.objects.get(email=request.POST['email'])
-            except Exception:  # pylint: disable=broad-except
+            except ConfirmedEmail.DoesNotExist:
                 pass  # Ignore automatic assignment
 
         if 'openid' in request.POST:
             try:
                 openid = ConfirmedOpenId.objects.get(  # pylint: disable=no-member
                     openid=request.POST['openid'])
-            except Exception:  # pylint: disable=broad-except
+            except ConfirmedOpenId.DoesNotExist:
                 pass  # Ignore automatic assignment
 
         return photo.perform_crop(request, dimensions, email, openid)
@@ -731,8 +732,8 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
                 for arg in request.POST:
                     if arg.startswith('email_'):
                         email = request.POST[arg]
-                        if not ConfirmedEmail.objects.filter(email=email) and \
-                            not UnconfirmedEmail.objects.filter(email=email):  # pylint: disable=no-member
+                        if (not ConfirmedEmail.objects.filter(email=email)
+                                and not UnconfirmedEmail.objects.filter(email=email)):  # pylint: disable=no-member
                             try:
                                 unconfirmed = UnconfirmedEmail.objects.create(  # pylint: disable=no-member
                                     user=request.user,
@@ -743,19 +744,20 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
                                     url=request.build_absolute_uri('/')[:-1])
                                 messages.info(
                                     request,
-                                    '%s: %s' %(
+                                    '%s: %s' % (
                                         email,
                                         _('address added successfully,\
                                             confirmation mail sent')))
-                            except Exception as e:  # pylint: disable=broad-except,invalid-name
+                            except Exception as exc:  # pylint: disable=broad-except
                                 # DEBUG
-                                print('Exception during adding mail address (%s): %s' % (email, e))
+                                print('Exception during adding mail address (%s): %s'
+                                      % (email, exc))
 
                     if arg.startswith('photo'):
                         try:
                             data = base64.decodebytes(bytes(request.POST[arg], 'utf-8'))
-                        except Exception as e:  # pylint: disable=broad-except,invalid-name
-                            print('Cannot decode photo: %s' % e)
+                        except binascii.Error as exc:
+                            print('Cannot decode photo: %s' % exc)
                             continue
                         try:
                             pilobj = Image.open(BytesIO(data))
@@ -768,8 +770,8 @@ class UploadLibravatarExportView(SuccessMessageMixin, FormView):
                             photo.format = file_format(pilobj.format)
                             photo.data = out.read()
                             photo.save()
-                        except Exception as e:  # pylint: disable=broad-except,invalid-name
-                            print('Exception during save: %s' % e)
+                        except Exception as exc:  # pylint: disable=broad-except
+                            print('Exception during save: %s' % exc)
                             continue
 
                 return HttpResponseRedirect(reverse_lazy('profile'))
@@ -799,17 +801,18 @@ class ResendConfirmationMailView(View):
         try:
             email = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['email_id'])
+        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
+            messages.error(request, _('ID does not exist'))
+        else:
             try:
                 email.send_confirmation_mail(
                     url=request.build_absolute_uri('/')[:-1])
                 messages.success(
                     request, '%s: %s' %
                     (_('Confirmation mail sent to'), email.email))
-            except Exception as e:  # pylint: disable=broad-except,invalid-name
+            except Exception as exc:  # pylint: disable=broad-except
                 messages.error(
                     request, '%s %s: %s' %
                     (_('Unable to send confirmation email for'),
-                     email.email, e))
-        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
-            messages.error(request, _('ID does not exist'))
+                     email.email, exc))
         return HttpResponseRedirect(reverse_lazy('profile'))

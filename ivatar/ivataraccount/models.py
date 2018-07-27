@@ -141,15 +141,15 @@ class Photo(BaseAccountModel):
         try:
             image = urlopen(image_url)
         # No idea how to test this
-        # pragma: no cover  # pylint: disable=invalid-name
-        except HTTPError as e:
+        # pragma: no cover
+        except HTTPError as exc:
             print('%s import failed with an HTTP error: %s' %
-                  (service_name, e.code))
+                  (service_name, exc.code))
             return False
         # No idea how to test this
         # pragma: no cover
-        except URLError as e:  # pylint: disable=invalid-name
-            print('%s import failed: %s' % (service_name, e.reason))
+        except URLError as exc:
+            print('%s import failed: %s' % (service_name, exc.reason))
             return False
         data = image.read()
 
@@ -176,9 +176,9 @@ class Photo(BaseAccountModel):
         try:
             img = Image.open(BytesIO(self.data))
         # Testing? Ideas anyone?
-        except Exception as e:  # pylint: disable=invalid-name,broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             # For debugging only
-            print('Exception caught: %s' % e)
+            print('Exception caught: %s' % exc)
             return False
         self.format = file_format(img.format)
         if not self.format:
@@ -201,7 +201,7 @@ class Photo(BaseAccountModel):
                 addr.save()
 
         if email:
-            # Explicitely asked
+            # Explicitly asked
             email.photo = self
             email.save()
 
@@ -227,11 +227,10 @@ class Photo(BaseAccountModel):
             dimensions['w'], dimensions['h'] = dimensions['a'], dimensions['b']
             min_from_w_h = min(dimensions['w'], dimensions['h'])
             dimensions['w'], dimensions['h'] = min_from_w_h, min_from_w_h
-        elif dimensions['w'] < 0 or (
-                dimensions['x'] + dimensions['w']
-            ) > dimensions['a'] or dimensions['h'] < 0 or (
-                dimensions['y'] + dimensions['h']
-            ) > dimensions['b']:
+        elif ((dimensions['w'] < 0)
+              or ((dimensions['x'] + dimensions['w']) > dimensions['a'])
+              or (dimensions['h'] < 0)
+              or ((dimensions['y'] + dimensions['h']) > dimensions['b'])):
             messages.error(
                 request,
                 _('Crop outside of original image bounding box'))
@@ -538,8 +537,7 @@ class DjangoOpenIDStore(OpenIDStore):
             try:
                 # pylint: disable=no-member
                 expires = association.getExpiresIn()
-            # pylint: disable=invalid-name,broad-except,unused-variable
-            except Exception as e:
+            except AttributeError:
                 expires = association.expiresIn
             if expires == 0:
                 self.removeAssociation(server_url, assoc.handle)
