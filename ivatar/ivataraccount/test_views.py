@@ -37,7 +37,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
     username = random_string()
     password = random_string()
     email = '%s@%s.%s' % (username, random_string(), random_string(2))
-    # Dunno why random tld doens't work, but I'm too lazy now to investigate
+    # Dunno why random tld doesn't work, but I'm too lazy now to investigate
     openid = 'http://%s.%s.%s/' % (username, random_string(), 'org')
 
     def login(self):
@@ -375,7 +375,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(
             response.status_code,
             200,
-            'deleting photo doesnt work?')
+            'deleting photo does not work?')
         self.assertEqual(
             str(list(response.context[0]['messages'])[0]),
             'Photo deleted successfully',

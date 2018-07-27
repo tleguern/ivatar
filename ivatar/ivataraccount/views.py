@@ -318,7 +318,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
             )
             try:
                 if libravatar_service_url:
-                    # if it doesn't work, it will be catched by except
+                    # if it doesn't work, it will be caught by except
                     urlopen(libravatar_service_url)
                     context['photos'].append({
                         'service_url': libravatar_service_url,

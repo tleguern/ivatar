@@ -201,7 +201,7 @@ class Photo(BaseAccountModel):
                 addr.save()
 
         if email:
-            # Explicitely asked
+            # Explicitly asked
             email.photo = self
             email.save()
 
