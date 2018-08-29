@@ -7,18 +7,22 @@
 
 <h1>{% trans 'Add a new OpenID' %}</h1>
 
-<p>{% trans 'Once you have confirmed this OpenID URL, you will be able to log into your account using that OpenID URL.' %}</p>
+<p>{% trans 'Once you have confirmed this OpenID URL, you will be able to log into your account using that OpenID URL.' %}<br/>
+{% trans 'You will be redirected to the authorisation page for the provider. If the process fails, you can remove the ID from this list and try adding it again.' %}</p>
+{% if form.openid.errors %}
+<div class="alert alert-danger" role="alert">{{ form.openid.errors }}</div>
+{% endif %}
+<div style="max-width:600px">
+<form action="{% url 'add_openid' %}" name="addopenid" method="post">
+{% csrf_token %}
 
-<form action="{% url 'add_openid' %}" name="addopenid" method="post">{% csrf_token %}
-
-  {{form.openid.errors}}
-  <p class="aligned wide">{{form.openid.label_tag}} {{form.openid}}</p>
-
-  <p class="hint">{% trans 'You will be redirected to the authorisation page for the provider. If the process fails, you can remove the ID from this list and try adding it again.' %}</p>
-
-  <p><input type="submit" value="{% trans 'Add' %}" />
-  &nbsp;<a href="{% url 'profile' %}">{% trans 'Cancel' %}</a></p>
+<div class="form-group">
+<label for="id_openid">{% trans 'OpenID' %}:</label>
+<input type="url" name="openid" value="https://" maxlength="255" minlength="11" required id="id_openid" autofocus class="form-control">
+</div>
+<button type="submit" class="btn btn-default">{% trans 'Add' %}</button>
 
 </form>
-
+</div>
+<div style="height:40px"></div>
 {% endblock content %}

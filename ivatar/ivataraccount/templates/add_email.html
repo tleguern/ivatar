@@ -5,26 +5,29 @@
 
 {% block content %}
 
-{% if form.errors %}
-    {% for error in form.non_field_errors %}
-        <div class="alert alert-danger">
-            <strong>{{ error|escape }}</strong>
-        </div>
-    {% endfor %}
-{% endif %}
-
 <h1>{% trans 'Add a new email address' %}</h1>
 
 <p>{% blocktrans %}Otherwise, type your email address in the box below and we will send you an email with a link to click on in order to verify that you own that email address.{% endblocktrans %}</p>
 
-<form action="{% url 'add_email' %}" name="addemail" method="post" id="form-addemail">{% csrf_token %}
+{% if form.errors %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">{{ error|escape }}</div>
+    {% endfor %}
+{% endif %}
+{% if form.email.errors %}
+<div class="alert alert-danger" role="alert">{{ form.email.errors }}</div>
+{% endif %}
+<div style="max-width:600px">
+<form action="{% url 'add_email' %}" name="addemail" method="post" id="form-addemail">
+{% csrf_token %}
 
-  {{ form.email.errors }}
-  <p class="aligned wide">{{ form.email.label_tag }} {{ form.email }}</p>
-
-  <p><input type="submit" value="{% trans 'Add' %}" />
-  &nbsp;<a href="{% url 'profile' %}">{% trans 'Cancel' %}</a></p>
+<div class="form-group">
+<label for="id_email">{% trans 'Email' %}:</label>
+<input type="text" name="email" autofocus required class="form-control" id="id_email">
+</div>
+<button type="submit" class="btn btn-default">{% trans 'Add' %}</button>
 
 </form>
-
+</div>
+<div style="height:40px"></div>
 {% endblock content %}

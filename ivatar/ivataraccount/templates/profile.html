@@ -26,154 +26,112 @@
     padding-right: 0.3em;
   }
 }
+.thumbnail {
+max-width:80px;
+max-height:80px;
+}
+.nobutton {
+background: none;
+color: inherit;
+border: none;
+padding: 0;
+font: inherit;
+cursor: pointer;
+outline: inherit;
+}
 </style>
 
 {% if user.confirmedemail_set.count or user.confirmedopenid_set.count %}
-<p>{% trans 'You have the following confirmed identities:' %}</p>
-<ul class="horizontal-list avatar-list">
+<h3>{% trans 'You have the following confirmed identities:' %}</h3>
+<div class="row">
     {% for email in user.confirmedemail_set.all %}
-      <li style="float:left;">
-        <form action="{% url 'remove_confirmed_email' email.id %}" method="post">{% csrf_token %}
-            <div style="float:left; width: 80px; height: 80px;">
-              <a href="{% url 'assign_photo_email' email.id %}">
-                {% if email.photo %}
-                  <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' email.photo.id %}" alt="">
-                {% else %}
-                  <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/80.png' %}" alt="Nobody">
-                {% endif %}
-              </a>
-            </div>
-            <div class="d-none d-sm-block" style="min-width: 320px;">{{ email.email|truncatechars:40 }}</div>
-            <div style="display:flex;">
-              <a class="btn btn-light action-item" href="{% url 'assign_photo_email' email.id %}"
-                role="button" title="{% trans 'Change photo' %}">
-                <i class="fa fa-edit"></i>
-                <span class="d-none">{% trans 'Change' %}</span>
-              </a>
-              <button type="submit" class="btn btn-danger action-item" title="{% trans 'Remove' %}">
-                <i class="fa fa-trash"></i>
-                <span class="d-none">{% trans 'Delete' %}</span>
-              </button>
-            </div>
-            <div class="d-block d-sm-none" style="min-width: 320px;">{{ email.email|truncatechars:30 }}</div>
+        <form action="{% url 'remove_confirmed_email' email.id %}" method="post">
+{% csrf_token %}
+<div class="panel panel-tortin" style="width:172px;margin-left:20px;float:left">
+  <div class="panel-heading" style="padding-right:0">
+    <h3 class="panel-title" title="{{ email.email }}" style="display:inline-flex"><a href="{% url 'assign_photo_email' email.id %}"><i class="fa fa-edit"></i></a>&nbsp;
+<button type="submit" class="nobutton" onclick="return confirm('{% trans 'Are you sure that you want to delete this email address?' %}')"><i class="fa fa-trash"></i></button>&nbsp;
+{{ email.email|truncatechars:12 }}</h3>
+</div>
+  <div class="panel-body" style="height:130px">
+        <center>
+            <img style="max-height:100px;max-width:100px" src="{% if email.photo %}{% url 'raw_image' email.photo.id %}{% else %}{% static '/img/nobody/80.png' %}{% endif %}">
+        </center>
+</div>
+</div>
         </form>
-      </li>
     {% endfor %}
     {% for openid in user.confirmedopenid_set.all %}
-      <li style="float:left;">
         <form action="{% url 'remove_confirmed_openid' openid.id %}" method="post">{% csrf_token %}
-            <div style="float:left; min-width: 80px; min-height: 80px;">
-              <a href="{% url 'assign_photo_openid' openid.id %}">
-                {% if openid.photo %}
-                  <img class="thumbnail editable avatar-chooser" src="{% url 'raw_image' openid.photo.id %}" alt="">
-                {% else %}
-                  <img class="thumbnail editable avatar-chooser" src="{% static '/img/nobody/80.png' %}" alt="">
-                {% endif %}
-              </a>
-            </div>
-            <div class="d-none d-sm-block" style="min-width: 320px;">{{ openid.openid|truncatechars:40 }}</div>
-            <div style="display:flex;">
-              <a class="btn btn-light action-item" href="{% url 'assign_photo_openid' openid.pk %}"
-                role="button" title="{% trans 'Change photo' %}">
-                <i class="fa fa-edit"></i>
-                <span class="d-none">{% trans 'Change' %}</span>
-              </a>
-              <button type="submit" class="btn btn-danger action-item" title="{% trans 'Remove' %}">
-                <i class="fa fa-trash"></i>
-                <span class="d-none">{% trans 'Delete' %}</span>
-              </button>
-            </div>
-            <div class="d-block d-sm-none" style="min-width: 320px;">{{ openid.openid|truncatechars:30 }}</div>
+<div class="panel panel-tortin" style="width:172px;margin-left:20px;float:left">
+  <div class="panel-heading" style="padding-right:0">
+    <h3 class="panel-title" title="{{ openid.openid }}" style="display:inline-flex"><a href="{% url 'assign_photo_openid' openid.pk %}"><i class="fa fa-edit"></i></a>&nbsp;
+<button type="submit" class="nobutton" onclick="return confirm('{% trans 'Are you sure that you want to delete this OpenID?' %}')"><i class="fa fa-trash"></i></button>&nbsp;
+{{ openid.openid|cut:"http://"|cut:"https://"|truncatechars:12 }}</h3>
+</div>
+  <div class="panel-body" style="height:130px">
+        <center>
+            <img style="max-height:100px;max-width:100px" src="{% if openid.photo %}{% url 'raw_image' openid.photo.id %}{% else %}{% static '/img/nobody/80.png' %}{% endif %}">
+        </center>
+</div>
+</div>
         </form>
-      </li>
     {% endfor %}
-</ul>
-<div class="clear-both"></div>
+</div>
 {% endif %}
 
 {% if user.unconfirmedemail_set.count or user.unconfirmedopenid_set.count %}
-<p>{% trans 'You have the following unconfirmed email addresses and OpenIDs:' %}</p>
-<ul class="vertical-list">
+<h3>{% trans 'You have the following unconfirmed email addresses and OpenIDs:' %}</h3>
     {% for email in user.unconfirmedemail_set.all %}
-      <li>
-        <form action="{% url 'remove_unconfirmed_email' email.id %}" method="post">{% csrf_token %}
-          {{ email.email }}
-          <br/>
-          <!-- TODO: Confirmation mail URL -->
-          <a class="btn btn-info btn-sm action-item" href="{% url 'resend_confirmation_mail' email.pk %}"
-            role="button" title="{% trans 'Resend confirmation mail' %}" style="color:white;">
-            <i class="fa fa-envelope"></i>
-            <span class="d-none">{% trans 'Resend confirmation mail' %}</span>
-          </a>
-          <button type="submit" class="btn btn-danger btn-sm action-item" title="{% trans 'Remove' %}">
-            <i class="fa fa-trash"></i>
-            <span class="d-none">{% trans 'Delete' %}</span>
-          </button>
-        </form>
+        <form action="{% url 'remove_unconfirmed_email' email.id %}" method="post">
+{% csrf_token %}
+<div class="btn-group form-group" role="group">
+<button type="submit" class="btn btn-default" onclick="return confirm('{% trans 'Are you sure that you want to delete this email address?' %}')"><i class="fa fa-trash"></i></button>
+<a href="{% url 'resend_confirmation_mail' email.pk %}" class="btn btn-default"><i class="fa fa-envelope"></i></a>
+<span class="input-group-addon">{{ email.email }}</span>
+</div>
+</form>
         {# TODO: (expires in xx hours) #}
-      </li>
     {% endfor %}
     {% for openid in user.unconfirmedopenid_set.all %}
-      <li>
-        <form action="{% url 'remove_unconfirmed_openid' openid.id %}" method="post">{% csrf_token %}
-          {{ openid.openid }}
-          <br/>
-          <button type="submit" class="btn btn-danger btn-sm" title="{% trans 'Remove' %}">
-            <i class="fa fa-trash"></i>
-          </button>
+        <form action="{% url 'remove_unconfirmed_openid' openid.id %}" method="post">
+{% csrf_token %}
+<div class="btn-group form-group" role="group">
+<button type="submit" class="btn btn-default" onclick="return confirm('{% trans 'Are you sure that you want to delete this OpenID?' %}')"><i class="fa fa-trash"></i></button>
+<span class="input-group-addon">{{ openid.openid }}</span>
+</div>
         </form>
         {# TODO: (expires in xx hours) #}
-      </li>
     {% endfor %}
-</ul>
 {% endif %}
 
 <p>
-{% if not max_emails %}
-<a href="{% url 'add_email' %}">{% trans 'Add a new email address' %}</a>
-|
-{% endif %}
-<a href="{% url 'add_openid' %}">{% trans 'Add a new OpenID' %}</a></p>
+{% if not max_emails %}<a href="{% url 'add_email' %}" class="btn btn-default">{% trans 'Add a new email address' %}</a> or{% endif %}
+<a href="{% url 'add_openid' %}" class="btn btn-default">{% trans 'Add a new OpenID' %}</a></p>
 </p>
-
 {% if user.photo_set.count %}
-<p>{% trans 'Here are the photos you have uploaded/imported:' %}</p>
-<ul class="horizontal-list avatar-list centered">
+<h3>{% trans 'Here are the photos you have uploaded/imported:' %}</h3>
+<div class="row">
   {% for photo in user.photo_set.all %}
-    <li>
-      <a href="{% url 'raw_image' photo.id %}">
-        <img class="thumbnail" src="{% url 'raw_image' photo.id %}"
-          title="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}"
-          alt="{% blocktrans with photo.add_date as datetime %}Uploaded on {{ datetime }}{% endblocktrans %}">
-      </a>
-      <div style="padding-top: 2px; min-width: 100px;"/>
-      <a class="btn btn-danger btn-sm action-item" href="{% url 'delete_photo' photo.pk %}"
-        role="button" title="{% trans 'Delete' %}" style="color:white;">
-        <i class="fa fa-trash"></i>
-        <span class="d-none">Delete</span>
-      </a>
+<div class="panel panel-tortin" style="width:132px;margin-left:20px;float:left">
+  <div class="panel-heading">
+    <h3 class="panel-title"><a href="{% url 'delete_photo' photo.pk %}" onclick="return confirm('{% trans 'Are you sure that you want to delete this image?' %}')"><i class="fa fa-trash"></i></a> {% trans 'Image' %} {{ forloop.counter }}</h3>
+</div>
+  <div class="panel-body" style="height:130px">
+        <center>
+            <img style="max-height:100px;max-width:100px" src="{% url 'raw_image' photo.id %}">
+        </center>
+</div>
+</div>
 {% endfor %}
-</ul>
+</div>
 {% endif %}
 
 {% if not max_photos %}
 <p>
-  <br/>
-  <a href="{% url 'upload_photo' %}">{% trans 'Upload a new photo' %}</a><br/>
-  <a href="{% url 'import_photo' %}">{% trans 'Import photo from other services' %}</a>
+<a href="{% url 'upload_photo' %}" class="btn btn-default">{% trans 'Upload a new photo' %}</a> or 
+<a href="{% url 'import_photo' %}" class="btn btn-default">{% trans 'Import photo from other services' %}</a>
 </p>
 {% endif %}
-
-<h2>{% trans 'Account settings' %}</h2>
-
-{% if has_password %}
-<p><a href="{% url 'password_change' %}">{% trans 'Change your password' %}</a></p>
-{% else %}
-<p><a href="{% url 'password_set' %}">{% trans 'Set a password' %}</a></p>
-{% endif %}
-
-<!-- <p><a href="{% url 'export' %}">{% trans 'Export your data' %}</a></p> -->
-
-<p><a href="{% url 'delete' %}">{% trans 'Permanently delete your account' %}</a></p>
-
+<div style="height:40px"></div>
 {% endblock content %}

@@ -1,7 +1,6 @@
 {% extends 'base.html' %}                                                                                                                      
 {% load i18n %}
 {% load static %}
-{% load bootstrap4 %}
 
 {% block title %}{% trans 'Upload a new photo' %}{% endblock title %}
 
@@ -9,35 +8,60 @@
 <link rel="prefetch" href="{% static '/js/jcrop.js' %}">{% endblock header %}
 
 {% block content %}
+<style>
+input[type=checkbox] {display:none}
+input[type=checkbox] + label {
+padding-left:0;
+}
+input[type=checkbox] + label:before {
+font-family: FontAwesome;
+display: inline-block;
+letter-spacing:5px;
+font-size:20px;
+color:#36b7d7;
+vertical-align:middle;
+}
+input[type=checkbox] + label:before {content: "\f0c8"}
+input[type=checkbox]:checked + label:before {content: "\f14a"}
+.uploadbtn:before {
+position:absolute;
+left:0;
+right:0;
+text-align:center;
+content:"Select file";
+font-family: 'Montserrat', sans-serif;
+}
+</style>
   <h1>{% trans 'Upload a new photo' %}</h1>
 
   <form enctype="multipart/form-data" action="{% url 'upload_photo' %}" method="post">{% csrf_token %}
     {% if email %}<input type="hidden" name="email" value="{{ email }}">{% endif %}
     {% if openid %}<input type="hidden" name="openid" value="{{ openid }}">{% endif %}
 
-    {{ form.photo.errors }}
-    <div class="form-group">
-      {{ form.photo.label_tag }}
-      <input id="id_photo" type="file" name="photo" accept="image/*">
-    </div>
+{% if form.photo.errors %}
+<div class="alert alert-danger" role="alert">{{ form.photo.errors }}</div>
+{% endif %}
+<div class="form-group">
+<label for="id_photo">{% trans 'Photo' %}:</label>
+<span class="btn btn-default uploadbtn" style="display:flex;width:120px;padding:0;height:36px;position:relative;align-items:center">
+<input type="file" name="photo" required id="id_photo" accept="image/*" style="opacity:0;width:100%;height:100%;float:left">
+</span>
+</div>
     {% blocktrans with max_file_size|filesizeformat as max_size %}Maximum file size of {{ max_size }}.{% endblocktrans %}</p>
 
-    <div class="form-group">
-      <ul class="conditions">
-        <li>
-          {{ form.not_porn.errors }} {{ form.not_porn }}
-          <label for="id_not_porn">{{ form.not_porn.label }}</label>
-        </li>
-        <li>
-          {{ form.can_distribute.errors }} {{ form.can_distribute }}
-          <label for="id_can_distribute">{{ form.can_distribute.label }}</label>
-        </li>
-      </ul>
-    </div>
-
-    {% buttons %}
-      <button type="submit" class="btn btn-primary">{% trans 'Upload' %}</button>
-      <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
-    {% endbuttons %}
+<div class="form-group">
+<div class="checkbox">
+<input type="checkbox" name="not_porn" required id="id_not_porn">
+<label for="id_not_porn">{% trans 'suitable for all ages (i.e. no offensive content)' %}</label>
+</div>
+</div>
+<div class="form-group">
+<div class="checkbox">
+<input type="checkbox" name="can_distribute" required id="id_can_distribute">
+<label for="id_can_distribute">{% trans 'can be freely copied' %}</label>
+</div>
+</div>
+      <button type="submit" class="btn btn-default">{% trans 'Upload' %}</button>
   </form>
+<div style="height:40px"></div>
 {% endblock content %}

@@ -1,9 +1,8 @@
 {% load i18n %}
-{% load bootstrap4 %}
 
 {% if not user.is_anonymous %}
   {% if photos %}
-    <p>{% trans 'Would you like to import some of these externally hosted photos?' %}</p>
+    <h3>{% trans 'Would you like to import some of these externally hosted photos?' %}</h3>
     {% if email_id %}
       <form action="{% url 'import_photo' email_id %}" method="post">{% csrf_token %}
       <input type="hidden" name="email_id" value="{{ email_id }}">
@@ -11,26 +10,29 @@
       <form action="{% url 'import_photo' %}" method="post">{% csrf_token %}
       <input type="hidden" name="email_addr" value="{{ email_addr }}">
     {% endif %}
-      <ul class="horizontal-list imported-list centered">
+      <div class="row">
       {% for photo in photos %}
-        <li><input type="checkbox" name="photo_{{photo.service_name}}" id="photo_{{photo.service_name}}" checked="checked">
-        <br/>
-        <label for="photo_{{photo.service_name}}">
-          <img src="{{ photo.thumbnail_url }}" class="thumbnail" alt="{{ photo.service_name }} image">
-        </label>
-        <br/>
-        {% if photo.service_url %}
-        <a href="{{ photo.service_url }}">{{ photo.service_name }}</a>
-        {% else %}  {# pragma: no cover #}
-        {{ photo.service_name }}  {# pragma: no cover #}
-        {% endif %}  {# pragma: no cover #}
-        </li>
+<div class="panel panel-tortin" style="width:182px;float:left;margin-left:20px">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+<input type="checkbox" name="photo_{{photo.service_name}}" id="photo_{{photo.service_name}}" checked="checked">
+<label for="photo_{{photo.service_name}}" style="width:100%">
+{{ photo.service_name }}
+{% if photo.service_url %}
+        <a href="{{ photo.service_url }}" style="float:right;color:#FFFFFF"><i class="fa fa-external-link"></i></a>
+        {% endif %}
+</label>
+</h3></div>
+  <div class="panel-body">
+        <center>
+          <img src="{{ photo.thumbnail_url }}" alt="{{ photo.service_name }} image">
+        </center>
+</div>
+</div>
       {% endfor %}
-      </ul>
+      </div>
       <p>
-        {% buttons %}
-          <button type="submit" class="btn btn-primary">{% trans 'Import' %}</button>
-        {% endbuttons %}
+          <button type="submit" class="btn btn-default">{% trans 'Import' %}</button>
       </p>
     </form>
   {% endif %}

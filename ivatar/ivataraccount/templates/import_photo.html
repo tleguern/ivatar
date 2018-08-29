@@ -1,22 +1,32 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% load bootstrap4 %}
 
 {% block title %}{% trans 'Import photo' %} - Libravatar{% endblock title %}
 
 {% block content %}
-
+<style>
+input[type=checkbox] {display:none}
+input[type=checkbox] + label:before {
+font-family: FontAwesome;
+display: inline-block;
+}
+input[type=checkbox] + label:before {content: "\f096"}
+input[type=checkbox] + label:before {letter-spacing: 5px}
+input[type=checkbox]:checked + label:before {content: "\f046"}
+input[type=checkbox]:checked + label:before {letter-spacing: 3px}
+</style>
 <h1>{% trans 'Import photo' %}</h1>
 
-{% include '_import_photo_form.html' %}
-
 {% if not email_id %}
+<div style="max-width:600px">
   <form action="{% url 'import_photo' %}" method="get" id="check_mail_form">
+<div class="form-group">
     <label for="check_email_addr">{% trans 'Email Address' %}</label>
-    <input type="text" name="check_email_addr" value="{{ email_addr }}">
-    {% buttons %}
-      <button type="submit" class="btn btn-primary">{% trans 'Check' %}</button>
-    {% endbuttons %}
+    <input type="text" name="check_email_addr" class="form-control" value="{{ email_addr }}">
+</div>
+<div class="form-group">
+      <button type="submit" class="btn btn-default">{% trans 'Check' %}</button>
+</div>
   </form>
   <script>
     document.getElementById('check_mail_form').onsubmit = 
@@ -25,9 +35,9 @@
         return false;
     };
   </script>
-
+</div>
 {% endif %}
 
-<p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
-
+{% include '_import_photo_form.html' %}
+<div style="height:40px"></div>
 {% endblock content %}

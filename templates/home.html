@@ -1,7 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'base_home.html' %}
 {% load i18n %}
 {% load static %}
-{% load bootstrap4 %}
 
 {% block title %}{% trans 'federated avatar hosting service' %}{% endblock %}
 
@@ -9,29 +8,54 @@
 
 {% url 'new_account' as new_account_url %}
 
-<div id="action-panel">
-  {% if not user.is_authenticated and not disable_signup %}
-  <p>{% blocktrans %}Create a <a href="{{ new_account_url }}">free account</a>{% endblocktrans %}</p>
-  {% endif %}
-  <p>{% trans 'Download the <a href="https://git.linux-kernel.at/oliver/ivatar">source code</a>' %}</p>
-  <p>{% trans 'File <a href="https://git.linux-kernel.at/oliver/ivatar/issues">bugs</a>' %}</p>
-  <p>{% trans 'Read our <a href="https://git.linux-kernel.at/oliver/ivatar/wikis">wiki</a>' %}</p>
-  <p>{% trans 'Follow us on <a href="https://identi.ca/libravatar">Identica</a>' %} / <a href="https://twitter.com/libravatar">Twitter</a></p>
-  <p id="contribute-button"><a href="https://git.linux-kernel.at/oliver/ivatar/wikis/contribute/">{% trans 'Contribute!' %}</a></p>
+<div class="hero">
+<div class="container">
+<header>
+<h1>{% trans 'ivatar' %}</h1>
+<h2>{% trans 'freeing the web one face at a time' %}</h2>
+<a href="/accounts/login/" class="btn btn-lg btn-primary">{% trans 'Login' %}</a>&nbsp;
+<a href="/accounts/new/" class="btn btn-lg btn-primary">{% trans 'Sign up' %}</a>&nbsp;
+<a href="/tools/check/" class="btn btn-lg btn-primary">{% trans 'Check email' %}</a>&nbsp;
+</header>
 </div>
-
-<p>{% blocktrans %}ivatar is a service which delivers your avatar (profile picture) to other websites. If you <a href="{{ new_account_url }}">create an account</a> with us, your photo could start popping up next to forum posts or blog comments on any site where you left your email address.{% endblocktrans %} {% trans '<a href="https://git.linux-kernel.at/oliver/ivatar/wikis">Read more...</a>' %}</p>
-
-<h2>{% trans 'Federated Open Source Service' %}</h2>
-
-<p>{% trans 'This service is powered by <a href="https://www.gnu.org/licenses/agpl.html">Free and Open Source software</a> and allows owners of a domain name to <a href="https://git.linux-kernel.at/oliver/ivatar/wikis/running-your-own">run their own instance</a> of ivatar and serve avatars themselves.' %}</p>
-
-<h2>{% trans 'Simple API for Developers' %}</h2>
-
-<p>{% trans 'Application developers can easily add support for this service using our <a href="https://git.linux-kernel.at/oliver/ivatar/wikis/api">simple API</a> or one of the <a href="https://git.linux-kernel.at/oliver/ivatar/wikis/libraries">libraries and plugins</a> available for a number of platforms and languages.' %}</p>
-
-<p>{% trans 'Big thanks to our sponsors without whom none of this would be possible!' %}</p>
-<div id="sponsors">
-  <a href="https://fedoraprojec.org/"><img src="{% static '/img/Fedora_logo.png' %}" title="Fedora Project" alt="{% trans 'Fedora Logo' %}"></a>
 </div>
+<div class="social"></div>
+<div class="clipper"></div>
+<section class="content">
+<div class="container">
+<div class="text-center">
+<h2>{% trans 'The open avatar service' %}</h2>
+<p class="lead">{% blocktrans %}ivatar is a service which delivers your avatar (profile picture) to other websites. If you create an account with us, your photo could start popping up next to forum posts or blog comments on any site where you left your email address.{% endblocktrans %}<br>
+<a href="https://wiki.libravatar.org/description/">{% trans 'Read more...' %}</a></p>
+</div>
+<hr/>
+<div class="row">
+<section class="col-md-8">
+<h1>{% trans 'Federated Open Source Service' %}</h1>
+<p class="lead">{% trans 'This service is powered by <a href="https://www.gnu.org/licenses/agpl.html">Free and Open Source software</a> and allows owners of a domain name to <a href="https://wiki.libravatar.org/running_your_own/">run their own instance</a> of ivatar and serve avatars themselves.' %}</p>
+<hr>
+<h1>{% trans 'Simple API for Developers' %}</h1>
+<p class="lead">{% trans 'Application developers can easily add support for this service using our <a href="https://wiki.libravatar.org/api/">simple API</a> or one of the <a href="https://wiki.libravatar.org/libraries/">libraries and plugins</a> available for a number of platforms and languages.' %}</p>
+<hr/>
+<a class="btn btn-default btn-lg btn-block" href="https://wiki.libravatar.org/contribute/">{% trans 'Contribute' %}</a>
+</section>
+<section class="col-md-4">
+<h1>Useful links</h1>
+<a class="btn btn-default" href="https://wiki.libravatar.org/talk_to_us/">{% trans 'Contact us' %}</a><br/>
+<a class="btn btn-default" href="https://wiki.libravatar.org/security/">{% trans 'Security' %}</a><br/>
+<a class="btn btn-default" href="https://code.launchpad.net/libravatar">{% trans 'Source code' %}</a><br/>
+<a class="btn btn-default" href="https://bugs.launchpad.net/libravatar">{% trans 'Report bugs' %}</a><br/>
+<a class="btn btn-default" href="https://answers.launchpad.net/libravatar">{% trans 'Questions' %}</a><br/>
+<a class="btn btn-default" href="https://wiki.libravatar.org/">{% trans 'Wiki' %}</a><br/>
+<a class="btn btn-default" href="http://blog.libravatar.org/">{% trans 'Blog' %}</a><br/>
+<h3>{% trans 'Social media' %}</h3>
+<a class="btn btn-default" href="https://identi.ca/libravatar">Identica</a><br/>
+<a class="btn btn-default" href="https://twitter.com/libravatar">Twitter</a><br/>
+</section>
+</div>
+<div class="text-center">
+<h3>{% trans 'Big thanks to our sponsors without whom none of this would be possible!' %}</h3>
+<a href="https://fedoraproject.org/"><img src="{% static '/img/Fedora_logo.png' %}" title="Fedora Project" alt="{% trans 'Fedora Logo' %}"></a>
+</div>
+</section>
 {% endblock %}
