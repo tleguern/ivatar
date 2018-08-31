@@ -34,8 +34,10 @@ class AvatarImageView(TemplateView):
             default = request.GET['d']
 
         if 's' in request.GET:
-            size = request.GET['s']
-        size = int(size)
+            if request.GET['s'] != '' and request.GET['s'] is not None \
+                and request.GET['s'] != '0':
+                size = request.GET['s']
+                size = int(size)
         if size > int(AVATAR_MAX_SIZE):
             size = int(AVATAR_MAX_SIZE)
         if len(kwargs['digest']) == 32:
