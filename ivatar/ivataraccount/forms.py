@@ -2,26 +2,19 @@
 Classes for our ivatar.ivataraccount.forms
 '''
 from urllib.parse import urlsplit, urlunsplit
-from io import BytesIO
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django.urls import reverse
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from django.contrib import messages
 
 from ipware import get_client_ip
 
 from ivatar import settings
 from ivatar.settings import MIN_LENGTH_EMAIL, MAX_LENGTH_EMAIL
 from ivatar.settings import MIN_LENGTH_URL, MAX_LENGTH_URL
-from ivatar.settings import JPEG_QUALITY
 from . models import UnconfirmedEmail, ConfirmedEmail, Photo
 from . models import UnconfirmedOpenId, ConfirmedOpenId
 from . models import UserPreference
-from . models import pil_format, file_format
-from . read_libravatar_export import read_gzdata as libravatar_read_gzdata
+
 
 MAX_NUM_UNCONFIRMED_EMAILS_DEFAULT = 5
 

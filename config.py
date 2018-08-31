@@ -107,7 +107,7 @@ DEFAULT_FROM_EMAIL = 'ivatar@mg.linux-kernel.at'
 
 try:
     from ivatar.settings import DATABASES
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     DATABASES = []  # pragma: no cover
 
 if 'default' not in DATABASES:

@@ -9,41 +9,28 @@
 
 {% if form.errors %}
     {% for error in form.non_field_errors %}
-        <div class="alert alert-danger">
-            <strong>{{ error|escape }}</strong>
-        </div>
+<div class="alert alert-danger" role="alert">{{ error|escape }}</div>
     {% endfor %}
 {% endif %}
-
-
-<form action="{% url 'login' %}" method="post" name="login">{% csrf_token %}
-
-<table summary="">
 {% if form.username.errors %}
-<tr>
-  <td colspan="2">{{ form.username.errors }}</td>
-</tr>
+<div class="alert alert-danger" role="alert">{{ form.username.errors }}</div>
 {% endif %}
-<tr>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
-</tr>
 {% if form.password.errors %}
-<tr>
-  <td colspan="2">{{ form.password.errors }}</td>
-</tr>
+<div class="alert alert-danger" role="alert">{{ form.password.errors }}</div>
 {% endif %}
-<tr>
-  <td>{{ form.password.label_tag }}</td>
-  <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<p><input type="submit" value="{% trans 'Login' %}">
-&nbsp;<a href="/">{% trans 'Cancel' %}</a></p>
-
+<div style="max-width:600px">
+<form action="{% url 'login' %}" method="post" name="login">
+{% csrf_token %}
+<div class="form-group">
+<label for="id_username">{% trans 'Benutzername' %}:</label>
+<input type="text" name="username" autofocus required class="form-control" id="id_username">
+</div>
+<div class="form-group">
+<label for="id_password">{% trans 'Password' %}:</label>
+<input type="password" name="password" class="form-control" required id="id_password">
+</div>
+  <button type="submit" class="btn btn-default">{% trans 'Login' %}</button> or <a href="{% url 'new_account' %}" class="btn btn-default">{% trans 'Create new user' %}</a>
 </form>
-or
-<a href="{% url 'new_account' %}">{% trans 'Create new user' %}</a>
-
+</div>
+<div style="height:40px"></div>
 {% endblock content %}

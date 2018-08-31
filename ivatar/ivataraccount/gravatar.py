@@ -24,21 +24,21 @@ def get_photo(email):
 
     try:
         urlopen(image_url, timeout=URL_TIMEOUT)
-    except HTTPError as e:  # pylint: disable=invalid-name
-        if e.code != 404 and e.code != 503:
+    except HTTPError as exc:
+        if exc.code != 404 and exc.code != 503:
             print(  # pragma: no cover
                 'Gravatar fetch failed with an unexpected %s HTTP error' %
-                e.code)
+                exc.code)
         return False
-    except URLError as e:  # pragma: no cover  # pylint: disable=invalid-name
+    except URLError as exc:  # pragma: no cover
         print(
             'Gravatar fetch failed with URL error: %s' %
-            e.reason)  # pragma: no cover
+            exc.reason)  # pragma: no cover
         return False  # pragma: no cover
-    except SSLError as e:   # pragma: no cover  # pylint: disable=invalid-name
+    except SSLError as exc:   # pragma: no cover
         print(
             'Gravatar fetch failed with SSL error: %s' %
-            e.reason)  # pragma: no cover
+            exc.reason)  # pragma: no cover
         return False  # pragma: no cover
 
     return {

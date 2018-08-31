@@ -7,41 +7,32 @@
 
 <h1>{% trans 'Create a new account' %}</h1>
 
-<form action="{% url 'new_account' %}" method="post" name="newaccount">{% csrf_token %}
-
-<table summary="">
 {% if form.username.errors %}
-<tr>
-  <td colspan="2">{{ form.username.errors }}</td>
-</tr>
+<div class="alert alert-danger" role="alert">{{ form.username.errors }}</div>
 {% endif %}
-<tr>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
-</tr>
 {% if form.password1.errors %}
-<tr>
-  <td colspan="2">{{ form.password1.errors }}</td>
-</tr>
+<div class="alert alert-danger" role="alert">{{ form.password1.errors }}</div>
 {% endif %}
-<tr>
-  <td>{{ form.password1.label_tag }}</td>
-  <td>{{ form.password1 }}</td>
-</tr>
 {% if form.password2.errors %}
-<tr>
-  <td colspan="2">{{ form.password2.errors }}</td>
-</tr>
+<div class="alert alert-danger" role="alert">{{ form.password2.errors }}</div>
 {% endif %}
-<tr>
-  <td>{{ form.password2.label_tag }}</td>
-  <td>{{ form.password2 }}</td>
-</tr>
-</table>
-
-<p><input type="submit" value="{% trans 'Create account' %}">
-&nbsp;<a href="/">{% trans 'Cancel' %}</a></p>
-
+<form action="{% url 'new_account' %}" method="post" name="newaccount">
+{% csrf_token %}
+<div style="max-width:600px">
+<div class="form-group">
+<label for="id_username">{% trans 'Username' %}:</label>
+<input type="text" name="username" autofocus required class="form-control" id="id_username">
+</div>
+<div class="form-group">
+<label for="id_password1">{% trans 'Password' %}:</label>
+<input type="password" name="password1" class="form-control" required id="id_password1">
+</div>
+<div class="form-group">
+<label for="id_password2">{% trans 'Password confirmation' %}:</label>
+<input type="password" name="password2" class="form-control" required id="id_password2">
+</div>
+<button type="submit" class="btn btn-default">{% trans 'Create account' %}</button> or <a href="/accounts/login/" class="btn btn-default">{% trans 'Login' %}</a>
 </form>
-
+</div>
+<div style="height:40px"></div>
 {% endblock content %}

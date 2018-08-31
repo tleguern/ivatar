@@ -1,20 +1,57 @@
 {% extends 'base.html' %}                                                                                                                      
 {% load i18n %}
 {% load static %}
-{% load bootstrap4 %}
 
 {% block title %}{% trans 'Upload an export from libravatar' %} - ivatar{% endblock title %}
 
 {% block content %}
+<style>
+input[type=checkbox] {display:none}
+input[type=checkbox] + label {
+padding-left:0;
+}
+input[type=checkbox] + label:before {
+font-family: FontAwesome;
+display: inline-block;
+letter-spacing:5px;
+font-size:20px;
+color:#36b7d7;
+vertical-align:middle;
+}
+input[type=checkbox] + label:before {content: "\f0c8"}
+input[type=checkbox]:checked + label:before {content: "\f14a"}
+.uploadbtn:before {
+position:absolute;
+left:0;
+right:0;
+text-align:center;
+content:"Select file";
+font-family: 'Montserrat', sans-serif;
+}
+</style>
   <h1>{% trans 'Upload an export from libravatar' %}</h1>
 
-  <div style="max-width:600px;">
-    <form enctype="multipart/form-data" method="post">{% csrf_token %}
-      {% bootstrap_form form %}
-      {% buttons %}
-        <button type="submit" class="btn btn-primary">{% trans 'Upload' %}</button>
-        <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
-      {% endbuttons %}
+    <form enctype="multipart/form-data" method="post">
+{% csrf_token %}
+<div class="form-group">
+<label for="id_export_file">{% trans 'Export file' %}</label>
+<span class="btn btn-default uploadbtn" style="display:flex;width:120px;padding:0;height:36px;position:relative;align-items:center">
+<input type="file" name="export_file" required id="id_export_file" style="opacity:0;width:100%;height:100%;float:left">
+</span>
+</div>
+<div class="form-group">
+<div class="checkbox">
+<input type="checkbox" name="not_porn" required id="id_not_porn">
+<label for="id_not_porn">{% trans 'suitable for all ages (i.e. no offensive content)' %}</label>
+</div>
+</div>
+<div class="form-group">
+<div class="checkbox">
+<input type="checkbox" name="can_distribute" required id="id_can_distribute">
+<label for="id_can_distribute">{% trans 'can be freely copied' %}</label>
+</div>
+</div>
+        <button type="submit" class="btn btn-default">{% trans 'Upload' %}</button>
     </form>
-  </div>
+<div style="height:40px"></div>
 {% endblock content %}

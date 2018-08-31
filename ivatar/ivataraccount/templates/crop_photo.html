@@ -7,7 +7,13 @@
 {% block header %}<link rel="prefetch" href="{% static 'css/jcrop.css' %}">{% endblock header %}
 
 {% block content %}
-
+<style>
+.jcrop-holder > div > div:nth-child(1) {
+outline-width:2px;
+outline-style:solid;
+outline-color:#36b7d7;
+}
+</style>
 <h1>{% trans 'Crop photo' %}</h1>
 
 <p>{% trans 'Draw a square around the portion of the image you want to use:' %}</p>
@@ -15,22 +21,18 @@
 <form action="{% url 'crop_photo' photo.pk %}" method="post">{% csrf_token %}
   {% if email %}<input type="hidden" name="email" value="{{email}}">{% endif %}
   {% if openid %}<input type="hidden" name="openid" value="{{openid}}">{% endif %}
-
-  <p class="aligned wide"><img src='{% url 'raw_image' photo.pk %}' id='cropbox' /></p>
+<div class="form-group">
+  <img src='{% url 'raw_image' photo.pk %}' id='cropbox'>
+</div>
   <input type='hidden' id='x' name='x' value='0'/>
   <input type='hidden' id='y' name='y' value='0'/>
   <input type='hidden' id='w' name='w' value='0'/>
   <input type='hidden' id='h' name='h' value='0'/>
-
-  <p><input type="submit" value="{% trans 'Crop' %}" onsubmit="return checkCoords();"/>
-  &nbsp;<a id="cancel-link" href="{% url 'profile' %}">{% trans 'Cancel' %}</a></p>
-
+<div class="form-group">
+  <button type="submit" class="btn btn-default" onsubmit="return checkCoords();">{% trans 'Crop' %}</button>
+</div>
 </form>
 
-{% endblock content %}
-
-{% block bootstrap4_after_content %}
-{{ block.super }}
 <script src="{% static '/js/jcrop.js' %}"></script>
 <script type="text/javascript">
 function updateCoords(c) {
@@ -48,8 +50,11 @@ function checkCoords() {
 <script type="text/javascript">
     jQuery(function($){
         $('#cropbox').Jcrop({
-            onSelect: updateCoords
+            onSelect: updateCoords,
+bgOpacity:1,
+bgColor:'transparent'
       });
     });
 </script>
-{% endblock bootstrap4_after_content %}
+<div style="height:40px"></div>
+{% endblock content %}
