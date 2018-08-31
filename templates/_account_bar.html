@@ -4,9 +4,9 @@
     <li class="dropdown" id="tab_account">
         <a class="dropdown-toggle" href="#" id="account_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {% if request.user.is_authenticated %}
-            <i class="fa fa-user" aria-hidden="true"></i> {{ request.user }} ⏷
+            <i class="fa fa-user" aria-hidden="true"></i> {{ request.user }}
           {% else %}
-            <i class="fa fa-sign-in" aria-hidden="true"></i> Login ⏷
+            <i class="fa fa-sign-in" aria-hidden="true"></i> Login
           {% endif %}
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
