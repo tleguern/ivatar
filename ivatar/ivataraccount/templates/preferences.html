@@ -1,20 +1,20 @@
 {% extends 'base.html' %}                                                                                                                      
 {% load i18n %}
-{% load bootstrap4 %}
 {% load static %}
 
 {% block title %}{% trans 'Your Preferences' %}{% endblock title %}
 
 {% block content %}
+<h1>{% trans 'Account settings' %}</h1>
 
-<div style="max-width:600px;">
-  <form method="post" name="check">{% csrf_token %}
-    {% bootstrap_form form %}
-    {% buttons %}
-      <button type="submit" class="btn btn-primary">{% trans 'Update' %}</button>
-      <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
-    {% endbuttons %}
-  </form>
-</div>
+{% if has_password %}
+<p><a href="{% url 'password_change' %}" class="btn btn-default">{% trans 'Change your password' %}</a></p>
+{% else %}
+<p><a href="{% url 'password_set' %}" class="btn btn-default">{% trans 'Set a password' %}</a></p>
+{% endif %}
 
+<!-- <p><a href="{% url 'export' %}" class="btn btn-default">{% trans 'Export your data' %}</a></p> -->
+
+<p><a href="{% url 'delete' %}" class="btn btn-default">{% trans 'Permanently delete your account' %}</a></p>
+<div style="height:40px"></div>
 {% endblock content %}

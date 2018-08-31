@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% load bootstrap4 %}
 {% load static %}
 
 {% block title %}{% trans 'Check e-mail or openid' %}{% endblock title %}
@@ -10,20 +9,26 @@
 <h1>{% trans 'Check e-mail or openid' %}</h1>
 
 <div style="max-width:600px;">
-<form method="post" name="check">{% csrf_token %}
-  {% bootstrap_form form %}
-  {% buttons %}
-      <button type="submit" class="btn btn-primary">{% trans 'Check' %}</button>
-      <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
-  {% endbuttons %}
+<form method="post" name="check">
+{% csrf_token %}
+<div class="form-group"><label for="id_mail">{% trans 'E-Mail' %}</label>
+<input type="email" name="mail" maxlength="254" minlength="6" class="form-control" placeholder="{% trans 'E-Mail' %}" {% if mailurl %} value="{{ form.mail.value }}" {% endif %} id="id_mail"></div>
+<div class="form-group"><label for="id_openid">{% trans 'OpenID' %}</label>
+<input type="text" name="openid" maxlength="255" minlength="11" class="form-control" placeholder="{% trans 'OpenID' %}" {% if openidurl %} value="{{ form.openid.value }}" {% endif %} id="id_openid"></div>
+<div class="form-group"><label for="id_size">{% trans 'Size' %}</label>
+<input type="number" name="size" min="5" max="512" class="form-control" placeholder="{% trans 'Size' %}" {% if mailurl or openidurl %} value="{{ form.size.value }}" {% else %} value="100" {% endif %} required id="id_size"></div>
+<div class="form-group"><label for="id_default_url">{% trans 'Default URL' %}</label>
+<input type="url" name="default_url" class="form-control" placeholder="{% trans 'Default URL' %}" {% if mailurl or openidurl %} value="{{ form.default_url.value }}" {% endif %} id="id_default_url"></div>
+  <div class="form-group">
+      <button type="submit" class="btn btn-default">{% trans 'Check' %}</button>
+</div>
 </form>
 </div>
 
 {% if mailurl or openidurl %}
+<hr/>
+      <h2>This is what the avatars will look like depending on the hash and protocol you use:</h2>
     <p>
-      This is what the avatars will look like depending on the hash and protocol you use:<br/>
-
-      <div class="d-none d-lg-block">
         {% if mail_hash %}
           MD5 hash (mail): {{ mail_hash }}<br/>
           SHA256 hash (mail): {{ mail_hash256 }}<br/>
@@ -32,65 +37,45 @@
         {% if openid_hash %}
           SHA256 hash (OpenID): {{ openid_hash }}<br/>
         {% endif %}
-      </div>
     </p>
 
-    <ul class="horizontal-list avatar-list centered" style="font-size:smaller;">
+    <div class="row">
       {% if mailurl %}
-        <li>
-          <div style="float:left;">
-            <a href="{{ mailurl_secure }}">
-              <img src="{{ mailurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+<div class="panel panel-tortin" style="min-width:132px;width:calc({{ size }}px + 32px);float:left;margin-left:30px">
+  <div class="panel-heading">
+    <h3 class="panel-title">MD5 <i class="fa fa-unlock" title="Secure connection (https)"></i> <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i></h3>
+  </div>
+  <div class="panel-body">
+           <a href="{{ mailurl_secure }}">
+              <center><img src="{{ mailurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;"></center>
             </a>
-            <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fa fa-unlock" title="Secure connection (https)"></i>
-              <br/>
-              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
-            </div>
-          </div>
-          <br/>MD5
-        </li>
-        <li>
-          <div style="float:left;">
+</div>
+</div>
+<div class="panel panel-tortin" style="min-width:132px;width:calc({{ size }}px + 32px);float:left;margin-left:20px">
+  <div class="panel-heading">
+    <h3 class="panel-title">SHA256 <i class="fa fa-unlock" title="Secure connection (https)"></i> <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i></h3>
+  </div>
+  <div class="panel-body">
             <a href="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}">
-              <img src="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+              <center><img src="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}" style="max-width: {{ size }}px; max-height: {{ size }}px;"></center>
             </a>
-            <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px;">
-              <i class="fa fa-unlock" title="Secure connection (https)"></i>
-              <br/>
-              <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i>
-            </div>
-          </div>
-          <br/>SHA256
-        </li>
+</div>
+</div>
       {% endif %}
 
       {% if openidurl %}
-        <li>
-          <div style="float:left;">
+<div class="panel panel-tortin" style="min-width:122px;width:calc({{ size }}px + 32px);float:left;margin-left:30px">
+  <div class="panel-heading">
+    <h3 class="panel-title">SHA256 <i class="fa fa-unlock" title="Secure connection (http)"></i><i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i></h3>
+  </div>
+  <div class="panel-body">
             <a href="{{ openidurl_secure }}">
-              <img src="{{ openidurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;">
+              <center><img src="{{ openidurl_secure }}" style="max-width: {{ size }}px; max-height: {{ size }}px;"></center>
             </a>
-            <div style="padding-left:2px; float:inline-end; font-size:{% widthratio size 3 1 %}px">
-              <i class="fa fa-unlock" title="Secure connection (http)"></i>
-              <br/>
-              <i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i>
-            </div>
-          </div>
-          <br/>SHA256
-        </li>
+</div>
+</div>
       {% endif %}
-    </ul>
+    </div>
 {% endif %}
-
-{# Bad hack in order to have the images for sure inside our "outer" div box #}
-<!-- Bad hack -->
-{% if mailurl %}
-<div style="height: {{ size }}px;">&nbsp;</div>
-{% endif %}
-{% if openidurl %}
-<div style="height: {{ size }}px;">&nbsp;</div>
-{% endif %}
-<!-- End of bad hack -->
-
+<div style="height:40px"></div>
 {% endblock content %}

@@ -18,8 +18,11 @@
 <link rel="icon" type="image/png" href="{% static '/img/nobody/128.png' %}" sizes="128x128">
 <link rel="icon" type="image/png" href="{% static '/img/nobody/195.png' %}" sizes="195x195">
 <link rel="mask-icon" href="{% static '/img/safari-pinned-tab.svg' %}" color="#fa711f">
-<link rel="stylesheet" href="{% static '/css/ivatar.css' %}" type="text/css">
-<link rel="stylesheet" href="{% static 'line-awesome/css/line-awesome-font-awesome.min.css' %}">
+<link rel="stylesheet" href="{% static '/css/bootstrap.min.css' %}" type="text/css">
+<link rel="stylesheet" href="{% static '/css/tortin.css' %}" type="text/css">
+<link rel="stylesheet" href="{% static '/css/fonts.css' %}" type="text/css">
+<link rel="stylesheet" href="{% static '/css/fontawesome.min.css' %}">
+<script src="{% static '/js/jquery-3.3.1.slim.min.js' %}"></script>
 {% if user.is_authenticated %}
   {% if user.userpreference and user.userpreference.theme != 'default' %}
     <link rel="stylesheet" href="{% static 'css/' %}{{ user.userpreference.theme }}.css" type="text/css">
@@ -27,8 +30,8 @@
 {% endif %}
 <link rel="manifest" href="/manifest.json">
 <meta name="msapplication-TileImage" content="{% static '/img/nobody/144.png' %}">
-<meta name="msapplication-TileColor" content="#fa711f">
+<meta name="msapplication-TileColor" content="#36b7d7">
 <meta name="apple-mobile-web-app-title" content="ivatar">
 <meta name="application-name" content="ivatar">
-<meta name="theme-color" content="#fa711f">
+<meta name="theme-color" content="#36b7d7">
 {% block header %}{% endblock header %}

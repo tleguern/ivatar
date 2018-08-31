@@ -1,105 +1,84 @@
-{% extends 'bootstrap.html' %}
 {% load static %}
-{% load bootstrap4 %}
 {% load i18n %}<!DOCTYPE HTML>
-
-{% block bootstrap4_extra_head %}
 {% include 'header.html' %}
 <title>iVatar :: {% block title %}{% trans 'Freeing the Web, one face at a time!' %}{% endblock title %}</title>
-{% endblock bootstrap4_extra_head %}
 
-{% spaceless %}{% block bootstrap4_content %}
+{% spaceless %}
 <div id="page">
   <div id="header">
   {% block topbar_base %}
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+      <nav class="navbar navbar-tortin">
+  <div class="container-fluid">
+<div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
           {% block topbar %}
               {% block site_brand %}
-                  <div id="logo">
-                    {% if user.is_anonymous %}
-                      <a class="navbar-brand d-none d-lg-block" href="/">
-                        <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top"
-                          alt="{% trans 'Home' %}">
+{% if user.is_anonymous %}
+                      <a class="navbar-brand" href="/">
+{% else %}
+                    <a class="navbar-brand" href="{% url 'profile' %}">
+{% endif %}
+                        ivatar
                       </a>
-                    {% else %}
-                    <a class="navbar-brand d-none d-lg-block" href="{% url 'profile' %}">
-                        <img src="{% static 'img/logo.png' %}" width="60" height="60" class="d-inline-block align-top"
-                          alt="{% trans 'Profile' %}">
-                      </a>
-                    {% endif %}
-                  </div>
-                  <span class="d-none d-lg-block">
-                    <div id="site-branding">
-                      <span id="site-name">
-                        i<span class="bolder">vatar</span>
-                      </span>
-                      <br/>
-                      freeing the web one face at a time
-                    </div>
-                  </span>
+</div>
               {% endblock %}
               {% block nav %}
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                  <ul class="navbar-nav mr-auto nav">
+                <div class="collapse navbar-collapse" id="navbar">
+                  <ul class="nav navbar-nav">
                      {% if not user.is_anonymous %}
-                       <li class="nav-item" style="margin-left: 5px;">
-                         <a class="nav-link" href="/"><i class="fa fa-home" aria-hidden="true"></i>
+                       <li>
+                         <a href="/"><i class="fa fa-home" aria-hidden="true"></i>
                            {% trans 'Home' %}
                          </a>
                        </li>
                      {% endif %}
-                     <li class="nav-item" style="margin-left: 5px;">
+                     <li>
                        <a class="nav-link" href="TODO contact"><i class="fa fa-envelope" aria-hidden="true"></i>
                          {% trans 'Contact' %}
                        </a>
                      </li>
-                     <li class="nav-item" style="margin-left: 5px;">
-                       <a class="nav-link" href="TODO security"><i class="fa fa-user-secret" aria-hidden="true"></i>
+                     <li>
+                       <a href="TODO security"><i class="fa fa-user-secret" aria-hidden="true"></i>
                          {% trans 'Security' %}
                        </a>
                       </li>
-                     <li class="nav-item dropdown" id="tab_tools">
-                       <a class="nav-link dropdown-toggle" href="/" id="tools_dropdown"
-                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{% trans 'Tools' %}">
+                     <li class="dropdown" id="tab_tools">
+                       <a class="dropdown-toggle" href="#" id="tools_dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{% trans 'Tools' %}">
                          <i class="fa fa-wrench" aria-hidden="true"></i>
                          {% trans 'Tools' %}
                       </a>
-                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tools_dropdown">
-                        <a id="tools-check" class="dropdown-item"
-                          href="{% url 'tools_check' %}">
+                      <ul class="dropdown-menu" aria-labelledby="tools_dropdown">
+                        <li><a id="tools-check" href="{% url 'tools_check' %}">
                           <i class="fa fa-check-square" aria-hidden="true"></i> {% trans 'Check' %}
-                        </a>
-                      </div>
+                        </a></li>
+                      </ul>
                     </li>
                   </ul>
+{% block account_bar %}{% include "_account_bar.html" %}{% endblock %}
                 </div>
-                <div>
-                  {% block account_bar %}{% include "_account_bar.html" %}{% endblock %}
-                </div>
+</div>
+</nav>
               {% endblock %}
           {% endblock %}
       </nav>
   {% endblock %}
   </div>
 
-  {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+  {% autoescape off %}{% endautoescape %}
 
-  <div id="outer">
-    <div id="content">
+  <div class="container">
       {% block content %}{% endblock content %}
     </div>
-  </div>
 
   {% block footer %}{% include 'footer.html' %}{% endblock footer %}
 </div>
+{% endspaceless %}
 
-{% endblock %}{% endspaceless %}
-
-{% block bootstrap4_after_content %}
-<script src="{% static '/js/jquery-3.3.1.slim.min.js' %}" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="{% static '/js/ivatar.js' %}" defer></script>
+<script src="{% static '/js/bootstrap.min.js' %}"></script>
+<script src="{% static '/js/ivatar.js' %}"></script>
 {{ settings }}
-{% endblock bootstrap4_after_content %}

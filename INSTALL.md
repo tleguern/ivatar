@@ -28,7 +28,7 @@ pip install -r requirements.txt
 ## (SQL) Migrations
 
 ```bash
-./manage migrate
+./manage.py migrate
 ```
 
 ## Collect static files

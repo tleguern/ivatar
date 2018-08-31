@@ -1,40 +1,67 @@
 {% extends 'base.html' %}                                                                                                                      
 {% load i18n %}
 {% load static %}
-{% load bootstrap4 %}
 
 {% block title %}{% trans 'Choose items to be uploaded' %}{% endblock title %}
 
 {% block content %}
+<style>
+input[type=checkbox] {display:none}
+input[type=checkbox].text + label {
+padding-left:0;
+font-weight:normal;
+}
+input[type=checkbox].text + label:before {
+font-family: FontAwesome;
+display: inline-block;
+letter-spacing:5px;
+font-size:20px;
+color:#36b7d7;
+vertical-align:middle;
+}
+input[type=checkbox].text + label:before {content: "\f0c8"}
+input[type=checkbox].text:checked + label:before {content: "\f14a"}
+input[type=checkbox].image + label:before {
+font-family: FontAwesome;
+display: inline-block;
+}
+input[type=checkbox].image + label:before {content: "\f096"}
+input[type=checkbox].image + label:before {letter-spacing: 5px}
+input[type=checkbox].image:checked + label:before {content: "\f046"}
+input[type=checkbox].image:checked + label:before {letter-spacing: 3px}
+</style>
   <h1>{% trans 'Choose items to be imported' %}</h1>
 
-  <div style="max-width:600px;">
     <form method="post" action="{% url 'upload_export' 'save' %}">{% csrf_token %}
       {% if emails %}
-        <p>
-          {% trans 'Email addresses we found in the export - existing ones will not be re-added' %}:
-        </p>
+        <h4>{% trans 'Email addresses we found in the export - existing ones will not be re-added' %}</h4>
         {% for email in emails %}
-          <input type="checkbox" checked name="email_{{ forloop.counter }}" value="{{ email }}"> {{ email }}</input><br/>
+          <input type="checkbox" checked name="email_{{ forloop.counter }}" id="email_{{ forloop.counter }}" value="{{ email }}" class="text"><label for="email_{{ forloop.counter }}">{{ email }}</label><br/>
         {% endfor %}
       {% endif %}
-      <p/>
       {% if photos %}
-        <p>
-          {% trans 'Photos we found in the export' %}:
-        </p>
+          <h4>{% trans 'Photos we found in the export' %}</h4>
+<div class="row">
         {% for photo in photos %}
-        <input type="checkbox" checked name="photo_{{ forloop.counter }}" value="{{ photo.data }}">
-            <img style="max-width: 80px; max-height: 80px;" src="data:image/{{ photo.format }};base64,{{ photo.data }}"/>
-          </input>
-          <br/>
+<div class="panel panel-tortin" style="width:132px;float:left;margin-left:20px">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+        <input type="checkbox" checked name="photo_{{ forloop.counter }}" id="photo_{{ forloop.counter }}" value="{{ photo.data }}" class="image">
+<label for="photo_{{ forloop.counter }}">{% trans 'Image' %} {{ forloop.counter }}</label>
+</label>
+</h3></div>
+  <div class="panel-body">
+        <center>
+            <img style="max-height:100px;max-width:100px" src="data:image/{{ photo.format }};base64,{{ photo.data }}">
+        </center>
+</div>
+</div>
         {% endfor %}
+</div>
       {% endif %}
-      <br/>
-      {% buttons %}
-        <button type="submit" class="btn btn-primary">{% trans 'Upload' %}</button>
-        <button type="cancel" class="btn btn-danger">{% trans 'Cancel' %}</button>
-      {% endbuttons %}
+<p>
+        <button type="submit" class="btn btn-default">{% trans 'Upload' %}</button>
+</p>
     </form>
-  </div>
+<div style="height:40px"></div>
 {% endblock content %}

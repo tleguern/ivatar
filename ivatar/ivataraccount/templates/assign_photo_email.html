@@ -4,46 +4,65 @@
 {% block title %}{% blocktrans with email.email as email_address %}Choose a photo for {{ email_address }}{% endblocktrans %}{% endblock title %}
 
 {% block content %}
-
+<style>
+.nobutton {
+background: none;
+color: inherit;
+border: none;
+padding: 0;
+font: inherit;
+cursor: pointer;
+outline: inherit;
+}
+</style>
 <h1>{% blocktrans with email.email as email_address %}Choose a photo for {{ email_address }}{% endblocktrans %}</h1>
 
 {% if not user.photo_set.count %}
 
 {% url 'upload_photo' as upload_url %}
-<p>{% blocktrans %}You need to <a href="{{ upload_url }}">upload some photos</a> first!{% endblocktrans %}</p>
+<h4>{% blocktrans %}You need to <a href="{{ upload_url }}">upload some photos</a> first!{% endblocktrans %}</h4>
 
-<p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
+<p><a href="{% url 'profile' %}" class="btn btn-default">{% trans 'Back to your profile' %}</a></p>
 
 {% else %}
 
 <p>{% trans 'Here are the pictures you have uploaded, click on the one you wish to associate with this email address:' %}</p>
-<ul class="horizontal-list avatar-list centered">
+<div class="row">
 {% for photo in user.photo_set.all %}
-  <li>
-  <form action="{% url 'assign_photo_email' view.kwargs.email_id %}" method="post">{% csrf_token %}
+  <form action="{% url 'assign_photo_email' view.kwargs.email_id %}" method="post" style="float:left;margin-left:20px">{% csrf_token %}
   <input type="hidden" name="photo_id" value="{{ photo.id }}">
-  <input type="image" name="photo{{ photo.id }}" src="{% url 'raw_image' photo.id %}" class="thumbnail">
-  {% ifequal email.photo.id photo.id %}
-  <br>{% trans '(current)' %}
-  {% endifequal %}
-  </form></li>
+  <button type="submit" name="photo{{ photo.id }}" class="nobutton">
+<div class="panel panel-tortin" style="width:132px;margin:0">
+  <div class="panel-heading">
+    <h3 class="panel-title">{% ifequal email.photo.id photo.id %}<i class="fa fa-check"></i>{% endifequal %} {% trans 'Image' %} {{ forloop.counter }}</h3>
+</div>
+  <div class="panel-body" style="height:130px">
+        <center>
+            <img style="max-height:100px;max-width:100px" src="{% url 'raw_image' photo.id %}">
+        </center>
+</div>
+</div>
+</button>
+  </form>
 {% endfor %}
-  <li>
-  <form action="{% url 'assign_photo_email' view.kwargs.email_id %}" method="post">{% csrf_token %}
-  <input type="submit" name="photoNone" value="{% trans 'None' %}">
-  {% ifequal email.photo.id photo.id %}
-  <br>{% trans '(current)' %}
-  {% endifequal %}
-  </form></li>
-</ul>
-
-<p>
-  <br/>
-  <a href="{% url 'upload_photo' %}">{% blocktrans %}Upload a new one{% endblocktrans %}</a>
-  <br/>
-  <a href="{% url 'import_photo' email.pk %}">{% blocktrans %}Import from other services{% endblocktrans %}</a>
-</p>
-
+  <form action="{% url 'assign_photo_email' view.kwargs.email_id %}" method="post" style="float:left;margin-left:20px">{% csrf_token %}
+<button type="submit" name="photoNone" class="nobutton">
+<div class="panel panel-tortin" style="width:132px;margin:0">
+  <div class="panel-heading">
+    <h3 class="panel-title">{% ifequal email.photo.id photo.id %}<i class="fa fa-check"></i>{% endifequal %} {% trans 'No image' %}</h3>
+</div>
+  <div class="panel-body" style="height:130px">
+        <center>
+            <img style="max-height:100px;max-width:100px" src="/static/img/nobody/100.png">
+        </center>
+</div>
+</div>
+</button>
+  </form>
+</div>
+<div style="height:8px"></div>
+  <a href="{% url 'upload_photo' %}" class="btn btn-default">{% blocktrans %}Upload a new one{% endblocktrans %}</a>&nbsp;&nbsp;
+  <a href="{% url 'import_photo' email.pk %}" class="btn btn-default">{% blocktrans %}Import from other services{% endblocktrans %}</a>
 {% endif %}
-
+<div style="height:40px"></div>
 {% endblock content %}
