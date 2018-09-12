@@ -20,7 +20,7 @@ class AvatarImageView(TemplateView):
     '''
     # TODO: Do cache resize images!! Memcached?
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches
+    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements
         '''
         Override get from parent class
         '''
@@ -29,15 +29,29 @@ class AvatarImageView(TemplateView):
         imgformat = 'png'
         obj = None
         default = None
+        forcedefault = False
 
         if 'd' in request.GET:
             default = request.GET['d']
+        if 'default' in request.GET:
+            default = request.GET['d']
 
+        if 'f' in request.GET:
+            if request.GET['f'] == 'y':
+                forcedefault = True
+        if 'forcedefault' in request.GET:
+            if request.GET['forcedefault'] == 'y':
+                forcedefault = True
+
+        sizetemp = None
         if 's' in request.GET:
-            if request.GET['s'] != '' and request.GET['s'] is not None \
-                and request.GET['s'] != '0':
-                size = request.GET['s']
-                size = int(size)
+            sizetemp = request.GET['s']
+        if 'size' in request.GET:
+            sizetemp = request.GET['size']
+        if sizetemp:
+            if sizetemp != '' and sizetemp is not None and sizetemp != '0':
+                size = int(sizetemp)
+
         if size > int(AVATAR_MAX_SIZE):
             size = int(AVATAR_MAX_SIZE)
         if len(kwargs['digest']) == 32:
@@ -61,23 +75,22 @@ class AvatarImageView(TemplateView):
                 pass
 
         # If that mail/openid doesn't exist, or has no photo linked to it
-        if not obj or not obj.photo:
+        if not obj or not obj.photo or forcedefault:
             # Return the default URL, as specified, or 404 Not Found, if default=404
             if default:
                 if str(default) == str(404):
                     return HttpResponseNotFound(_('<h1>Image not found</h1>'))
                 return HttpResponseRedirect(default)
-            # Return our default URL
-            else:
-                static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
-                if not path.isfile(static_img):
-                    # We trust this exists!!!
-                    static_img = path.join('static', 'img', 'mm', '512.png')
-                # We trust static/ is mapped to /static/
-                return HttpResponseRedirect('/' + static_img)
-        else:
-            imgformat = obj.photo.format
-            photodata = Image.open(BytesIO(obj.photo.data))
+
+            static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
+            if not path.isfile(static_img):
+                # We trust this exists!!!
+                static_img = path.join('static', 'img', 'mm', '512.png')
+            # We trust static/ is mapped to /static/
+            return HttpResponseRedirect('/' + static_img)
+
+        imgformat = obj.photo.format
+        photodata = Image.open(BytesIO(obj.photo.data))
 
         photodata.thumbnail((size, size), Image.ANTIALIAS)
         data = BytesIO()
