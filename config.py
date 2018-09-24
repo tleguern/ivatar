@@ -9,13 +9,7 @@ from django.urls import reverse_lazy
 from ivatar.settings import BASE_DIR
 
 ADMIN_USERS = []
-ALLOWED_HOSTS = [
-    'localhost',
-    gethostname(),
-    gethostbyname(gethostname()),
-    '.openshiftapps.com',
-    '127.0.0.1',
-]
+ALLOWED_HOSTS = [ '*' ]
 
 from ivatar.settings import INSTALLED_APPS  # noqa
 INSTALLED_APPS.extend([
