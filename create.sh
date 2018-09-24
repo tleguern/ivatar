@@ -28,7 +28,8 @@ else
 fi
 
 if [ -n "$LKERNAT_GITLAB_OPENSHIFT_ACCESS_TOKEN" ]; then
-    oc secrets new-basicauth lkernat-gitlab-openshift-falko-access-token --password=$LKERNAT_GITLAB_OPENSHIFT_ACCESS_TOKEN
+    #oc secrets new-basicauth lkernat-gitlab-openshift-falko-access-token --password=$LKERNAT_GITLAB_OPENSHIFT_ACCESS_TOKEN
+    oc create secret generic lkernat-gitlab-openshift-falko-access-token --from-literal=password=$LKERNAT_GITLAB_OPENSHIFT_ACCESS_TOKEN
     oc secrets add serviceaccount/builder secrets/lkernat-gitlab-openshift-falko-access-token
     SECRET_CMDLINE="--source-secret=lkernat-gitlab-openshift-falko-access-token"
 fi
