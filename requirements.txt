@@ -31,3 +31,6 @@ yapf
 django-anymail[mailgun]
 mysqlclient
 psycopg2
+notsetuptools
+git+https://github.com/ofalk/monsterid.git
+git+https://github.com/azaghal/pydenticon.git
