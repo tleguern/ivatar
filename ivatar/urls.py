@@ -20,6 +20,7 @@ urlpatterns = [  # pylint: disable=invalid-name
     url(
         r'avatar/(?P<digest>\w{32})',
         AvatarImageView.as_view(), name='avatar_view'),
+    url('description/', TemplateView.as_view(template_name='description.html'), name='description'),
     url('security/', TemplateView.as_view(template_name='security.html'), name='security'),
     url('contact/', TemplateView.as_view(template_name='contact.html'), name='contact'),
     path('talk_to_us/', RedirectView.as_view(url='/contact'), name='talk_to_us'),
