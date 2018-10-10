@@ -90,7 +90,11 @@ class AvatarImageView(TemplateView):
                     return HttpResponse(
                         data,
                         content_type='image/png')
-                return HttpResponseRedirect(default)
+                if str(default) == 'mm':
+                    # If mm is explicitly given, we need to catch that
+                    pass
+                else:
+                    return HttpResponseRedirect(default)
 
             static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
             if not path.isfile(static_img):
