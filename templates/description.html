@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans 'federated avatar hosting service' %}{% endblock %}
+
+{% block content %}
+
+<h2>What is Libravatar?</h2>
+
+ivatar/Libravatar (from "libre" and "avatar" or "internet" and "avatar") is a piece of <a href="http://www.gnu.org/philosophy/free-sw.html">free software</a> to do federated avatar hosting. What does that do and why should you care?
+<br/>
+Say you've got a profile image you like to use when you have an account somewhere. You want this photo to show up whenever you interact socially with a website. In other words, you want your blog comments, status updates, git commits or anything else you do publicly to be associated with that image.
+<br/>
+Uploading your image everywhere is clearly a waste of time. What if there was a place where you could put it and where every website out there could access it easily? That's the idea behind <a href="http://www.gravatar.com/">Gravatar</a>, the service that pioneered this approach and inspired Libravatar.
+
+<h2>How to use it</h2>
+
+All you have to do is <a href="{% url 'new_account' %}">sign up on libravatar.org</a>, upload your photo and tell us what your email address is. That's all.<br/>
+<br/>
+<img src="{% static 'img/ivatar-screenshot-profile-view.png' %}">
+<br/>
+Once you've done that, a bunch of websites (where you've entered your email address, usually as part of the registration process) will start displaying your avatar next to your name.<br/>
+<img src="{% static 'img/gitlab-profile-view.png' %}">
+<br/>
+    
+<h2>Freedom and federation</h2>
+
+How is Libravatar <a href="{% url 'features' %}">different</a> from Gravatar though? The main difference is that while <a href="{% url 'home' %}">Libravatar.org</a> is an online avatar hosting service just like Gravatar, the software that powers the former is also available for download under a free software license.
+<br/>
+Why would you want to <a href="{% url 'run_your_own' %}">run your own</a> instance? Our belief is that centralised approaches don't put users in control. If you own your own domain name, you control how mail is delivered to your domain. You should also be able to control how avatars are served to other websites.
+<br/>
+
+For example, if you own a business, you may want to integrate with existing systems (e.g. a staff directory) and delegate authentication to what you're already using (LDAP?). Plus, you can choose what happens when email addresses are not found (display your company logo?).
+<br/>
+
+<h2>What else?</h2>
+
+Libravatar also supports things like <a href="http://openid.net/">OpenID</a>. Not only can you <a href="{% url 'openid-login' %}">login</a> without creating a username and password, but you can also assign a photo to your OpenID identifier just like you assign photos to your email addresses.<br/>
+<img src="{% static 'img/ivatar-openid-screenshot.png' %}">
+<br/>
+<!-- TODO: Pipeline URL -->
+There are lots of other things in the <a href="https://bugs.launchpad.net/libravatar/+bugs?field.importance=WISHLIST">pipeline</a> and if you have a great idea why not tell us?
+
+<h2>How does it work?</h2>
+
+The basic architecture is meant to be simple and scalable:
+<br/>
+
+<ol>
+  <li>Users log into a dynamic <a href="http://www.djangoproject.com/">Django</a>-based site where they upload their photos and confirm their email or OpenID addresses.</li>
+  <li>Photos are dynamically resized as requested directly to end-user browsers.</li>
+</ol>
+<br/>
+<!-- TODO architecture picture does no longer reflect the reality -->
+<img src="{% static 'img/architecture.png' %}">
+<br/>
+<br/>
+
+<!-- TODO: API url -->
+If you're interested in the details of how third-party websites display Libravatar photos, have a look at our <a href="https://wiki.libravatar.org/api/">API</a>. The gist of it is that clients get a base URL via a DNS lookup and then tack on the hashed value of the user's email or OpenID address to form the final image:
+<br/>
+<figure>
+  <img src="https://seccdn.libravatar.org/avatar/63a75a80e6b1f4adfdb04c1ca02e596c">
+  <figcaption>&lt;img src="https://seccdn.libravatar.org/avatar/63a75a80e6b1f4adfdb04c1ca02e596c"&gt;</code></figcaption>
+</figure> 
+<br/>
+<!-- TODO: Libraries url -->
+It's pretty simple, but for most web applications it's even easier because they're just using one of the convenient <a href="https://wiki.libravatar.org/libraries/">libraries</a> provided by the community.
+
+
+<div style="height:40px"></div>
+
+{% endblock %}
