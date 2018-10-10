@@ -36,7 +36,7 @@ class AvatarImageView(TemplateView):
         if 'd' in request.GET:
             default = request.GET['d']
         if 'default' in request.GET:
-            default = request.GET['d']
+            default = request.GET['default']
 
         if 'f' in request.GET:
             if request.GET['f'] == 'y':
