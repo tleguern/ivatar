@@ -12,7 +12,9 @@
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           {% if request.user.is_authenticated %}
             <li><a href="{% url 'profile' %}"><i class="fa fa-image" aria-hidden="true"></i> {% trans 'Profile' %}</a></li>
+<!--
             <li><a href="{% url 'user_preference' %}"><i class="fa fa-cog" aria-hidden="true"></i> {% trans 'Preferences' %}</a></li>
+-->
             <li><a href="{% url 'import_photo' %}"><i class="fa fa-envelope-square" aria-hidden="true"></i> {% trans 'Import photo via mail address' %}</a></li>
             <li><a href="{% url 'upload_export' %}"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {% trans 'Import libravatar XML export' %}</a></li>
             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> {% trans 'Logout' %}</a></li>

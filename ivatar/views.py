@@ -13,6 +13,8 @@ from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
 from . ivataraccount.models import pil_format
 
+from monsterid.id import build_monster
+
 
 class AvatarImageView(TemplateView):
     '''
@@ -34,7 +36,7 @@ class AvatarImageView(TemplateView):
         if 'd' in request.GET:
             default = request.GET['d']
         if 'default' in request.GET:
-            default = request.GET['d']
+            default = request.GET['default']
 
         if 'f' in request.GET:
             if request.GET['f'] == 'y':
@@ -80,6 +82,14 @@ class AvatarImageView(TemplateView):
             if default:
                 if str(default) == str(404):
                     return HttpResponseNotFound(_('<h1>Image not found</h1>'))
+                if str(default) == 'monsterid':
+                    monsterdata = build_monster(seed=kwargs['digest'], size=(size, size))
+                    data = BytesIO()
+                    monsterdata.save(data, 'PNG', quality=JPEG_QUALITY)
+                    data.seek(0)
+                    return HttpResponse(
+                        data,
+                        content_type='image/png')
                 return HttpResponseRedirect(default)
 
             static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
