@@ -116,7 +116,7 @@ class AvatarImageView(TemplateView):
                         data,
                         content_type='image/png')
 
-                if str(default) == 'mm':
+                if str(default) == 'mm' or str(default) == 'mp':
                     # If mm is explicitly given, we need to catch that
                     pass
                 else:
