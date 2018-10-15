@@ -3,17 +3,19 @@ views under /
 '''
 from io import BytesIO
 from os import path
+import hashlib
 from PIL import Image
 from django.views.generic.base import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 
+from monsterid.id import build_monster as BuildMonster
+from pydenticon import Generator as IdenticonGenerator
+
 from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
 from . ivataraccount.models import pil_format
-
-from monsterid.id import build_monster
 
 
 class AvatarImageView(TemplateView):
@@ -22,7 +24,7 @@ class AvatarImageView(TemplateView):
     '''
     # TODO: Do cache resize images!! Memcached?
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements
+    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements,too-many-locals
         '''
         Override get from parent class
         '''
@@ -82,14 +84,38 @@ class AvatarImageView(TemplateView):
             if default:
                 if str(default) == str(404):
                     return HttpResponseNotFound(_('<h1>Image not found</h1>'))
+
                 if str(default) == 'monsterid':
-                    monsterdata = build_monster(seed=kwargs['digest'], size=(size, size))
+                    monsterdata = BuildMonster(seed=kwargs['digest'], size=(size, size))
                     data = BytesIO()
                     monsterdata.save(data, 'PNG', quality=JPEG_QUALITY)
                     data.seek(0)
                     return HttpResponse(
                         data,
                         content_type='image/png')
+
+                if str(default) == 'identicon' or str(default) == 'retro':
+                    # Taken from example code
+                    foreground = [
+                        'rgb(45,79,255)',
+                        'rgb(254,180,44)',
+                        'rgb(226,121,234)',
+                        'rgb(30,179,253)',
+                        'rgb(232,77,65)',
+                        'rgb(49,203,115)',
+                        'rgb(141,69,170)']
+                    background = 'rgb(224,224,224)'
+                    padding = (10, 10, 10, 10)
+                    generator = IdenticonGenerator(
+                        10, 10, digest=hashlib.sha1,
+                        foreground=foreground, background=background)
+                    data = generator.generate(
+                        kwargs['digest'], size, size,
+                        output_format='png', padding=padding, inverted=False)
+                    return HttpResponse(
+                        data,
+                        content_type='image/png')
+
                 if str(default) == 'mm':
                     # If mm is explicitly given, we need to catch that
                     pass
