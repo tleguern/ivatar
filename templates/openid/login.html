@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'federated avatar hosting service' %}{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+<h1>{% trans 'OpenID Login' %}</h1>
+{% if openid_form.errors %}
+<p class="error">{% trans "Please correct errors below:" %}<br>
+{% if openid_form.openid_identifier.errors %}
+{{ openid_form.openid_identifier.errors|join:', ' }}
+{% endif %}
+{% if openid_form.next.errors %}
+{{ openid_form.next.errors|join:', ' }}
+{% endif %}
+</p>
+{% endif %}
+<form name='login' action="{% url 'openid-login' %}" method="post">{% csrf_token %}
+
+{% url 'login' as login_url %}
+<p>{% trans "You'd rather use a regular account?" %} {% blocktrans %}That's fine, just use <a href="{{ login_url }}">this login form</a> instead.{% endblocktrans %}</p>
+
+<p><label for="id_openid_identifier">{% trans 'OpenID' %}:</label>&nbsp;
+<input class="required openid" id="id_openid_identifier" size="70" maxlength="255" name="openid_identifier" value="{{ openid_identifier }}" type="text"></p>
+
+<p><input type="submit" value="{% trans 'Login' %}" />
+<input type="hidden" name="next" value="{{ next }}" />
+&nbsp;<a href="{% url 'home' %}">{% trans 'Cancel' %}</a></p>
+
+</form>
+
+</div>
+<div style="height:40px"></div>
+
+{% endblock %}
