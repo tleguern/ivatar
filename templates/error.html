@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}Libravatar: {% trans 'Error!' %}{% endblock title %}
+
+{% block content %}
+<h1 class="error">{% trans 'Error!' %}</h1>
+
+<p>{% block errormessage %}{% trans 'Libravatar has encountered an error.' %}{% endblock errormessage %}</p>
+
+<div style="height:40px"></div>
+
+{% endblock content %}
+
+{% block backlink %}
+{% if user.is_authenticated %}
+<p><a href="{% url 'profile' %}">{% trans 'Back to your profile' %}</a></p>
+{% endif %}
+
+{% endblock %}
