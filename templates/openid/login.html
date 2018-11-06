@@ -28,7 +28,7 @@
 <input class="required openid" id="id_openid_identifier" size="70" maxlength="255" name="openid_identifier" value="{{ openid_identifier }}" type="text"></p>
 
 <p><input type="submit" value="{% trans 'Login' %}" />
-<input type="hidden" name="next" value="{{ next }}" />
+<input type="hidden" name="next" value="{{ request.build_absolute_uri }}" />
 &nbsp;<a href="{% url 'home' %}">{% trans 'Cancel' %}</a></p>
 
 </form>
