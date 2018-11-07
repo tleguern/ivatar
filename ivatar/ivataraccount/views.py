@@ -526,10 +526,14 @@ class RemoveConfirmedOpenIDView(View):
         try:
             openid = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
-            openidobj = UserOpenID.objects.get(  # pylint: disable=no-member
-                user_id=request.user.id,
-                claimed_id=openid.openid)
-            openidobj.delete()
+            try:
+                openidobj = UserOpenID.objects.get(  # pylint: disable=no-member
+                    user_id=request.user.id,
+                    claimed_id=openid.openid)
+                openidobj.delete()
+            except:
+                # Why it is not there?
+                pass
             openid.delete()
             messages.success(request, _('ID removed'))
         except self.model.DoesNotExist:  # pylint: disable=no-member
