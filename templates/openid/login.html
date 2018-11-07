@@ -27,12 +27,14 @@
 <p><label for="id_openid_identifier">{% trans 'OpenID' %}:</label>&nbsp;
 <input class="required openid" id="id_openid_identifier" size="70" maxlength="255" name="openid_identifier" value="{{ openid_identifier }}" type="text"></p>
 
-<p><input type="submit" value="{% trans 'Login' %}" />
+<p>
+<button type="submit" class="btn btn-default">{% trans 'Login' %}</button>
 <input type="hidden" name="next" id="next"/>
 <script>
   document.getElementById("next").value = window.location.protocol + '//' + window.location.hostname + "{% url 'profile' %}";
 </script>
-&nbsp;<a href="{% url 'home' %}">{% trans 'Cancel' %}</a></p>
+&nbsp;
+<button type="reset" class="btn btn-default" onclick="window.history.back();">{% trans 'Cancel' %}</button>
 
 </form>
 
