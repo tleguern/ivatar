@@ -29,7 +29,11 @@
 <label for="id_password">{% trans 'Password' %}:</label>
 <input type="password" name="password" class="form-control" required id="id_password">
 </div>
-  <button type="submit" class="btn btn-default">{% trans 'Login' %}</button> or <a href="{% url 'new_account' %}" class="btn btn-default">{% trans 'Create new user' %}</a>
+  <button type="submit" class="btn btn-default">{% trans 'Login' %}</button>
+  or
+  <a href="{% url 'openid-login' %}" class="btn btn-default">{% trans 'Login with OpenID' %}</a>
+  or
+  <a href="{% url 'new_account' %}" class="btn btn-default">{% trans 'Create new user' %}</a>
 </form>
 </div>
 <div style="height:40px"></div>
