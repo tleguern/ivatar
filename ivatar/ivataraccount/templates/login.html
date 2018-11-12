@@ -22,7 +22,7 @@
 <form action="{% url 'login' %}" method="post" name="login">
 {% csrf_token %}
 <div class="form-group">
-<label for="id_username">{% trans 'Benutzername' %}:</label>
+<label for="id_username">{% trans 'Username' %}:</label>
 <input type="text" name="username" autofocus required class="form-control" id="id_username">
 </div>
 <div class="form-group">
