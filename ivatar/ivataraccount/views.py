@@ -415,6 +415,8 @@ class RawImageView(DetailView):
 
     def get(self, request, *args, **kwargs):
         photo = self.model.objects.get(pk=kwargs['pk'])  # pylint: disable=no-member
+        if not photo.user.id is request.user.id:
+            return HttpResponseRedirect(reverse_lazy('home'))
         return HttpResponse(
             BytesIO(photo.data), content_type='image/%s' % photo.format)
 
