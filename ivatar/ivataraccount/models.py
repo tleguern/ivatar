@@ -114,6 +114,7 @@ class Photo(BaseAccountModel):
     ip_address = models.GenericIPAddressField(unpack_ipv4=True)
     data = models.BinaryField()
     format = models.CharField(max_length=3)
+    access_count = models.BigIntegerField(default=0, editable=False)
 
     class Meta:  # pylint: disable=too-few-public-methods
         '''
@@ -304,6 +305,7 @@ class ConfirmedEmail(BaseAccountModel):
     digest = models.CharField(max_length=32)
     digest_sha256 = models.CharField(max_length=64)
     objects = ConfirmedEmailManager()
+    access_count = models.BigIntegerField(default=0, editable=False)
 
     class Meta:  # pylint: disable=too-few-public-methods
         '''
@@ -419,6 +421,7 @@ class ConfirmedOpenId(BaseAccountModel):
         on_delete=models.deletion.SET_NULL,
     )
     digest = models.CharField(max_length=64)
+    access_count = models.BigIntegerField(default=0, editable=False)
 
     class Meta:  # pylint: disable=too-few-public-methods
         '''

@@ -5,7 +5,7 @@ from django.urls import path
 from django.conf.urls import url
 
 from django.views.generic import TemplateView
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
 from django.contrib.auth.decorators import login_required
 
 from . views import CreateView, PasswordSetView, AddEmailView
@@ -18,14 +18,14 @@ from . views import AddOpenIDView, RedirectOpenIDView, ConfirmOpenIDView
 from . views import CropPhotoView
 from . views import UserPreferenceView, UploadLibravatarExportView
 from . views import ResendConfirmationMailView
+from . views import IvatarLoginView
 
 # Define URL patterns, self documenting
 # To see the fancy, colorful evaluation of these use:
 # ./manager show_urls
 urlpatterns = [  # pylint: disable=invalid-name
     path('new/', CreateView.as_view(), name='new_account'),
-    path('login/', LoginView.as_view(template_name='login.html'),
-         name='login'),
+    path('login/', IvatarLoginView.as_view(), name='login'),
     path(
         'logout/', LogoutView.as_view(next_page='/'),
         name='logout'),

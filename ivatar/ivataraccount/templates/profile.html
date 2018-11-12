@@ -55,7 +55,7 @@ outline: inherit;
 </div>
   <div class="panel-body" style="height:130px">
         <center>
-            <img style="max-height:100px;max-width:100px" src="{% if email.photo %}{% url 'raw_image' email.photo.id %}{% else %}{% static '/img/nobody/80.png' %}{% endif %}">
+          <img title="{% trans 'Access count' %}: {{ email.access_count }}" style="max-height:100px;max-width:100px" src="{% if email.photo %}{% url 'raw_image' email.photo.id %}{% else %}{% static '/img/nobody/80.png' %}{% endif %}">
         </center>
 </div>
 </div>
@@ -71,7 +71,7 @@ outline: inherit;
 </div>
   <div class="panel-body" style="height:130px">
         <center>
-            <img style="max-height:100px;max-width:100px" src="{% if openid.photo %}{% url 'raw_image' openid.photo.id %}{% else %}{% static '/img/nobody/80.png' %}{% endif %}">
+          <img title="{% trans 'Access count' %}: {{ openid.access_count }}" style="max-height:100px;max-width:100px" src="{% if openid.photo %}{% url 'raw_image' openid.photo.id %}{% else %}{% static '/img/nobody/80.png' %}{% endif %}">
         </center>
 </div>
 </div>
@@ -119,7 +119,7 @@ outline: inherit;
 </div>
   <div class="panel-body" style="height:130px">
         <center>
-            <img style="max-height:100px;max-width:100px" src="{% url 'raw_image' photo.id %}">
+          <img title="{% trans 'Access count' %}: {{ photo.access_count }}" style="max-height:100px;max-width:100px" src="{% url 'raw_image' photo.id %}">
         </center>
 </div>
 </div>
