@@ -136,7 +136,10 @@ class AvatarImageView(TemplateView):
         data = BytesIO()
         photodata.save(data, pil_format(imgformat), quality=JPEG_QUALITY)
         data.seek(0)
-
+        obj.photo.access_count += 1
+        obj.photo.save()
+        obj.access_count += 1
+        obj.save()
         return HttpResponse(
             data,
             content_type='image/%s' % imgformat)
