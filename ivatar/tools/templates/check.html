@@ -43,7 +43,7 @@
       {% if mailurl %}
 <div class="panel panel-tortin" style="min-width:132px;width:calc({{ size }}px + 32px);float:left;margin-left:30px">
   <div class="panel-heading">
-    <h3 class="panel-title">MD5 <i class="fa fa-unlock" title="Secure connection (https)"></i> <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i></h3>
+    <h3 class="panel-title">MD5 <i class="fa fa-lock" title="Secure connection (https)"></i>&nbsp;<i class="fa fa-at" title="mail: {{ form.mail.value }}"></i></h3>
   </div>
   <div class="panel-body">
            <a href="{{ mailurl_secure }}">
@@ -51,9 +51,9 @@
             </a>
 </div>
 </div>
-<div class="panel panel-tortin" style="min-width:132px;width:calc({{ size }}px + 32px);float:left;margin-left:20px">
+<div class="panel panel-tortin" style="min-width:132px;width:calc({{ size }}px + 33px);float:left;margin-left:20px">
   <div class="panel-heading">
-    <h3 class="panel-title">SHA256 <i class="fa fa-unlock" title="Secure connection (https)"></i> <i class="fa fa-at" title="mail: {{ form.mail.value }}"></i></h3>
+    <h3 class="panel-title">SHA256 <i class="fa fa-lock" title="Secure connection (https)"></i>&nbsp;<i class="fa fa-at" title="mail: {{ form.mail.value }}"></i></h3>
   </div>
   <div class="panel-body">
             <a href="{{ SECURE_BASE_URL }}{{ mail_hash256 }}?s={{ size }}">
@@ -64,9 +64,9 @@
       {% endif %}
 
       {% if openidurl %}
-<div class="panel panel-tortin" style="min-width:122px;width:calc({{ size }}px + 32px);float:left;margin-left:30px">
+<div class="panel panel-tortin" style="min-width:122px;width:calc({{ size }}px + 33px);float:left;margin-left:30px">
   <div class="panel-heading">
-    <h3 class="panel-title">SHA256 <i class="fa fa-unlock" title="Secure connection (http)"></i><i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i></h3>
+    <h3 class="panel-title">SHA256 <i class="fa fa-lock" title="Secure connection (http)"></i>&nbsp;<i class="fa fa-openid" title="openid: {{ form.openid.value }}"></i></h3>
   </div>
   <div class="panel-body">
             <a href="{{ openidurl_secure }}">

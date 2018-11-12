@@ -19,6 +19,7 @@ from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
+from django.contrib.auth.views import LoginView
 from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
@@ -72,6 +73,15 @@ class CreateView(SuccessMessageMixin, FormView):
             return HttpResponseRedirect(reverse_lazy('profile'))
         return HttpResponseRedirect(
             reverse_lazy('login'))  # pragma: no cover
+
+    def get(self, request, *args, **kwargs):
+        '''
+        Handle get for create view
+        '''
+        if request.user:
+            if request.user.is_authenticated:
+                return HttpResponseRedirect(reverse_lazy('profile'))
+        return super().get(self, request, args, kwargs)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -637,7 +647,7 @@ class ConfirmOpenIDView(View):  # pragma: no cover
         if self.request.user.photo_set.count() == 1:
             confirmed.set_photo(self.request.user.photo_set.first())
 
-        # Also allow user to login using this OPenID (if not already taken)
+        # Also allow user to login using this OpenID (if not already taken)
         if not UserOpenID.objects.filter(claimed_id=confirmed.openid).exists():  # pylint: disable=no-member
             user_openid = UserOpenID()
             user_openid.user = self.request.user
@@ -700,7 +710,7 @@ class CropPhotoView(TemplateView):
             try:
                 openid = ConfirmedOpenId.objects.get(  # pylint: disable=no-member
                     openid=request.POST['openid'])
-            except ConfirmedOpenId.DoesNotExist:
+            except ConfirmedOpenId.DoesNotExist:  # pylint: disable=no-member
                 pass  # Ignore automatic assignment
 
         return photo.perform_crop(request, dimensions, email, openid)
@@ -809,7 +819,7 @@ class ResendConfirmationMailView(View):
         try:
             email = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['email_id'])
-        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
+        except self.model.DoesNotExist:  # pragma: no cover  pylint: disable=no-member
             messages.error(request, _('ID does not exist'))
         else:
             try:
@@ -824,3 +834,19 @@ class ResendConfirmationMailView(View):
                     (_('Unable to send confirmation email for'),
                      email.email, exc))
         return HttpResponseRedirect(reverse_lazy('profile'))
+
+class IvatarLoginView(LoginView):
+    '''
+    View class for login
+    '''
+
+    template_name = 'login.html'
+
+    def get(self, request, *args, **kwargs):
+        '''
+        Handle get for login view
+        '''
+        if request.user:
+            if request.user.is_authenticated:
+                return HttpResponseRedirect(reverse_lazy('profile'))
+        return super().get(self, request, args, kwargs)
