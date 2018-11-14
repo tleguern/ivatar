@@ -18,7 +18,7 @@
 {% endif %}
 <form action="{% url 'new_account' %}" method="post" name="newaccount">
 {% csrf_token %}
-<div style="max-width:600px">
+<div style="max-width:640px">
 <div class="form-group">
 <label for="id_username">{% trans 'Username' %}:</label>
 <input type="text" name="username" autofocus required class="form-control" id="id_username">

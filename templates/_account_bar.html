@@ -17,6 +17,8 @@
 -->
             <li><a href="{% url 'import_photo' %}"><i class="fa fa-envelope-square" aria-hidden="true"></i> {% trans 'Import photo via mail address' %}</a></li>
             <li><a href="{% url 'upload_export' %}"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {% trans 'Import libravatar XML export' %}</a></li>
+            <li><a href="{% url 'password_change' %}"><i class="fa fa-key" aria-hidden="true"></i> {% trans 'Change password' %}</a></li>
+            <li><a href="{% url 'password_reset' %}"><i class="fa fa-unlock-alt" aria-hidden="true"></i> {% trans 'Reset password' %}</a></li>
             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> {% trans 'Logout' %}</a></li>
           {% else %}
             <li><a href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i> {% trans 'Local' %}</a></li>

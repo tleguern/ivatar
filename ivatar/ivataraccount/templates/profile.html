@@ -106,7 +106,7 @@ outline: inherit;
 {% endif %}
 
 <p>
-{% if not max_emails %}<a href="{% url 'add_email' %}" class="btn btn-default">{% trans 'Add a new email address' %}</a> or{% endif %}
+{% if not max_emails %}<a href="{% url 'add_email' %}" class="btn btn-default">{% trans 'Add a new email address' %}</a>&nbsp;{% endif %}
 <a href="{% url 'add_openid' %}" class="btn btn-default">{% trans 'Add a new OpenID' %}</a></p>
 </p>
 {% if user.photo_set.count %}
@@ -129,7 +129,7 @@ outline: inherit;
 
 {% if not max_photos %}
 <p>
-<a href="{% url 'upload_photo' %}" class="btn btn-default">{% trans 'Upload a new photo' %}</a> or 
+<a href="{% url 'upload_photo' %}" class="btn btn-default">{% trans 'Upload a new photo' %}</a>&nbsp;
 <a href="{% url 'import_photo' %}" class="btn btn-default">{% trans 'Import photo from other services' %}</a>
 </p>
 {% endif %}

@@ -18,7 +18,7 @@ input[type=checkbox]:checked + label:before {letter-spacing: 3px}
 <h1>{% trans 'Import photo' %}</h1>
 
 {% if not email_id %}
-<div style="max-width:600px">
+<div style="max-width:640px">
   <form action="{% url 'import_photo' %}" method="get" id="check_mail_form">
 <div class="form-group">
     <label for="check_email_addr">{% trans 'Email Address' %}</label>

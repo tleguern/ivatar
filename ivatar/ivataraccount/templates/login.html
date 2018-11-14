@@ -18,7 +18,7 @@
 {% if form.password.errors %}
 <div class="alert alert-danger" role="alert">{{ form.password.errors }}</div>
 {% endif %}
-<div style="max-width:600px">
+<div style="max-width:700px">
 <form action="{% url 'login' %}" method="post" name="login">
 {% csrf_token %}
 <div class="form-group">
@@ -30,10 +30,12 @@
 <input type="password" name="password" class="form-control" required id="id_password">
 </div>
   <button type="submit" class="btn btn-default">{% trans 'Login' %}</button>
-  or
+  &nbsp;
   <a href="{% url 'openid-login' %}" class="btn btn-default">{% trans 'Login with OpenID' %}</a>
-  or
+  &nbsp;
   <a href="{% url 'new_account' %}" class="btn btn-default">{% trans 'Create new user' %}</a>
+  &nbsp;
+  <a href="{% url 'password_reset' %}" class="btn btn-default">{% trans 'Password reset' %}</a>
 </form>
 </div>
 <div style="height:40px"></div>
