@@ -12,7 +12,7 @@
 {% if form.openid.errors %}
 <div class="alert alert-danger" role="alert">{{ form.openid.errors }}</div>
 {% endif %}
-<div style="max-width:600px">
+<div style="max-width:640px">
 <form action="{% url 'add_openid' %}" name="addopenid" method="post">
 {% csrf_token %}
 

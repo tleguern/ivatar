@@ -6,6 +6,9 @@ from django.conf.urls import url
 
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView,\
+    PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.decorators import login_required
 
 from . views import CreateView, PasswordSetView, AddEmailView
@@ -29,6 +32,30 @@ urlpatterns = [  # pylint: disable=invalid-name
     path(
         'logout/', LogoutView.as_view(next_page='/'),
         name='logout'),
+
+    path('password_change/',
+         PasswordChangeView.as_view(template_name='password_change.html'),
+         name='password_change'),
+    path('password_change/done/',
+         PasswordChangeDoneView.as_view(template_name='password_change_done.html'),
+         name='password_change_done'),
+
+    path('password_reset/',
+         PasswordResetView.as_view(template_name='password_reset.html'),
+         name='password_reset'),
+    path('password_reset/done/',
+         PasswordResetDoneView.as_view(
+             template_name='password_reset_submitted.html'),
+         name='password_reset_done'),
+    path('reset/<uidb64>/<token>/',
+         PasswordResetConfirmView.as_view(
+             template_name='password_change.html'),
+         name='password_reset_confirm'),
+    path('reset/done/',
+         PasswordResetCompleteView.as_view(
+           template_name='password_change_done.html'),
+         name='password_reset_complete'),
+
     path('export/', login_required(
         TemplateView.as_view(template_name='export.html')
     ), name='export'),
