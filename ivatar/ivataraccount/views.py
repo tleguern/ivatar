@@ -377,7 +377,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         if 'photo_Gravatar' in request.POST:
             photo = Photo()
             photo.user = request.user
-            photo.ip_address = get_client_ip(request)
+            photo.ip_address = get_client_ip(request)[0]
             if photo.import_image('Gravatar', addr):
                 messages.success(request,
                                  _('Gravatar image successfully imported'))
@@ -391,7 +391,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         if 'photo_Libravatar' in request.POST:
             photo = Photo()
             photo.user = request.user
-            photo.ip_address = get_client_ip(request)
+            photo.ip_address = get_client_ip(request)[0]
             if photo.import_image('Libravatar', addr):
                 messages.success(request,
                                  _('Libravatar image successfully imported'))
