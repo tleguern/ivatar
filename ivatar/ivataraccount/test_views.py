@@ -1114,6 +1114,43 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             msg_prefix='Why does this not redirect to the default img?')
         # Eventually one should check if the data is the same
 
+    def test_avatar_url_inexisting_mail_digest_w_default_mm(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar via inexisting mail digest and default 'mm'
+        '''
+        urlobj = urlsplit(
+            libravatar_url(
+                email='asdf@company.local',
+                size=80,
+                default='mm',
+            )
+        )
+        url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
+            expected_url='/static/img/mm/80.png',
+            msg_prefix='Why does this not redirect to the default img?')
+        # Eventually one should check if the data is the same
+
+    def test_avatar_url_inexisting_mail_digest_wo_default(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar via inexisting mail digest and default 'mm'
+        '''
+        urlobj = urlsplit(
+            libravatar_url(
+                email='asdf@company.local',
+                size=80,
+            )
+        )
+        url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
+            expected_url='/static/img/nobody/80.png',
+            msg_prefix='Why does this not redirect to the default img?')
+        # Eventually one should check if the data is the same
+
     def test_avatar_url_default(self):  # pylint: disable=invalid-name
         '''
         Test fetching avatar for not existing mail with default specified
