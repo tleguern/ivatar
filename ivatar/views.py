@@ -110,7 +110,11 @@ class AvatarImageView(TemplateView):
                         'rgb(49,203,115)',
                         'rgb(141,69,170)']
                     background = 'rgb(224,224,224)'
-                    padding = (10, 10, 10, 10)
+                    padwidth = int(size/10)
+                    padding = (padwidth, padwidth, padwidth, padwidth)
+                    # Since padding is _added_ around the generated image, we
+                    # need to reduce the image size by padding*2 (left/right, top/bottom)
+                    size = size - 2*padwidth
                     generator = IdenticonGenerator(
                         10, 10, digest=hashlib.sha1,
                         foreground=foreground, background=background)
@@ -127,10 +131,10 @@ class AvatarImageView(TemplateView):
                 else:
                     return HttpResponseRedirect(default)
 
-            static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
+            static_img = path.join('static', 'img', 'nobody', '%s%s' % (str(size), '.png'))
             if not path.isfile(static_img):
                 # We trust this exists!!!
-                static_img = path.join('static', 'img', 'mm', '512.png')
+                static_img = path.join('static', 'img', 'nobody', '512.png')
             # We trust static/ is mapped to /static/
             return HttpResponseRedirect('/' + static_img)
 
