@@ -336,8 +336,8 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
                 else:
                     context['photos'].append({
                         'service_url': libravatar_service_url,
-                        'thumbnail_url': libravatar_service_url + '?s=80',
-                        'image_url': libravatar_service_url + '?s=512',
+                        'thumbnail_url': libravatar_service_url + '&s=80',
+                        'image_url': libravatar_service_url + '&s=512',
                         'width': 80,
                         'height': 80,
                         'service_name': 'Libravatar',
