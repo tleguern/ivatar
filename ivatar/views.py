@@ -127,7 +127,12 @@ class AvatarImageView(TemplateView):
 
                 if str(default) == 'mm' or str(default) == 'mp':
                     # If mm is explicitly given, we need to catch that
-                    pass
+                    static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
+                    if not path.isfile(static_img):
+                        # We trust this exists!!!
+                        static_img = path.join('static', 'img', 'mm', '512.png')
+                    # We trust static/ is mapped to /static/
+                    return HttpResponseRedirect('/' + static_img)
                 else:
                     return HttpResponseRedirect(default)
 
