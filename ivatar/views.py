@@ -127,10 +127,10 @@ class AvatarImageView(TemplateView):
                 else:
                     return HttpResponseRedirect(default)
 
-            static_img = path.join('static', 'img', 'mm', '%s%s' % (str(size), '.png'))
+            static_img = path.join('static', 'img', 'nobody', '%s%s' % (str(size), '.png'))
             if not path.isfile(static_img):
                 # We trust this exists!!!
-                static_img = path.join('static', 'img', 'mm', '512.png')
+                static_img = path.join('static', 'img', 'nobody', '512.png')
             # We trust static/ is mapped to /static/
             return HttpResponseRedirect('/' + static_img)
 
