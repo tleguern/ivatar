@@ -4,14 +4,16 @@ Configuration overrides for settings.py
 
 import os
 import sys
-from socket import gethostname, gethostbyname
 from django.urls import reverse_lazy
 from ivatar.settings import BASE_DIR
 
-ADMIN_USERS = []
-ALLOWED_HOSTS = [ '*' ]
+from ivatar.settings import MIDDLEWARE
+from ivatar.settings import INSTALLED_APPS
+from ivatar.settings import TEMPLATES
 
-from ivatar.settings import INSTALLED_APPS  # noqa
+ADMIN_USERS = []
+ALLOWED_HOSTS = ['*']
+
 INSTALLED_APPS.extend([
     'django_extensions',
     'django_openid_auth',
@@ -22,10 +24,12 @@ INSTALLED_APPS.extend([
     'ivatar.tools',
 ])
 
-from ivatar.settings import MIDDLEWARE  # noqa
 MIDDLEWARE.extend([
     'django.middleware.locale.LocaleMiddleware',
 ])
+MIDDLEWARE.insert(
+    0, 'ivatar.middleware.MultipleProxyMiddleware',
+)
 
 AUTHENTICATION_BACKENDS = (
     # Enable this to allow LDAP authentication.
@@ -35,7 +39,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-from ivatar.settings import TEMPLATES  # noqa
 TEMPLATES[0]['DIRS'].extend([
     os.path.join(BASE_DIR, 'templates'),
 ])
@@ -76,7 +79,8 @@ BOOTSTRAP4 = {
     'javascript_in_head': False,
     'css_url': {
         'href': '/static/css/bootstrap.min.css',
-        'integrity': 'sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB',  # noqa
+        'integrity':
+            'sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB',
         'crossorigin': 'anonymous',
     },
     'javascript_url': {
@@ -86,7 +90,8 @@ BOOTSTRAP4 = {
     },
     'popper_url': {
         'url': '/static/js/popper.min.js',
-        'integrity': 'sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49',  # noqa
+        'integrity':
+            'sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49',
         'crossorigin': 'anonymous',
     },
 }
@@ -134,3 +139,4 @@ if os.path.isfile(os.path.join(BASE_DIR, 'config_local.py')):
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 USE_X_FORWARDED_HOST = True
+ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS = ['avatars.linux-kernel.at', 'localhost',]
