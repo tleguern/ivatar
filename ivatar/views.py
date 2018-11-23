@@ -55,7 +55,8 @@ class AvatarImageView(TemplateView):
         if sizetemp:
             if sizetemp != '' and sizetemp is not None and sizetemp != '0':
                 try:
-                    size = int(sizetemp)
+                    if int(sizetemp) > 0:
+                        size = int(sizetemp)
                 # Should we receive something we cannot convert to int, leave
                 # the user with the default value of 80
                 except ValueError:
