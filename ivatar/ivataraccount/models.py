@@ -448,8 +448,8 @@ class ConfirmedOpenId(BaseAccountModel):
         lowercase_url = urlunsplit(
             (url.scheme.lower(), netloc, url.path, url.query, url.fragment)
         )
-        if lowercase_url[-1] != '/':
-            lowercase_url += '/'
+        #if lowercase_url[-1] != '/':
+        #    lowercase_url += '/'
         self.openid = lowercase_url
         self.digest = hashlib.sha256(lowercase_url.encode('utf-8')).hexdigest()
         return super().save(force_insert, force_update, using, update_fields)
