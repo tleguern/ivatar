@@ -20,6 +20,13 @@ urlpatterns = [  # pylint: disable=invalid-name
     url(
         r'avatar/(?P<digest>\w{32})',
         AvatarImageView.as_view(), name='avatar_view'),
+    url(
+        r'avatar/(?P<digest>\w)',
+        TemplateView.as_view(
+            template_name='error.html',
+            extra_context={
+                'errormessage': 'Incorrect digest length',
+            })),
     url('description/', TemplateView.as_view(template_name='description.html'), name='description'),
     # The following two are TODO TODO TODO TODO TODO
     url('run_your_own/', TemplateView.as_view(template_name='run_your_own.html'), name='run_your_own'),
