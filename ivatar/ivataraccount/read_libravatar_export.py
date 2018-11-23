@@ -20,6 +20,7 @@ def read_gzdata(gzdata=None):
     emails = []  # pylint: disable=invalid-name
     openids = []   # pylint: disable=invalid-name
     photos = []   # pylint: disable=invalid-name
+    username = None  # pylint: disable=invalid-name
 
     if not gzdata:
         return False
@@ -31,6 +32,11 @@ def read_gzdata(gzdata=None):
     if not root.tag == '{%s}user' % SCHEMAROOT:
         print('Unknown export format: %s' % root.tag)
         exit(-1)
+
+    # Username
+    for item in root.findall('{%s}account' % SCHEMAROOT)[0].items():
+        if item[0] == 'username':
+            username = item[1]
 
     # Emails
     for email in root.findall('{%s}emails' % SCHEMAROOT)[0]:
@@ -69,4 +75,5 @@ def read_gzdata(gzdata=None):
         'emails': emails,
         'openids': openids,
         'photos': photos,
+        'username': username,
     }
