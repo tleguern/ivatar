@@ -32,7 +32,7 @@ from openid.consumer import consumer
 from ipware import get_client_ip
 
 from libravatar import libravatar_url
-from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE, JPEG_QUALITY
+from ivatar.settings import MAX_NUM_PHOTOS, MAX_PHOTO_SIZE, JPEG_QUALITY, AVATAR_MAX_SIZE
 from .gravatar import get_photo as get_gravatar_photo
 
 from .forms import AddEmailForm, UploadPhotoForm, AddOpenIDForm
@@ -327,6 +327,7 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
             libravatar_service_url = libravatar_url(
                 email=addr,
                 default=404,
+                size=AVATAR_MAX_SIZE,
             )
             if libravatar_service_url:
                 try:
