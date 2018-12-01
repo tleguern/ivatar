@@ -117,8 +117,8 @@ class AddEmailView(SuccessMessageMixin, FormView):
     def form_valid(self, form):
         if not form.save(self.request):
             return render(self.request, self.template_name, {'form': form})
-        else:
-            messages.success(self.request, _('Address added successfully'))
+
+        messages.success(self.request, _('Address added successfully'))
         return super().form_valid(form)
 
 
@@ -310,14 +310,13 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         if 'email_id' in kwargs:
             try:
                 addr = ConfirmedEmail.objects.get(pk=kwargs['email_id']).email
-            except ConfirmedEmail.ObjectDoesNotExist:
+            except ConfirmedEmail.ObjectDoesNotExist:  # pylint: disable=no-member
                 messages.error(
                     self.request,
                     _('Address does not exist'))
                 return context
 
-        if 'email_addr' in kwargs:
-            addr = kwargs['email_addr']
+        addr = kwargs.get('email_addr', None)
 
         if addr:
             gravatar = get_gravatar_photo(addr)
@@ -351,18 +350,10 @@ class ImportPhotoView(SuccessMessageMixin, TemplateView):
         Handle post to photo import
         '''
 
-        addr = None
-        email_id = None
         imported = None
 
-        if 'email_id' in kwargs:
-            email_id = kwargs['email_id']
-        if 'email_id' in request.POST:
-            email_id = request.POST['email_id']
-        if 'email_addr' in kwargs:
-            addr = kwargs['email_addr']
-        if 'email_addr' in request.POST:
-            addr = request.POST['email_addr']
+        email_id = kwargs.get('email_id', request.POST.get('email_id', None))
+        addr = kwargs.get('emali_addr', request.POST.get('email_addr', None))
 
         if email_id:
             email = ConfirmedEmail.objects.filter(
@@ -437,7 +428,7 @@ class DeletePhotoView(SuccessMessageMixin, View):
             photo = self.model.objects.get(  # pylint: disable=no-member
                 pk=kwargs['pk'], user=request.user)
             photo.delete()
-        except (self.model.DoesNotExist, ProtectedError):
+        except (self.model.DoesNotExist, ProtectedError):  # pylint: disable=no-member
             messages.error(
                 request,
                 _('No such image or no permission to delete it'))
@@ -520,7 +511,7 @@ class RemoveUnconfirmedOpenIDView(View):
                 user=request.user, id=kwargs['openid_id'])
             openid.delete()
             messages.success(request, _('ID removed'))
-        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
+        except self.model.DoesNotExist:  # pragma: no cover pylint: disable=no-member
             messages.error(request, _('ID does not exist'))
         return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -544,9 +535,9 @@ class RemoveConfirmedOpenIDView(View):
                     user_id=request.user.id,
                     claimed_id=openid.openid)
                 openidobj.delete()
-            except:
+            except Exception as exc:  # pylint: disable=broad-except
                 # Why it is not there?
-                pass
+                print('How did we get here: %s' % exc)
             openid.delete()
             messages.success(request, _('ID removed'))
         except self.model.DoesNotExist:  # pylint: disable=no-member
@@ -568,7 +559,7 @@ class RedirectOpenIDView(View):
         try:
             unconfirmed = self.model.objects.get(  # pylint: disable=no-member
                 user=request.user, id=kwargs['openid_id'])
-        except self.model.DoesNotExist:  # pragma: no cover  # pylint: disable=no-member
+        except self.model.DoesNotExist:  # pragma: no cover  pylint: disable=no-member
             messages.error(request, _('ID does not exist'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -622,10 +613,12 @@ class ConfirmOpenIDView(View):  # pragma: no cover
                 self.request,
                 _('Confirmation failed: "') + str(info.message) + '"')
             return HttpResponseRedirect(reverse_lazy('profile'))
-        elif info.status == consumer.CANCEL:
+
+        if info.status == consumer.CANCEL:
             messages.error(self.request, _('Cancelled by user'))
             return HttpResponseRedirect(reverse_lazy('profile'))
-        elif info.status != consumer.SUCCESS:
+
+        if info.status != consumer.SUCCESS:
             messages.error(self.request, _('Unknown verification error'))
             return HttpResponseRedirect(reverse_lazy('profile'))
 
@@ -706,7 +699,7 @@ class CropPhotoView(TemplateView):
         if 'email' in request.POST:
             try:
                 email = ConfirmedEmail.objects.get(email=request.POST['email'])
-            except ConfirmedEmail.DoesNotExist:
+            except ConfirmedEmail.DoesNotExist:  # pylint: disable=no-member
                 pass  # Ignore automatic assignment
 
         if 'openid' in request.POST:
