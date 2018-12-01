@@ -722,8 +722,21 @@ class UserPreferenceView(FormView, UpdateView):
     form_class = UpdatePreferenceForm
     success_url = reverse_lazy('user_preference')
 
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        self.request.user.userpreference.theme = request.POST['theme']
+        self.request.user.userpreference.save()
+        return HttpResponseRedirect(reverse_lazy('user_preference'))
+
+
+    def get(self, request, *args, **kwargs):
+        return render(self.request, self.template_name, {
+            'THEMES': UserPreference.THEMES,
+        })
+
+
     def get_object(self, queryset=None):
-        return self.request.user.userpreference
+        (obj, created) = UserPreference.objects.get_or_create(user=self.request.user)  # pylint: disable=no-member,unused-variable
+        return obj
 
 
 @method_decorator(login_required, name='dispatch')
