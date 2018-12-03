@@ -34,4 +34,4 @@ psycopg2
 notsetuptools
 git+https://github.com/ofalk/monsterid.git
 git+https://github.com/azaghal/pydenticon.git
-robohash
+git+https://github.com/ofalk/Robohash.git@devel
