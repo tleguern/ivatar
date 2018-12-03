@@ -70,7 +70,8 @@ class UserPreference(models.Model):
     THEMES = (
         ('default', 'Default theme'),
         ('clime', 'climes theme'),
-        ('falko', 'falkos theme'),
+        ('green', 'green theme'),
+        ('red', 'red theme'),
     )
 
     theme = models.CharField(
