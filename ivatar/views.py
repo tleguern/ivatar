@@ -4,19 +4,20 @@ views under /
 from io import BytesIO
 from os import path
 import hashlib
-from PIL import Image
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from ssl import SSLError
 from django.views.generic.base import TemplateView, View
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse_lazy
 
-from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
-from ssl import SSLError
+from PIL import Image
 
 from monsterid.id import build_monster as BuildMonster
 from pydenticon import Generator as IdenticonGenerator
+from robohash import Robohash
 
 from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY, DEFAULT_AVATAR_SIZE
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
@@ -26,6 +27,9 @@ URL_TIMEOUT = 5  # in seconds
 
 
 def get_size(request, size=DEFAULT_AVATAR_SIZE):
+    '''
+    Get size from the URL arguments
+    '''
     sizetemp = None
     if 's' in request.GET:
         sizetemp = request.GET['s']
@@ -52,7 +56,7 @@ class AvatarImageView(TemplateView):
     '''
     # TODO: Do cache resize images!! Memcached?
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements,too-many-locals
+    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements,too-many-locals,too-many-return-statements
         '''
         Override get from parent class
         '''
@@ -91,7 +95,12 @@ class AvatarImageView(TemplateView):
             try:
                 obj = model.objects.get(digest_sha256=kwargs['digest'])
             except ObjectDoesNotExist:
-                pass
+                model = ConfirmedOpenId
+                try:
+                    obj = model.objects.get(digest=kwargs['digest'])
+                except:
+                    pass
+
 
         # If that mail/openid doesn't exist, or has no photo linked to it
         if not obj or not obj.photo or forcedefault:
@@ -118,6 +127,19 @@ class AvatarImageView(TemplateView):
                     monsterdata = BuildMonster(seed=kwargs['digest'], size=(size, size))
                     data = BytesIO()
                     monsterdata.save(data, 'PNG', quality=JPEG_QUALITY)
+                    data.seek(0)
+                    return HttpResponse(
+                        data,
+                        content_type='image/png')
+
+                if str(default) == 'robohash':
+                    roboset = 'any'
+                    if request.GET.get('robohash'):
+                        roboset = request.GET.get('robohash')
+                    robohash = Robohash(kwargs['digest'])
+                    robohash.assemble(roboset=roboset, sizex=size, sizey=size)
+                    data = BytesIO()
+                    robohash.img.save(data, format='png')
                     data.seek(0)
                     return HttpResponse(
                         data,
@@ -157,8 +179,7 @@ class AvatarImageView(TemplateView):
                         static_img = path.join('static', 'img', 'mm', '512.png')
                     # We trust static/ is mapped to /static/
                     return HttpResponseRedirect('/' + static_img)
-                else:
-                    return HttpResponseRedirect(default)
+                return HttpResponseRedirect(default)
 
             static_img = path.join('static', 'img', 'nobody', '%s%s' % (str(size), '.png'))
             if not path.isfile(static_img):
@@ -188,7 +209,7 @@ class GravatarProxyView(View):
     '''
     # TODO: Do cache images!! Memcached?
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements,too-many-locals
+    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements,too-many-locals,no-self-use,unused-argument
         '''
         Override get from parent class
         '''
@@ -205,17 +226,14 @@ class GravatarProxyView(View):
                 print(
                     'Gravatar fetch failed with an unexpected %s HTTP error' %
                     exc.code)
-                pass
         except URLError as exc:
             print(
                 'Gravatar fetch failed with URL error: %s' %
                 exc.reason)
-            pass
         except SSLError as exc:
             print(
                 'Gravatar fetch failed with SSL error: %s' %
                 exc.reason)
-            pass
         try:
             data = BytesIO(gravatarimagedata.read())
             img = Image.open(data)
@@ -226,8 +244,9 @@ class GravatarProxyView(View):
 
         except ValueError as exc:
             print('Value error: %s' % exc)
-            pass
 
         # TODO: In case anything strange happens, we need to redirect to the default
-        url = reverse_lazy('avatar_view', args=[kwargs['digest']]) + '?s=%i' % size + '&forcedefault=y'
+        url = reverse_lazy(
+            'avatar_view',
+            args=[kwargs['digest']]) + '?s=%i' % size + '&forcedefault=y'
         return HttpResponseRedirect(url)
