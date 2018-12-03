@@ -140,3 +140,5 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 USE_X_FORWARDED_HOST = True
 ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS = ['avatars.linux-kernel.at', 'localhost',]
+
+DEFAULT_AVATAR_SIZE = 80

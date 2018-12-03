@@ -11,24 +11,22 @@
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           {% if request.user.is_authenticated %}
-            <li><a href="{% url 'profile' %}"><i class="fa fa-image" aria-hidden="true"></i> {% trans 'Profile' %}</a></li>
-<!--
-            <li><a href="{% url 'user_preference' %}"><i class="fa fa-cog" aria-hidden="true"></i> {% trans 'Preferences' %}</a></li>
--->
-            <li><a href="{% url 'import_photo' %}"><i class="fa fa-envelope-square" aria-hidden="true"></i> {% trans 'Import photo via mail address' %}</a></li>
-            <li><a href="{% url 'upload_export' %}"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {% trans 'Import libravatar XML export' %}</a></li>
-            <li><a href="{% url 'password_change' %}"><i class="fa fa-key" aria-hidden="true"></i> {% trans 'Change password' %}</a></li>
-            <li><a href="{% url 'password_reset' %}"><i class="fa fa-unlock-alt" aria-hidden="true"></i> {% trans 'Reset password' %}</a></li>
-            <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> {% trans 'Logout' %}</a></li>
+            <li><a href="{% url 'profile'  %}"><i class="fa fa-fw fa-image" aria-hidden="true"></i> {% trans 'Profile' %}</a></li>
+            <li><a href="{% url 'user_preference' %}"><i class="fa fa-fw fa-cog" aria-hidden="true"></i> {% trans 'Preferences' %}</a></li>
+            <li><a href="{% url 'import_photo' %}"><i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> {% trans 'Import photo via mail address' %}</a></li>
+            <li><a href="{% url 'upload_export' %}"><i class="fa fa-fw fa-file-archive-o" aria-hidden="true"></i> {% trans 'Import libravatar XML export' %}</a></li>
+            <li><a href="{% url 'password_change' %}"><i class="fa fa-fw fa-key" aria-hidden="true"></i> {% trans 'Change password' %}</a></li>
+            <li><a href="{% url 'password_reset' %}"><i class="fa fa-fw fa-unlock-alt" aria-hidden="true"></i> {% trans 'Reset password' %}</a></li>
+            <li><a href="{% url 'logout' %}"><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> {% trans 'Logout' %}</a></li>
           {% else %}
-            <li><a href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i> {% trans 'Local' %}</a></li>
-            <li><a href="{% url 'new_account' %}"><i class="fa fa-user-plus" aria-hidden="true"></i> {% trans 'Create account' %}</a></li>
+            <li><a href="{% url 'login' %}"><i class="fa fa-fw fa-sign-in" aria-hidden="true"></i> {% trans 'Local' %}</a></li>
+            <li><a href="{% url 'new_account' %}"><i class="fa fa-fw fa-user-plus" aria-hidden="true"></i> {% trans 'Create account' %}</a></li>
           {% endif %}
         </ul>
     </li>
     {% if user.is_staff %}
       <li>
-        <a href="{% url 'admin:index' %}" target="_new"><i class="fa fa-user-secret" aria-hidden="true"></i> {% trans 'Admin' %}</a>
+        <a href="{% url 'admin:index' %}" target="_new"><i class="fa fa-fw fa-user-secret" aria-hidden="true"></i> {% trans 'Admin' %}</a>
       </li>
     {% endif %}
 </ul>

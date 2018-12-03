@@ -70,7 +70,8 @@ class UserPreference(models.Model):
     THEMES = (
         ('default', 'Default theme'),
         ('clime', 'climes theme'),
-        ('falko', 'falkos theme'),
+        ('green', 'green theme'),
+        ('red', 'red theme'),
     )
 
     theme = models.CharField(
@@ -135,7 +136,7 @@ class Photo(BaseAccountModel):
                 image_url = gravatar['image_url']
 
         if service_name == 'Libravatar':
-            image_url = libravatar_url(email_address)
+            image_url = libravatar_url(email_address, size=AVATAR_MAX_SIZE)
 
         if not image_url:
             return False  # pragma: no cover

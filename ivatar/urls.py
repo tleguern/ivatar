@@ -7,7 +7,7 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
 from ivatar import settings
-from . views import AvatarImageView
+from . views import AvatarImageView, GravatarProxyView
 
 urlpatterns = [  # pylint: disable=invalid-name
     path('admin/', admin.site.urls),
@@ -21,12 +21,15 @@ urlpatterns = [  # pylint: disable=invalid-name
         r'avatar/(?P<digest>\w{32})',
         AvatarImageView.as_view(), name='avatar_view'),
     url(
-        r'avatar/(?P<digest>\w)',
+        r'avatar/(?P<digest>\w*)',
         TemplateView.as_view(
             template_name='error.html',
             extra_context={
                 'errormessage': 'Incorrect digest length',
             })),
+    url(
+        r'gravatarproxy/(?P<digest>\w*)',
+        GravatarProxyView.as_view(), name='gravatarproxy'),
     url('description/', TemplateView.as_view(template_name='description.html'), name='description'),
     # The following two are TODO TODO TODO TODO TODO
     url('run_your_own/', TemplateView.as_view(template_name='run_your_own.html'), name='run_your_own'),

@@ -5,17 +5,45 @@ from io import BytesIO
 from os import path
 import hashlib
 from PIL import Image
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, View
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse_lazy
+
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from ssl import SSLError
 
 from monsterid.id import build_monster as BuildMonster
 from pydenticon import Generator as IdenticonGenerator
 
-from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY
+from ivatar.settings import AVATAR_MAX_SIZE, JPEG_QUALITY, DEFAULT_AVATAR_SIZE
 from . ivataraccount.models import ConfirmedEmail, ConfirmedOpenId
-from . ivataraccount.models import pil_format
+from . ivataraccount.models import pil_format, file_format
+
+URL_TIMEOUT = 5  # in seconds
+
+
+def get_size(request, size=DEFAULT_AVATAR_SIZE):
+    sizetemp = None
+    if 's' in request.GET:
+        sizetemp = request.GET['s']
+    if 'size' in request.GET:
+        sizetemp = request.GET['size']
+    if sizetemp:
+        if sizetemp != '' and sizetemp is not None and sizetemp != '0':
+            try:
+                if int(sizetemp) > 0:
+                    size = int(sizetemp)
+            # Should we receive something we cannot convert to int, leave
+            # the user with the default value of 80
+            except ValueError:
+                pass
+
+    if size > int(AVATAR_MAX_SIZE):
+        size = int(AVATAR_MAX_SIZE)
+    return size
 
 
 class AvatarImageView(TemplateView):
@@ -29,11 +57,13 @@ class AvatarImageView(TemplateView):
         Override get from parent class
         '''
         model = ConfirmedEmail
-        size = 80
+        size = get_size(request)
         imgformat = 'png'
         obj = None
         default = None
         forcedefault = False
+        gravatarredirect = False
+        gravatarproxy = True
 
         if 'd' in request.GET:
             default = request.GET['d']
@@ -47,34 +77,13 @@ class AvatarImageView(TemplateView):
             if request.GET['forcedefault'] == 'y':
                 forcedefault = True
 
-        sizetemp = None
-        if 's' in request.GET:
-            sizetemp = request.GET['s']
-        if 'size' in request.GET:
-            sizetemp = request.GET['size']
-        if sizetemp:
-            if sizetemp != '' and sizetemp is not None and sizetemp != '0':
-                try:
-                    if int(sizetemp) > 0:
-                        size = int(sizetemp)
-                # Should we receive something we cannot convert to int, leave
-                # the user with the default value of 80
-                except ValueError:
-                    pass
+        if 'gravatarredirect' in request.GET:
+            if request.GET['gravatarredirect'] == 'y':
+                gravatarredirect = True
 
-        if size > int(AVATAR_MAX_SIZE):
-            size = int(AVATAR_MAX_SIZE)
-        if len(kwargs['digest']) == 32:
-            # Fetch by digest from mail
-            pass
-        elif len(kwargs['digest']) == 64:
-            if ConfirmedOpenId.objects.filter(  # pylint: disable=no-member
-                    digest=kwargs['digest']).count():
-                # Fetch by digest from OpenID
-                model = ConfirmedOpenId
-        else:  # pragma: no cover
-            # We should actually never ever reach this code...
-            raise Exception('Digest provided is wrong: %s' % kwargs['digest'])
+        if 'gravatarproxy' in request.GET:
+            if request.GET['gravatarproxy'] == 'n':
+                gravatarproxy = False
 
         try:
             obj = model.objects.get(digest=kwargs['digest'])
@@ -86,6 +95,20 @@ class AvatarImageView(TemplateView):
 
         # If that mail/openid doesn't exist, or has no photo linked to it
         if not obj or not obj.photo or forcedefault:
+            gravatar_url = 'https://secure.gravatar.com/avatar/' + kwargs['digest'] \
+                + '?s=%i' % size
+
+            # If we have redirection to Gravatar enabled, this overrides all
+            # default= settings, except forcedefault!
+            if gravatarredirect and not forcedefault:
+                return HttpResponseRedirect(gravatar_url)
+
+            # Request to proxy Gravatar image - only if not forcedefault
+            if gravatarproxy and not forcedefault:
+                url = reverse_lazy('gravatarproxy', args=[kwargs['digest']]) \
+                    + '?s=%i' % size
+                return HttpResponseRedirect(url)
+
             # Return the default URL, as specified, or 404 Not Found, if default=404
             if default:
                 if str(default) == str(404):
@@ -158,3 +181,53 @@ class AvatarImageView(TemplateView):
         return HttpResponse(
             data,
             content_type='image/%s' % imgformat)
+
+class GravatarProxyView(View):
+    '''
+    Proxy request to Gravatar and return the image from there
+    '''
+    # TODO: Do cache images!! Memcached?
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-branches,too-many-statements,too-many-locals
+        '''
+        Override get from parent class
+        '''
+        size = get_size(request)
+        gravatarimagedata = None
+
+        gravatar_url = 'https://secure.gravatar.com/avatar/' + kwargs['digest'] \
+            + '?s=%i' % size
+
+        try:
+            gravatarimagedata = urlopen(gravatar_url, timeout=URL_TIMEOUT)
+        except HTTPError as exc:
+            if exc.code != 404 and exc.code != 503:
+                print(
+                    'Gravatar fetch failed with an unexpected %s HTTP error' %
+                    exc.code)
+                pass
+        except URLError as exc:
+            print(
+                'Gravatar fetch failed with URL error: %s' %
+                exc.reason)
+            pass
+        except SSLError as exc:
+            print(
+                'Gravatar fetch failed with SSL error: %s' %
+                exc.reason)
+            pass
+        try:
+            data = BytesIO(gravatarimagedata.read())
+            img = Image.open(data)
+            data.seek(0)
+            return HttpResponse(
+                data.read(),
+                content_type='image/%s' % file_format(img.format))
+
+        except ValueError as exc:
+            print('Value error: %s' % exc)
+            pass
+
+        # TODO: In case anything strange happens, we need to redirect to the default
+        url = reverse_lazy('avatar_view', args=[kwargs['digest']]) + '?s=%i' % size + '&forcedefault=y'
+        return HttpResponseRedirect(url)
