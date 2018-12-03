@@ -133,8 +133,11 @@ class AvatarImageView(TemplateView):
                         content_type='image/png')
 
                 if str(default) == 'robohash':
+                    roboset = 'any'
+                    if request.GET.get('robohash'):
+                        roboset = request.GET.get('robohash')
                     robohash = Robohash(kwargs['digest'])
-                    robohash.assemble(roboset='any', sizex=size, sizey=size)
+                    robohash.assemble(roboset=roboset, sizex=size, sizey=size)
                     data = BytesIO()
                     robohash.img.save(data, format='png')
                     data.seek(0)
