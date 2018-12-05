@@ -1,4 +1,3 @@
-/// Example theme using tortin with bg-hero:@lab-green;
 body {
   font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
   color: #525252;
@@ -281,6 +280,18 @@ footer .logo .polygon {
 .navbar-tortin .navbar-collapse,
 .navbar-tortin .navbar-form {
   border: 0;
+}
+.dropdown-menu {
+  background-color: #3aa850;
+  border: 1px solid #2d823e;
+}
+.dropdown-menu > li > a {
+  color: #FFFFFF;
+}
+.dropdown-menu > li > a:focus,
+.dropdown-menu > li > a:hover {
+  background-color: #2d823e;
+  color: #FFFFFF;
 }
 @media (max-width: 767px) {
   .navbar-tortin .navbar-nav .open .dropdown-menu > li > a {
