@@ -407,7 +407,7 @@ class RawImageView(DetailView):
 
     def get(self, request, *args, **kwargs):
         photo = self.model.objects.get(pk=kwargs['pk'])  # pylint: disable=no-member
-        if not photo.user.id is request.user.id:
+        if not photo.user.id == request.user.id:
             return HttpResponseRedirect(reverse_lazy('home'))
         return HttpResponse(
             BytesIO(photo.data), content_type='image/%s' % photo.format)
@@ -577,7 +577,7 @@ class RedirectOpenIDView(View):
         except UnicodeDecodeError as exc:  # pragma: no cover
             msg = _('OpenID discovery failed (userid=%s) for %s: %s' %
                     (request.user.id, user_url.encode('utf-8'), exc))
-            print(msg)
+            print("message: %s" % msg)
             messages.error(request, msg)
 
         if auth_request is None:  # pragma: no cover
@@ -859,3 +859,32 @@ class IvatarLoginView(LoginView):
             if request.user.is_authenticated:
                 return HttpResponseRedirect(reverse_lazy('profile'))
         return super().get(self, request, args, kwargs)
+
+@method_decorator(login_required, name='dispatch')
+class ProfileView(TemplateView):
+    '''
+    View class for profile
+    '''
+
+    template_name = 'profile.html'
+
+    def get(self, request, *args, **kwargs):
+        self._confirm_claimed_openid()
+        return super().get(self, request, args, kwargs)
+
+    def _confirm_claimed_openid(self):
+        openids = self.request.user.useropenid_set.all()
+        # If there is only one OpenID, we eventually need to add it to the user account
+        if openids.count() == 1:
+            # Already confirmed, skip
+            if ConfirmedOpenId.objects.filter(openid=openids.first().claimed_id).count() > 0:  # pylint: disable=no-member
+                return
+            # For whatever reason, this is in unconfirmed state, skip
+            if UnconfirmedOpenId.objects.filter(openid=openids.first().claimed_id).count() > 0:  # pylint: disable=no-member
+                return
+            print('need to confirm: %s' % openids.first())
+            confirmed = ConfirmedOpenId()
+            confirmed.user = self.request.user
+            confirmed.ip_address = get_client_ip(self.request)[0]
+            confirmed.openid = openids.first().claimed_id
+            confirmed.save()
