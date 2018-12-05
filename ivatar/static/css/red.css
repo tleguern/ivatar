@@ -281,6 +281,18 @@ footer .logo .polygon {
 .navbar-tortin .navbar-form {
   border: 0;
 }
+.dropdown-menu {
+  background-color: #f7645e;
+  border: 1px solid #f5352d;
+}
+.dropdown-menu > li > a {
+  color: #FFFFFF;
+}
+.dropdown-menu > li > a:focus,
+.dropdown-menu > li > a:hover {
+  background-color: #f5352d;
+  color: #FFFFFF;
+}
 @media (max-width: 767px) {
   .navbar-tortin .navbar-nav .open .dropdown-menu > li > a {
     color: #FFFFFF;
