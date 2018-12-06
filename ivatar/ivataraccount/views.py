@@ -9,6 +9,7 @@ import binascii
 from PIL import Image
 
 from django.db.models import ProtectedError
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
@@ -723,8 +724,13 @@ class UserPreferenceView(FormView, UpdateView):
     success_url = reverse_lazy('user_preference')
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        self.request.user.userpreference.theme = request.POST['theme']
-        self.request.user.userpreference.save()
+        userpref = None
+        try:
+            userpref = self.request.user.userpreference
+        except ObjectDoesNotExist:
+            userpref = UserPreference(user=self.request.user)
+        userpref.theme = request.POST['theme']
+        userpref.save()
         return HttpResponseRedirect(reverse_lazy('user_preference'))
 
 
