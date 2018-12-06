@@ -347,3 +347,9 @@ footer .logo .polygon {
   width: auto;
   height: 36px;
 }
+.radio {
+  color: #3aa850;
+}
+input[type="radio"]:checked + label {
+  font-weight: bold;
+}
