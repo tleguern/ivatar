@@ -37,17 +37,10 @@ for file in os.listdir(PATH):
         items = libravatar_read_gzdata(fh.read())
         print('Adding user "%s"' % items['username'])
         (user, created) = User.objects.get_or_create(username=items['username'])
-        for email in items['emails']:
-            try:
-                ConfirmedEmail.objects.get_or_create(email=email, user=user)
-            except django.db.utils.IntegrityError:
-                print('%s not unique?' % email)
-        for openid in items['openids']:
-            try:
-                ConfirmedOpenId.objects.get_or_create(openid=openid, user=user)  # pylint: disable=no-member
-            except django.db.utils.IntegrityError:
-                print('%s not unique?' % openid)
+
+        saved_photos = {}
         for photo in items['photos']:
+            photo_id = photo['id']
             data = base64.decodebytes(bytes(photo['data'], 'utf-8'))
             pilobj = Image.open(BytesIO(data))
             out = BytesIO()
@@ -59,5 +52,20 @@ for file in os.listdir(PATH):
             photo.format = file_format(pilobj.format)
             photo.data = out.read()
             photo.save()
+            saved_photos[photo_id] = photo
+
+        for email in items['emails']:
+            try:
+                ConfirmedEmail.objects.get_or_create(email=email['email'], user=user,
+                                                     photo=saved_photos.get(email['photo_id']))
+            except django.db.utils.IntegrityError:
+                print('%s not unique?' % email['email'])
+
+        for openid in items['openids']:
+            try:
+                ConfirmedOpenId.objects.get_or_create(openid=openid['openid'], user=user,
+                                                      photo=saved_photos.get(openid['photo_id'])) # pylint: disable=no-member
+            except django.db.utils.IntegrityError:
+                print('%s not unique?' % openid['openid'])
 
         fh.close()
