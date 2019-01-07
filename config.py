@@ -96,12 +96,17 @@ BOOTSTRAP4 = {
     },
 }
 
-if 'test' not in sys.argv and 'collectstatic' not in sys.argv:
-    ANYMAIL = {  # pragma: no cover
-        'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
-        'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
-    }
-    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
+if 'EMAIL_BACKEND' in os.environ:
+    EMAIL_BACKEND = os.environ['EMAIL_BACKEND']
+else:
+    if 'test' in sys.argv or 'collectstatic' in sys.argv:
+        EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    else:
+        ANYMAIL = {  # pragma: no cover
+            'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
+            'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
+        }
+        EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
 DEFAULT_FROM_EMAIL = 'ivatar@mg.linux-kernel.at'
 
 try:
