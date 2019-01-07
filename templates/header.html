@@ -25,7 +25,9 @@
 <script src="{% static '/js/jquery-3.3.1.slim.min.js' %}"></script>
 {% if user.is_authenticated %}
   {% if user.userpreference and user.userpreference.theme != 'default' %}
-    <link rel="stylesheet" href="{% static 'css/' %}{{ user.userpreference.theme }}.css" type="text/css">
+    {% with 'css/'|add:user.userpreference.theme|add:'.css' as theme_css %}
+      <link rel="stylesheet" href="{% static theme_css %}" type="text/css">
+    {% endwith %}
   {% endif %}
 {% endif %}
 <link rel="manifest" href="/manifest.json">
