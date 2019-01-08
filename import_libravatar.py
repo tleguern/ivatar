@@ -13,6 +13,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ivatar.settings")  # pylint: di
 django.setup()  # pylint: disable=wrong-import-position
 from django.contrib.auth.models import User
 from PIL import Image
+from django_openid_auth.models import UserOpenID
 from ivatar.settings import JPEG_QUALITY
 from ivatar.ivataraccount.read_libravatar_export import read_gzdata as libravatar_read_gzdata
 from ivatar.ivataraccount.models import ConfirmedEmail
@@ -67,6 +68,11 @@ for file in os.listdir(PATH):
             try:
                 ConfirmedOpenId.objects.get_or_create(openid=openid['openid'], user=user,
                                                       photo=saved_photos.get(openid['photo_id'])) # pylint: disable=no-member
+                UserOpenID.objects.get_or_create(
+                    user_id=user.id,
+                    claimed_id=openid['openid'],
+                    display_id=openid['openid'],
+                )
             except django.db.utils.IntegrityError:
                 print('%s not unique?' % openid['openid'])
 
