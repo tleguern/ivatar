@@ -56,25 +56,30 @@ def xml_account(username):
     escaped_site_url = saxutils.quoteattr(settings.SITE_URL)
     return '  <account username=%s site=%s/>\n' % (escaped_username, escaped_site_url)
 
+def xml_email(emails):
+    returnstring = "  <emails>\n"
+    for email in emails:
+        returnstring += '    <email photo_id="' + str(email.photo_id) + '">' + email.email.encode('utf-8') + '</email>' + "\n"
+    returnstring += "  </emails>\n"
+    return returnstring
 
-def xml_list(list_type, list_elements):
-    s = '  <%ss>\n' % list_type
-    for element in list_elements:
-        element = element.encode('utf-8')
-        s += '    <%s>%s</%s>\n' % (list_type, saxutils.escape(element), list_type)
-    s += '  </%ss>\n' % list_type
-    return s
+def xml_openid(openids):
+    returnstring = "  <openids>\n"
+    for openid in openids:
+        returnstring += '    <openid photo_id="' + str(openid.photo_id) + '">' + openid.openid.encode('utf-8') + '</openid>' + "\n"
+    returnstring += "  </openids>\n"
+    return returnstring
 
 
 def xml_photos(photos):
     s = '  <photos>\n'
     for photo in photos:
-        (photo_filename, photo_format) = photo
+        (photo_filename, photo_format, id) = photo
         encoded_photo = encode_photo(photo_filename, photo_format)
         if encoded_photo:
-            s += '''    <photo encoding="base64" format=%s>
+            s += '''    <photo id="%s" encoding="base64" format=%s>
 %s
-    </photo>\n''' % (saxutils.quoteattr(photo_format), encoded_photo)
+    </photo>\n''' % (id, saxutils.quoteattr(photo_format), encoded_photo)
     s += '  </photos>\n'
     return s
 
@@ -96,32 +101,43 @@ def encode_photo(photo_filename, photo_format):
     return base64.b64encode(photo_content)
 
 
-def main(argv=None):
+def main(argv=None, dryrun=False):
     if argv is None:
         argv = sys.argv
 
-    for user in User.objects.all():
+    if(len(sys.argv) > 1):
+        userobjs = User.objects.filter(username=sys.argv[1])
+    else:
+        userobjs = User.objects.all()
+    if(len(sys.argv) > 2):
+        dryrun = True
+
+    for user in userobjs:
         hash_object = hashlib.new('sha256')
         hash_object.update(user.username + user.password)
         file_hash = hash_object.hexdigest()
-        emails = list(user.confirmed_emails.values_list('email', flat=True))
-        openids = list(user.confirmed_openids.values_list('openid', flat=True))
         photos = []
         for photo in user.photos.all():
-            photo_details = (photo.filename, photo.format)
+            photo_details = (photo.filename, photo.format, photo.id)
             photos.append(photo_details)
         username = user.username
         
         dest_filename = settings.EXPORT_FILES_ROOT + file_hash + '.xml.gz'
-        destination = gzip.open(dest_filename, 'w')
-        destination.write(xml_header())
-        destination.write(xml_account(username))
-        destination.write(xml_list('email', emails))
-        destination.write(xml_list('openid', openids))
-        destination.write(xml_photos(photos))
-        destination.write(xml_footer())
-        destination.close()
-        print(dest_filename)
+        data = ''
+        data += xml_header()
+        data += xml_account(username)
+        data += xml_email(user.confirmed_emails.all())
+        data += xml_openid(user.confirmed_openids.all())
+        data += xml_photos(photos)
+        data += xml_footer()
+
+        if not dryrun:
+            destination = gzip.open(dest_filename, 'w')
+            destination.write(data)
+            destination.close()
+            print(dest_filename)
+        else:
+            print(data)
     return 0
 
 
