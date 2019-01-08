@@ -5,21 +5,6 @@
 {% block title %}{% trans 'Your Preferences' %}{% endblock title %}
 
 {% block content %}
-<style>
-input[type=radio] {display:none}
-input[type=radio] + label {
-padding-left:0;
-}
-input[type=radio] + label:before {
-font-family: FontAwesome;
-display: inline-block;
-letter-spacing:5px;
-font-size:20px;
-vertical-align:middle;
-}
-input[type=radio] + label:before {content: "\f10c"}
-input[type=radio]:checked + label:before {content: "\f192"}
-</style>
 <h1>{% trans 'Account settings' %}</h1>
 
 <p>

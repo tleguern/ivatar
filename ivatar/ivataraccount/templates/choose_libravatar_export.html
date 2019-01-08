@@ -7,20 +7,6 @@
 {% block content %}
 <style>
 input[type=checkbox] {display:none}
-input[type=checkbox].text + label {
-padding-left:0;
-font-weight:normal;
-}
-input[type=checkbox].text + label:before {
-font-family: FontAwesome;
-display: inline-block;
-letter-spacing:5px;
-font-size:20px;
-color:#36b7d7;
-vertical-align:middle;
-}
-input[type=checkbox].text + label:before {content: "\f0c8"}
-input[type=checkbox].text:checked + label:before {content: "\f14a"}
 input[type=checkbox].image + label:before {
 font-family: FontAwesome;
 display: inline-block;
@@ -36,7 +22,9 @@ input[type=checkbox].image:checked + label:before {letter-spacing: 3px}
       {% if emails %}
         <h4>{% trans 'Email addresses we found in the export - existing ones will not be re-added' %}</h4>
         {% for email in emails %}
-          <input type="checkbox" checked name="email_{{ forloop.counter }}" id="email_{{ forloop.counter }}" value="{{ email }}" class="text"><label for="email_{{ forloop.counter }}">{{ email }}</label><br/>
+        <div class="checkbox">
+          <input type="checkbox" checked name="email_{{ forloop.counter }}" id="email_{{ forloop.counter }}" value="{{ email }}" class="text"><label for="email_{{ forloop.counter }}">{{ email }}</label>
+          </div>
         {% endfor %}
       {% endif %}
       {% if photos %}
