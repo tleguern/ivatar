@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans 'federated avatar hosting service' %}{% endblock %}
+
+{% block content %}
+
+<h4>Reporting security bugs</h4>
+
+If you discover a security issue in ivatar, please report it to us privately so
+that we can push a fix to the main service before disclosing the problem
+publicly. We will credit you publicly (unless you don't want to) with this
+discovery.
+<p/><p/>
+The best way to do that is to file a security bug on our
+<a href="https://git.linux-kernel.at/oliver/ivatar/issues/new"
+   title="https://git.linux-kernel.at/oliver/ivatar/issues/new">
+  bug tracker
+</a>. Make sure you change the bug visibility (see "This issue is confidential
+and should only be visible to team members with at least Reporter access") and
+set the 'Security' label.
+<p/><p/>
+Alternatively, you can talk to us at
+<a href="mailto:security@libravatar.org"
+  title="mailto:security@libravatar.org">
+  security@libravatar.org
+</a>.
+<br/>
+We will do our best to respond to you within 24-48 hours.
+<br/>
+Also, please let us know if you are under any kind of publication deadline.
+<p/><p/>
+
+<h4>Security Hall of fame</h4>
+
+We would like to thank the following people who have helped make
+ivatar/Libravatar more secure by reporting security issues to us.
+
+<ul>
+  <li>Ahmed Adel Abdelfattah (
+    <a href="https://twitter.com/00SystemError00"
+       title="https://twitter.com/00SystemError00">@00SystemError00</a>):
+     improvement to mail configuration on <code>libravatar.org</code> and
+     <code>libravatar.com</code></li>
+  <li>
+    <a href="https://www.facebook.com/BugHunterID"
+       title="https://www.facebook.com/BugHunterID">
+      Putra Adhari</a>:
+    <a href="https://bugs.launchpad.net/libravatar/+bug/1808720"
+       title="https://bugs.launchpad.net/libravatar/+bug/1808720">
+      server-side request forgery</a> in OpenID support</li>
+</ul>
+
+<div style="height:40px"></div>
+
+{% endblock %}
