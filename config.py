@@ -107,7 +107,8 @@ else:
             'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
         }
         EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
-DEFAULT_FROM_EMAIL = 'ivatar@mg.linux-kernel.at'
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'ivatar@mg.linux-kernel.at')
 
 try:
     from ivatar.settings import DATABASES
