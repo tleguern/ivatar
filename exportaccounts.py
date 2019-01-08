@@ -101,7 +101,7 @@ def encode_photo(photo_filename, photo_format):
     return base64.b64encode(photo_content)
 
 
-def main(argv=None, dryrun=False):
+def main(argv=None):
     if argv is None:
         argv = sys.argv
 
@@ -109,8 +109,6 @@ def main(argv=None, dryrun=False):
         userobjs = User.objects.filter(username=sys.argv[1])
     else:
         userobjs = User.objects.all()
-    if(len(sys.argv) > 2):
-        dryrun = True
 
     for user in userobjs:
         hash_object = hashlib.new('sha256')
@@ -123,21 +121,16 @@ def main(argv=None, dryrun=False):
         username = user.username
         
         dest_filename = settings.EXPORT_FILES_ROOT + file_hash + '.xml.gz'
-        data = ''
-        data += xml_header()
-        data += xml_account(username)
-        data += xml_email(user.confirmed_emails.all())
-        data += xml_openid(user.confirmed_openids.all())
-        data += xml_photos(photos)
-        data += xml_footer()
 
-        if not dryrun:
-            destination = gzip.open(dest_filename, 'w')
-            destination.write(data)
-            destination.close()
-            print(dest_filename)
-        else:
-            print(data)
+        destination = gzip.open(dest_filename, 'w')
+        destination.write(xml_header())
+        destination.write(xml_account(username))
+        destination.write(xml_email(user.confirmed_emails.all()))
+        destination.write(xml_openid(user.confirmed_openids.all()))
+        destination.write(xml_photos(photos))
+        destination.write(xml_footer())
+        destination.close()
+        print(dest_filename)
     return 0
 
 
