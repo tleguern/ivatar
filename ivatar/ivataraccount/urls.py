@@ -6,12 +6,12 @@ from django.conf.urls import url
 
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LogoutView
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView,\
+from django.contrib.auth.views import PasswordResetDoneView,\
     PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.decorators import login_required
 
-from . views import ProfileView
+from . views import ProfileView, PasswordResetView
 from . views import CreateView, PasswordSetView, AddEmailView
 from . views import RemoveUnconfirmedEmailView, ConfirmEmailView
 from . views import RemoveConfirmedEmailView, AssignPhotoEmailView
