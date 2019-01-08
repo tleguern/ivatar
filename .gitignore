@@ -10,4 +10,4 @@ htmlcov/
 **.pyc
 .ropeproject/
 db.sqlite3.SAVE
-
+node_modules/

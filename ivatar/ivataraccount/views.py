@@ -21,6 +21,7 @@ from django.views.generic.detail import DetailView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import PasswordResetView as PasswordResetViewOriginal
 from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy, reverse
@@ -894,3 +895,23 @@ class ProfileView(TemplateView):
             confirmed.ip_address = get_client_ip(self.request)[0]
             confirmed.openid = openids.first().claimed_id
             confirmed.save()
+
+class PasswordResetView(PasswordResetViewOriginal):
+    '''
+    View class for password reset
+    '''
+
+    def post(self, request, *args, **kwargs):
+        '''
+        Since we have the mail addresses in ConfirmedEmail model,
+        we need to set the email on the user object in order for the
+        PasswordResetView class to pick up the correct user
+        '''
+        if 'email' in request.POST:
+            try:
+                confirmed_email = ConfirmedEmail.objects.get(email=request.POST['email'])
+                confirmed_email.user.email = confirmed_email.email
+                confirmed_email.user.save()
+            except Exception as exc:
+                pass
+        return super().post(self, request, args, kwargs)

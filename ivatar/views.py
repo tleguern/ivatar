@@ -213,8 +213,27 @@ class GravatarProxyView(View):
         '''
         Override get from parent class
         '''
+        def redir_default():
+            url = reverse_lazy(
+                'avatar_view',
+                args=[kwargs['digest']]) + '?s=%i' % size + '&forcedefault=y'
+            return HttpResponseRedirect(url)
+
         size = get_size(request)
         gravatarimagedata = None
+
+        # This part is special/hackish
+        # Check if the image returned by Gravatar is their default image, if so,
+        # redirect to our default instead.
+        gravatar_test_url = 'https://secure.gravatar.com/avatar/' + kwargs['digest'] \
+            + '?s=%i' % 50
+        try:
+            testdata = urlopen(gravatar_test_url, timeout=URL_TIMEOUT)
+            data = BytesIO(testdata.read())
+            if hashlib.md5(data.read()).hexdigest() == '71bc262d627971d13fe6f3180b93062a':
+                return redir_default()
+        except Exception as exc:
+            print('Gravatar test url fetch failed: %s' % exc)
 
         gravatar_url = 'https://secure.gravatar.com/avatar/' + kwargs['digest'] \
             + '?s=%i' % size
@@ -226,14 +245,17 @@ class GravatarProxyView(View):
                 print(
                     'Gravatar fetch failed with an unexpected %s HTTP error' %
                     exc.code)
+            return redir_default()
         except URLError as exc:
             print(
                 'Gravatar fetch failed with URL error: %s' %
                 exc.reason)
+            return redir_default()
         except SSLError as exc:
             print(
                 'Gravatar fetch failed with SSL error: %s' %
                 exc.reason)
+            return redir_default()
         try:
             data = BytesIO(gravatarimagedata.read())
             img = Image.open(data)
@@ -244,9 +266,7 @@ class GravatarProxyView(View):
 
         except ValueError as exc:
             print('Value error: %s' % exc)
+            return redir_default()
 
-        # TODO: In case anything strange happens, we need to redirect to the default
-        url = reverse_lazy(
-            'avatar_view',
-            args=[kwargs['digest']]) + '?s=%i' % size + '&forcedefault=y'
-        return HttpResponseRedirect(url)
+        # We shouldn't reach this point... But make sure we do something
+        return redir_default()

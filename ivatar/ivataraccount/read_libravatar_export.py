@@ -21,6 +21,7 @@ def read_gzdata(gzdata=None):
     openids = []   # pylint: disable=invalid-name
     photos = []   # pylint: disable=invalid-name
     username = None  # pylint: disable=invalid-name
+    password = None  # pylint: disable=invalid-name
 
     if not gzdata:
         return False
@@ -37,16 +38,18 @@ def read_gzdata(gzdata=None):
     for item in root.findall('{%s}account' % SCHEMAROOT)[0].items():
         if item[0] == 'username':
             username = item[1]
+        if item[0] == 'password':
+            password = item[1]
 
     # Emails
     for email in root.findall('{%s}emails' % SCHEMAROOT)[0]:
         if email.tag == '{%s}email' % SCHEMAROOT:
-            emails.append(email.text)
+            emails.append({'email': email.text, 'photo_id': email.attrib['photo_id']})
 
     # OpenIDs
     for openid in root.findall('{%s}openids' % SCHEMAROOT)[0]:
         if openid.tag == '{%s}openid' % SCHEMAROOT:
-            openids.append(openid.text)
+            openids.append({'openid': openid.text, 'photo_id': openid.attrib['photo_id']})
 
     # Photos
     for photo in root.findall('{%s}photos' % SCHEMAROOT)[0]:
@@ -54,14 +57,14 @@ def read_gzdata(gzdata=None):
             try:
                 data = base64.decodebytes(bytes(photo.text, 'utf-8'))
             except binascii.Error as exc:
-                print('Cannot decode photo; Encoding: %s, Format: %s: %s' % (
-                    photo.attrib['encoding'], photo.attrib['format'], exc))
+                print('Cannot decode photo; Encoding: %s, Format: %s, Id: %s: %s' % (
+                    photo.attrib['encoding'], photo.attrib['format'], photo.attrib['id'], exc))
                 continue
             try:
                 Image.open(BytesIO(data))
             except Exception as exc:  # pylint: disable=broad-except
-                print('Cannot decode photo; Encoding: %s, Format: %s: %s' % (
-                    photo.attrib['encoding'], photo.attrib['format'], exc))
+                print('Cannot decode photo; Encoding: %s, Format: %s, Id: %s: %s' % (
+                    photo.attrib['encoding'], photo.attrib['format'], photo.attrib['id'], exc))
                 continue
             else:
                 # If it is a working image, we can use it
@@ -69,6 +72,7 @@ def read_gzdata(gzdata=None):
                 photos.append({
                     'data': photo.text,
                     'format': photo.attrib['format'],
+                    'id': photo.attrib['id'],
                 })
 
     return {
@@ -76,4 +80,5 @@ def read_gzdata(gzdata=None):
         'openids': openids,
         'photos': photos,
         'username': username,
+        'password': password,
     }
