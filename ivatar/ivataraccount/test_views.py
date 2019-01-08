@@ -1116,7 +1116,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
-            expected_url='/gravatarproxy/%s?s=80' % check_hash,
+            expected_url='/static/img/nobody/80.png',
             msg_prefix='Why does this not redirect to Gravatar?')
         # Eventually one should check if the data is the same
 
@@ -1158,7 +1158,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
-            expected_url='/gravatarproxy/1b1d0b654430c012e47e350db07c83c5?s=80',
+            expected_url='/static/img/nobody/80.png',
             msg_prefix='Why does this not redirect to the default img?')
         # Eventually one should check if the data is the same
 
@@ -1195,7 +1195,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
-            expected_url='/gravatarproxy/1b1d0b654430c012e47e350db07c83c5?s=80',
+            expected_url='/static/img/nobody/80.png',
             msg_prefix='Why does this not redirect to the default img?')
         # Eventually one should check if the data is the same
 
@@ -1232,7 +1232,7 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
-            expected_url='/gravatarproxy/fb7a6d7f11365642d44ba66dc57df56f?s=80',
+            expected_url='/static/img/nobody/80.png',
             msg_prefix='Why does this not redirect to the default img?')
 
     def test_avatar_url_default_gravatarproxy_disabled(self):  # pylint: disable=invalid-name
