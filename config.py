@@ -49,11 +49,11 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append(
 OPENID_CREATE_USERS = True
 OPENID_UPDATE_DETAILS_FROM_SREG = True
 
-SITE_NAME = 'ivatar'
+SITE_NAME = os.environ.get('SITE_NAME', 'ivatar')
 IVATAR_VERSION = '0.1'
 
-SECURE_BASE_URL = 'https://avatars.linux-kernel.at/avatar/'
-BASE_URL = 'http://avatars.linux-kernel.at/avatar/'
+SECURE_BASE_URL = os.environ.get('SECURE_BASE_URL', 'https://avatars.linux-kernel.at/avatar/')
+BASE_URL = os.environ.get('BASE_URL', 'http://avatars.linux-kernel.at/avatar/')
 
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 MAX_LENGTH_EMAIL = 254  # http://stackoverflow.com/questions/386294
@@ -96,12 +96,17 @@ BOOTSTRAP4 = {
     },
 }
 
-if 'test' not in sys.argv and 'collectstatic' not in sys.argv:
-    ANYMAIL = {  # pragma: no cover
-        'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
-        'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
-    }
-    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
+if 'EMAIL_BACKEND' in os.environ:
+    EMAIL_BACKEND = os.environ['EMAIL_BACKEND']
+else:
+    if 'test' in sys.argv or 'collectstatic' in sys.argv:
+        EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    else:
+        ANYMAIL = {  # pragma: no cover
+            'MAILGUN_API_KEY': os.environ['IVATAR_MAILGUN_API_KEY'],
+            'MAILGUN_SENDER_DOMAIN': os.environ['IVATAR_MAILGUN_SENDER_DOMAIN'],
+        }
+        EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'  # pragma: no cover
 DEFAULT_FROM_EMAIL = 'ivatar@mg.linux-kernel.at'
 
 try:
@@ -140,3 +145,5 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 USE_X_FORWARDED_HOST = True
 ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS = ['avatars.linux-kernel.at', 'localhost',]
+
+DEFAULT_AVATAR_SIZE = 80

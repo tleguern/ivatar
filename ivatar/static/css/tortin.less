@@ -258,6 +258,46 @@ background-color:@bg-hero;
 .navbar-tortin .navbar-collapse, .navbar-tortin .navbar-form {
 border:0;
 }
+.dropdown-menu {
+background-color:@bg-hero;
+border:1px solid darken(@bg-hero, 10%);
+}
+.dropdown-menu>li>a {
+color:#FFFFFF;
+}
+.dropdown-menu>li>a:focus,.dropdown-menu>li>a:hover {
+background-color:darken(@bg-hero, 10%);
+color:#FFFFFF;
+}
+.checkbox input, .radio input {display:none}
+.checkbox input + label, .radio input + label {
+padding-left:0;
+}
+.checkbox input + label:before, .radio input + label:before {
+font-family: FontAwesome;
+display: inline-block;
+letter-spacing:5px;
+font-size:20px;
+color:@bg-hero;
+vertical-align:middle;
+}
+.checkbox input + label:before {content: "\f0c8"}
+.checkbox input:checked + label:before {content: "\f14a"}
+.radio input + label:before {content: "\f10c"}
+.radio input:checked + label:before {content: "\f192"}
+.uploadbtn:before {
+position:absolute;
+left:0;
+right:0;
+text-align:center;
+content:"Select file";
+font-family: 'Montserrat', sans-serif;
+}
+.jcrop-holder > div > div:nth-child(1) {
+outline-width:2px;
+outline-style:solid;
+outline-color:@bg-hero;
+}
 @media (max-width:767px) {
 .navbar-tortin .navbar-nav .open .dropdown-menu > li > a {
 color:#FFFFFF
@@ -310,4 +350,10 @@ border-color: lighten(@bg-hero, 10%);
 background: none;
 width:auto;
 height:36px;
+}
+.radio {
+color: @bg-hero;
+}
+input[type="radio"]:checked+label {
+font-weight: bold;
 }

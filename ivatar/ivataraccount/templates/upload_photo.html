@@ -8,30 +8,6 @@
 <link rel="prefetch" href="{% static '/js/jcrop.js' %}">{% endblock header %}
 
 {% block content %}
-<style>
-input[type=checkbox] {display:none}
-input[type=checkbox] + label {
-padding-left:0;
-}
-input[type=checkbox] + label:before {
-font-family: FontAwesome;
-display: inline-block;
-letter-spacing:5px;
-font-size:20px;
-color:#36b7d7;
-vertical-align:middle;
-}
-input[type=checkbox] + label:before {content: "\f0c8"}
-input[type=checkbox]:checked + label:before {content: "\f14a"}
-.uploadbtn:before {
-position:absolute;
-left:0;
-right:0;
-text-align:center;
-content:"Select file";
-font-family: 'Montserrat', sans-serif;
-}
-</style>
   <h1>{% trans 'Upload a new photo' %}</h1>
 
   <form enctype="multipart/form-data" action="{% url 'upload_photo' %}" method="post">{% csrf_token %}

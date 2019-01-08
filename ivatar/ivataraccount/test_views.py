@@ -12,6 +12,7 @@ from django.test import Client
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+import hashlib
 
 from libravatar import libravatar_url
 
@@ -1103,10 +1104,38 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
                 size=80,
             )
         )
+        # Simply delete it, then it's digest is 'correct', but
+        # the hash is no longer there
+        addr = self.user.confirmedemail_set.first().email
+        check_hash = hashlib.md5(
+            addr.strip().lower().encode('utf-8')
+        ).hexdigest()
+
+        self.user.confirmedemail_set.first().delete()
+        url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
+            expected_url='/gravatarproxy/%s?s=80' % check_hash,
+            msg_prefix='Why does this not redirect to Gravatar?')
+        # Eventually one should check if the data is the same
+
+    def test_avatar_url_inexisting_mail_digest_gravatarproxy_disabled(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar via inexisting mail digest
+        '''
+        self.test_upload_image()
+        self.test_confirm_email()
+        urlobj = urlsplit(
+            libravatar_url(
+                email=self.user.confirmedemail_set.first().email,
+                size=80,
+            )
+        )
         # Simply delete it, then it digest is 'correct', but
         # the hash is no longer there
         self.user.confirmedemail_set.first().delete()
-        url = '%s?%s' % (urlobj.path, urlobj.query)
+        url = '%s?%s&gravatarproxy=n' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
@@ -1129,6 +1158,25 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
+            expected_url='/gravatarproxy/1b1d0b654430c012e47e350db07c83c5?s=80',
+            msg_prefix='Why does this not redirect to the default img?')
+        # Eventually one should check if the data is the same
+
+    def test_avatar_url_inexisting_mail_digest_w_default_mm_gravatarproxy_disabled(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar via inexisting mail digest and default 'mm'
+        '''
+        urlobj = urlsplit(
+            libravatar_url(
+                email='asdf@company.local',
+                size=80,
+                default='mm',
+            )
+        )
+        url = '%s?%s&gravatarproxy=n' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
             expected_url='/static/img/mm/80.png',
             msg_prefix='Why does this not redirect to the default img?')
         # Eventually one should check if the data is the same
@@ -1144,6 +1192,24 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             )
         )
         url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
+            expected_url='/gravatarproxy/1b1d0b654430c012e47e350db07c83c5?s=80',
+            msg_prefix='Why does this not redirect to the default img?')
+        # Eventually one should check if the data is the same
+
+    def test_avatar_url_inexisting_mail_digest_wo_default_gravatarproxy_disabled(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar via inexisting mail digest and default 'mm'
+        '''
+        urlobj = urlsplit(
+            libravatar_url(
+                email='asdf@company.local',
+                size=80,
+            )
+        )
+        url = '%s?%s&gravatarproxy=n' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
@@ -1166,6 +1232,24 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
         response = self.client.get(url, follow=True)
         self.assertRedirects(
             response=response,
+            expected_url='/gravatarproxy/fb7a6d7f11365642d44ba66dc57df56f?s=80',
+            msg_prefix='Why does this not redirect to the default img?')
+
+    def test_avatar_url_default_gravatarproxy_disabled(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar for not existing mail with default specified
+        '''
+        urlobj = urlsplit(
+            libravatar_url(
+                'xxx@xxx.xxx',
+                size=80,
+                default='/static/img/nobody.png',
+            )
+        )
+        url = '%s?%s&gravatarproxy=n' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(
+            response=response,
             expected_url='/static/img/nobody.png',
             msg_prefix='Why does this not redirect to the default img?')
 
@@ -1182,6 +1266,26 @@ class Tester(TestCase):  # pylint: disable=too-many-public-methods
             )
         )
         url = '%s?%s' % (urlobj.path, urlobj.query)
+        response = self.client.get(url, follow=False)
+        self.assertRedirects(
+            response=response,
+            expected_url='/gravatarproxy/fb7a6d7f11365642d44ba66dc57df56f?s=80',
+            fetch_redirect_response=False,
+            msg_prefix='Why does this not redirect to the default img?')
+
+    def test_avatar_url_default_external_gravatarproxy_disabled(self):  # pylint: disable=invalid-name
+        '''
+        Test fetching avatar for not existing mail with external default specified
+        '''
+        default = 'http://host.tld/img.png'
+        urlobj = urlsplit(
+            libravatar_url(
+                'xxx@xxx.xxx',
+                size=80,
+                default=default,
+            )
+        )
+        url = '%s?%s&gravatarproxy=n' % (urlobj.path, urlobj.query)
         response = self.client.get(url, follow=False)
         self.assertRedirects(
             response=response,

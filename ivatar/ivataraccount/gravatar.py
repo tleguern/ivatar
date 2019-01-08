@@ -5,6 +5,8 @@ from ssl import SSLError
 from urllib.request import urlopen, HTTPError, URLError
 import hashlib
 
+from .. settings import AVATAR_MAX_SIZE
+
 URL_TIMEOUT = 5  # in seconds
 
 
@@ -15,7 +17,7 @@ def get_photo(email):
     hash_object = hashlib.new('md5')
     hash_object.update(email.lower().encode('utf-8'))
     thumbnail_url = 'https://secure.gravatar.com/avatar/' + \
-        hash_object.hexdigest() + '?s=80&d=404'
+        hash_object.hexdigest() + '?s=%i&d=404' % AVATAR_MAX_SIZE
     image_url = 'https://secure.gravatar.com/avatar/' + hash_object.hexdigest(
         ) + '?s=512&d=404'
 
@@ -44,8 +46,8 @@ def get_photo(email):
     return {
         'thumbnail_url': thumbnail_url,
         'image_url': image_url,
-        'width': 80,
-        'height': 80,
+        'width': AVATAR_MAX_SIZE,
+        'height': AVATAR_MAX_SIZE,
         'service_url': service_url,
         'service_name': 'Gravatar'
     }

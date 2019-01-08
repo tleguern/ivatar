@@ -6,67 +6,7 @@
 {% spaceless %}
 <div id="page">
   <div id="header">
-  {% block topbar_base %}
-      <nav class="navbar navbar-tortin">
-  <div class="container-fluid">
-<div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-          {% block topbar %}
-              {% block site_brand %}
-{% if user.is_anonymous %}
-                      <a class="navbar-brand" href="/">
-{% else %}
-                    <a class="navbar-brand" href="{% url 'profile' %}">
-{% endif %}
-                        ivatar
-                      </a>
-</div>
-              {% endblock %}
-              {% block nav %}
-                <div class="collapse navbar-collapse" id="navbar">
-                  <ul class="nav navbar-nav">
-                     {% if not user.is_anonymous %}
-                       <li>
-                         <a href="/"><i class="fa fa-home" aria-hidden="true"></i>
-                           {% trans 'Home' %}
-                         </a>
-                       </li>
-                     {% endif %}
-                     <li>
-                     <a class="nav-link" href="{% url 'contact' %}"><i class="fa fa-envelope" aria-hidden="true"></i>
-                         {% trans 'Contact' %}
-                       </a>
-                     </li>
-                     <li>
-                     <a href="{% url 'security' %}"><i class="fa fa-user-secret" aria-hidden="true"></i>
-                         {% trans 'Security' %}
-                       </a>
-                      </li>
-                     <li class="dropdown" id="tab_tools">
-                       <a class="dropdown-toggle" href="#" id="tools_dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{% trans 'Tools' %}">
-                         <i class="fa fa-wrench" aria-hidden="true"></i>
-                         {% trans 'Tools' %}
-                      </a>
-                      <ul class="dropdown-menu" aria-labelledby="tools_dropdown">
-                        <li><a id="tools-check" href="{% url 'tools_check' %}">
-                          <i class="fa fa-check-square" aria-hidden="true"></i> {% trans 'Check' %}
-                        </a></li>
-                      </ul>
-                    </li>
-                  </ul>
-{% block account_bar %}{% include "_account_bar.html" %}{% endblock %}
-                </div>
-</div>
-</nav>
-              {% endblock %}
-          {% endblock %}
-      </nav>
-  {% endblock %}
+    {% include 'navbar.html' %}
   </div>
 
   {% autoescape off %}{% endautoescape %}
@@ -89,4 +29,3 @@
 
 <script src="{% static '/js/bootstrap.min.js' %}"></script>
 <script src="{% static '/js/ivatar.js' %}"></script>
-{{ settings }}
