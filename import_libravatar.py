@@ -37,6 +37,8 @@ for file in os.listdir(PATH):
         items = libravatar_read_gzdata(fh.read())
         print('Adding user "%s"' % items['username'])
         (user, created) = User.objects.get_or_create(username=items['username'])
+        user.password = items['password']
+        user.save()
 
         saved_photos = {}
         for photo in items['photos']:

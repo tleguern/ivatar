@@ -21,6 +21,7 @@ def read_gzdata(gzdata=None):
     openids = []   # pylint: disable=invalid-name
     photos = []   # pylint: disable=invalid-name
     username = None  # pylint: disable=invalid-name
+    password = None  # pylint: disable=invalid-name
 
     if not gzdata:
         return False
@@ -37,6 +38,8 @@ def read_gzdata(gzdata=None):
     for item in root.findall('{%s}account' % SCHEMAROOT)[0].items():
         if item[0] == 'username':
             username = item[1]
+        if item[0] == 'password':
+            password = item[1]
 
     # Emails
     for email in root.findall('{%s}emails' % SCHEMAROOT)[0]:
@@ -77,4 +80,5 @@ def read_gzdata(gzdata=None):
         'openids': openids,
         'photos': photos,
         'username': username,
+        'password': password,
     }
