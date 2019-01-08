@@ -51,10 +51,11 @@ def xml_footer():
     return '</user>\n'
 
 
-def xml_account(username):
+def xml_account(username, password):
     escaped_username = saxutils.quoteattr(username)
     escaped_site_url = saxutils.quoteattr(settings.SITE_URL)
-    return '  <account username=%s site=%s/>\n' % (escaped_username, escaped_site_url)
+    escaped_password = saxutils.quoteattr(password)
+    return '  <account username=%s password=%s site=%s/>\n' % (escaped_username, escaped_password, escaped_site_url)
 
 def xml_email(emails):
     returnstring = "  <emails>\n"
@@ -124,7 +125,7 @@ def main(argv=None):
 
         destination = gzip.open(dest_filename, 'w')
         destination.write(xml_header())
-        destination.write(xml_account(username))
+        destination.write(xml_account(username, user.password))
         destination.write(xml_email(user.confirmed_emails.all()))
         destination.write(xml_openid(user.confirmed_openids.all()))
         destination.write(xml_photos(photos))
